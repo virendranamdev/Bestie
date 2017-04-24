@@ -1,0 +1,224 @@
+
+
+.corner7{clip-path:polygon(0% 0%, 95% 0%, 95% 20%, 100% 50%, 95% 80%, 95% 100%, 0% 100%);}
+.corner7,.no-corner{padding:15px;}
+
+/* **************this is code for making active tab****** */
+
+.myactive{background: linear-gradient(#4c85bb,#19548e),#0c2946;
+        box-shadow: rgba(0,0,0,.25) 0 1px 0, inset rgba(255,255,255,.16) 0 1px 0;color:#fff;
+}
+.addUserdata{border:1px solid #f2f2f2}
+
+.myform .form-group .control-label {text-align:left !important}
+
+
+/* ************** toggle button *********** ******* */
+
+
+.onoffswitch {
+    position: relative; width: 90px;
+    -webkit-user-select:none; -moz-user-select:none; -ms-user-select: none;
+}
+.onoffswitch-checkbox {
+    display: none;
+}
+.onoffswitch-label {
+    display: block; overflow: hidden; cursor: pointer;
+    border: 2px solid #e6e9ed; border-radius: 20px;
+}
+.onoffswitch-inner {
+    display: block; width: 200%; margin-left: -100%;
+    transition: margin 0.3s ease-in 0s;
+}
+.onoffswitch-inner:before, .onoffswitch-inner:after {
+    display: block; float: left; width: 50%; height: 30px; padding: 0; line-height: 30px;
+    font-size: 14px; color: white; font-family: Trebuchet, Arial, sans-serif; font-weight: bold;
+    box-sizing: border-box;
+}
+.onoffswitch-inner:before {
+    content: "ON";
+    padding-left: 10px;
+    background-color: #044f9a; color: #FFFFFF;
+}
+.onoffswitch-inner:after {
+    content: "OFF";
+    padding-right: 10px;
+    background-color: #EEEEEE; color: #999999;
+    text-align: right;
+}
+.onoffswitch-switch {
+    display: block; width: 18px; margin: 6px;
+    background: #FFFFFF;
+    position: absolute; top: 0; bottom: 0;
+    right: 56px;
+    border: 2px solid #ddd; border-radius: 20px;
+    transition: all 0.3s ease-in 0s; 
+}
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
+    margin-left: 0;
+}
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
+    right: 0px; 
+}
+.feature{text-align:left !important}
+
+
+
+/* now i am making a table */
+
+.MyTable .table-bordered>thead>tr>th {
+    border: none !important;
+}
+table.MyTable>thead>tr>th { border: none !important;}
+.wallUL li{display:inline;    margin-left: 8%;}
+.inlineUL li{display:inline;   }
+
+.right{float:right !important;}
+
+td.questionTD{width:50% !important;}
+.liveData{color:green;}
+.expireData{color:#a94442;}
+.slow-spin {
+  -webkit-animation: fa-spin 6s infinite linear;
+  animation: fa-spin 6s infinite linear;
+}
+.bbottom{border-bottom:1px solid #cdcdcd}
+.bbottom {    padding: 10px 0px 10px 0px;    font-size: 15px;}
+.bbottom i{margin-top:1px;}
+
+.inlineUL li .emoji-icon{max-width:50px !important;    display: inline;margin:10px 30px 10px 10px;}
+.emojiBtnDIV .inlineUL {padding-left:0px;margin-bottom: 0px;}
+.emojiBtnDIV ul.inlineUL {padding-left:0px;}
+
+.MyTable th.tblimage{width:100px !important;}
+
+td.tableleftImagE.sorting_1{width:100px !important;background:red;}
+/****************************************************/
+.wordData {
+    min-height: 351px;
+    /* max-height: 352px; */
+    overflow: auto;
+}
+.userresponse
+{
+	    font-size: 17px;
+    font-weight: 500;
+}
+
+.myContainer{padding-left:10%;padding-right:10%;}
+/******************************Recognition**********************************************/
+
+	.likeUserName{    color: #044f9a;    font-size: 14px;    font-weight: bold;}
+	.LikeDate{color: #91929f;    font-size: 12px;}
+					.inlineUL1 li{display:inline;}
+					.recognitionUser{width:90px;height:90px;border-radius:50%;border:1px solid #f2f2f2;object-fit:contain;}
+					.userNameRecognition{font-size:17px;color:#044f9a;padding-bottom:2px;font-weight:bold;  padding-bottom: 0px;    margin-bottom: 0px;}
+					.userDesignationRecognition{color:#73879c;}
+					.sameFont{font-size:16px;}
+					.recognitiontextpara{margin-top:20px;}
+					.fromRecognizeImg{float:right;}
+					.minCircle, .fromRecognizeImg{width:50px;height:50px;border-radius:50%;object-fit:contain;background:#f1f1f1;}
+					.tip {    position: relative;    background: transparent;    border: 20px solid #f1f1f1;      float: right;}
+					.tip-down {  border-right-color: transparent;  border-left-color: transparent; 
+					border-bottom-color: transparent;  }
+
+
+/******************************Mini-survey**********************************************/
+.miniSurveyQuestion{font-size:18px;}
+.emojiOption ul.inlineUL{padding-left:0px;}
+.emojiOption,.textAreaOption,.radioOption{padding:5%}
+
+
+
+/******************************story**********************************************/
+
+
+.myStoryContainer{padding-left:13%;padding-right:13%;}
+.storyUserBgImage{background-size:cover;background-repeat:no-repeat;}
+.storyUserBgImage h3, .storyUserBgImage h5{color:#fff;}
+.storyUserImageShadow{position: relative;
+    background-color: rgba(93, 89, 89, 0.6);
+    padding: 7% 10% 1% 10%;}
+	.inlineUL li img.storyImage{display:inline;margin-left:15px;}
+
+.happyRadiotext .radio label{font-size:15px;margin-bottom:15px;}
+
+
+/*****************************happiness details *****************************/
+     div.JMDBenepik {
+  font-family: "Helvetica", "Arial", sans-serif;
+  color: #09f;
+  overflow: hidden;
+  position: relative;
+  width: 100%; height: 350px;
+}
+div.JMDBenepik a {
+  color: inherit;
+  text-decoration: none;
+}
+div.JMDBenepik a:hover{
+  color: #0df;
+}
+div.JMDBenepik a:hover{
+  color: #0cf;
+}
+div.JMDBenepik span{
+  padding: 0;
+}
+div.JMDBenepik span.w10{
+  font-size: 54px;
+  color: #0cf;
+}
+div.JMDBenepik span.w9 {
+  font-size: 50px;
+  color: #0cf;
+}
+div.JMDBenepik span.w8 {
+  font-size: 44px;
+  color: #0cf;
+}
+div.JMDBenepik span.w7 {
+  font-size: 40px;
+  color: #39d;
+}
+div.JMDBenepik span.w6 {
+  font-size: 34px;
+  color: #90c5f0;
+}
+div.JMDBenepik span.w5 {
+  font-size: 30px;
+  color: #90a0dd;
+}
+div.JMDBenepik span.w4{
+  font-size: 24px;
+  color: #90c5f0;
+}
+div.JMDBenepik span.w3 {
+  font-size: 20px;
+  color: #a0ddff;
+}
+div.JMDBenepik span.w2 {
+  font-size: 14px;
+  color: #99ccee;
+}
+div.JMDBenepik span.w1 {
+  font-size: 10px;
+  color: #aab5f0;
+}
+.VHinfoIcon{font-size:19px;margin-left:18px;}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

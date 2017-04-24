@@ -1,0 +1,27 @@
+.userresponse{font-size: 17px;font-weight: 500;}
+
+.wordData{min-height: 351px;overflow: auto;}
+
+.chart-legend li span{display: inline-block;width: 12px;height: 12px;margin-right: 5px;}
+   
+.doughnut-legend li{display:inline;margin-right:20px;}
+
+.paddingright{padding-right:27px;}
+
+.form-group {margin-bottom: 5px ! important;	}
+
+.height{min-height:240px;}
+
+.heightwidth{width: 100%; height: 196px;}
+
+.heightwidthh{width: 100%; height: auto;}
+
+.width{width:80%;}
+
+.widthsixty{width:60%;}
+
+.widththirty{width:30%;}
+
+.widthten{width:10%;}
+
+.img-circle {height: 10% ! important;width: 70% ! important;}

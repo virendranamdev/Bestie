@@ -1,0 +1,15 @@
+.right{float:right ! important;}
+
+.chart-legend li span{display: inline-block;width: 12px;height: 12px;margin-right: 5px;}
+   
+.doughnut-legend li{display:inline;margin-right:20px;}
+
+.width{width:80%;}
+
+.widthsixty{width:60%;}
+
+.widththirty{width:30%;}
+
+.widthten{width:10%;}
+
+.height{height:300px;}
