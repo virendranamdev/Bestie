@@ -18,7 +18,7 @@ $feedDetailsArr = json_decode($wordDetails, true);
 //echo'<pre>';print_r($feedDetailsArr);
 
 $feedData = $feedDetailsArr['data'];
-//print_r($feedDetailsArr);
+//print_r($feedData);
 
 $data1 = $obj->getSurveyquestionresponse($sid, $qid);
 $data = json_decode($data1, true);
@@ -26,6 +26,7 @@ $data = json_decode($data1, true);
 //print_r($data);
 //echo "</pre>";
 $quesycount = count($data);
+//echo $quesycount;
 ?>
 
 <!-- page content -->
@@ -64,7 +65,7 @@ $quesycount = count($data);
             $comments .= ' /// ' . $wordData['comment'];
         }
         $words = json_decode($objFeed->extractCommonWords($comments), true);
-      //  print_r($words);
+       // print_r($words);
         $fieldnames_actual = array();
         $values = array();
 
@@ -74,7 +75,7 @@ $quesycount = count($data);
                 $values[] = $v;
             }
         }
-   //    echo'<pre>';        print_r($fieldnames_actual);        print_r($values);
+ //      echo'<pre>';        print_r($fieldnames_actual);        print_r($values);
         ?>
         <div class="row">
             <div class="col-md-6 col-xs-12">
@@ -117,6 +118,7 @@ $quesycount = count($data);
                                 $i++;
                                 array_push($globeGraph, $textGraph);
                             }
+                            
                             ?>
                         </form>
                     </div>

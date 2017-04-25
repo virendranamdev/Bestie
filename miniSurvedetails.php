@@ -95,8 +95,13 @@ $quesycount = count($data);
                                         $date = $data[$k]['answeredDate'];
                                         $fname = $data[$k]['firstName'];
                                         $lname = $data[$k]['lastName'];
-
-                                        if ($answer1 == 5) {
+if($data[$k]['optionType'] == 1)
+{
+    $answer = $answer1;
+}
+else
+{
+       if ($answer1 == 5) {
                                             $answer = 'Good';
                                         } elseif ($answer1 == 10) {
                                             $answer = 'Very Good';
@@ -105,6 +110,8 @@ $quesycount = count($data);
                                         } else {
                                             $answer = 'ok';
  }
+}
+                                     
     ?>
 
                                         <tr>
