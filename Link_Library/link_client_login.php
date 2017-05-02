@@ -16,11 +16,11 @@ if (!empty($_POST)) {
     }
 
     if ($res['success'] == 'True') {
-        echo "<script>window.location='../wall.php'</script>";
+        echo "<script>window.location='../dashboard.php'</script>";
     } else {
         $val = base64_encode($res['email']);
         echo "<script>alert('Please check your Password')</script>";
-        echo "<script>window.location='../login.php?email=" . $val . "'</script>";
+        echo "<script>window.location='../index.php?email=" . $val . "'</script>";
     }
 } else {
     ?>

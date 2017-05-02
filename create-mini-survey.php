@@ -60,14 +60,14 @@ $optcount = count($data['data']);
                             <div class="form-group">
                                 <label class=" control-label col-md-3 col-sm-3 col-xs-12">Survey Title</label>
                                 <div class="col-md-9 col-sm-9 col-xs-12 form-group has-feedback">
-                                    <input type="text" class="form-control has-feedback-left" placeholder="Enter Survey Title..." name = "surveytitle"/>
+                                    <input type="text" class="form-control has-feedback-left" placeholder="Enter Survey Title..." name = "surveytitle" required/>
                                     <span class="fa fa-question form-control-feedback left" aria-hidden="true"></span>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label class=" control-label col-md-3 col-sm-3 col-xs-12">Questions</label>
                                 <div class="col-md-9 col-sm-9 col-xs-12 form-group has-feedback">
-                                    <input type="text" name="questionno"  ng-model="noOfquestions" ng-keyup="questionsNumber(noOfquestions)" class="form-control has-feedback-left" placeholder="Enter Number of Questions..."/>
+                                    <input type="text" name="questionno"  ng-model="noOfquestions" ng-keyup="questionsNumber(noOfquestions)" class="form-control has-feedback-left" placeholder="Enter Number of Questions..." required/>
                                     <span class="fa fa-question form-control-feedback left" aria-hidden="true"></span>
                                      <div ng-if="noOfquestions>5    " style="color:red;"> No of question can not be more than 5</div>
                                 </div>
@@ -81,7 +81,7 @@ $optcount = count($data['data']);
                                 <div class="form-group">
                                     <label class=" control-label col-md-3 col-sm-3 col-xs-12">Question {{$index + 1}}</label>
                                     <div class="col-md-9 col-sm-9 col-xs-12 form-group has-feedback">
-                                       <input type="text" name="surveyquestion{{$index}}"  ng-model="question" ng-keyup="passQuestionText($index, question)" class="form-control has-feedback-left"placeholder="Write Your Question{{$index}}..."/>
+                                       <input type="text" name="surveyquestion{{$index}}"  ng-model="question" ng-keyup="passQuestionText($index, question)" class="form-control has-feedback-left"placeholder="Write Your Question{{$index}}..." required/>
                                         <span class="fa fa-question form-control-feedback left" aria-hidden="true"></span>
 
 
@@ -108,13 +108,13 @@ $optcount = count($data['data']);
                                                     <div  ng-if="quesDiv.questionType == 'option'">
                                                         <div class="row">
                                                             <div class="col-xs-7 col-sm-7 col-md-7 col-lg-7">
-                                                                <input type="text" name="numberoption" ng-model="noOfoptions" ng-keyup="optionContentData($index, noOfoptions)"class="form-control has-feedback-left"placeholder="Enter Number of option..."/>
+                                                                <input type="text" name="numberoption" ng-model="noOfoptions" ng-keyup="optionContentData($index, noOfoptions)"class="form-control has-feedback-left"placeholder="Enter Number of option..." required/>
                                                             </div>
                                                         </div><br>
                                                         <div class="row">
                                                             <div ng-repeat="options in quesDiv.ansNumber" ng-if="quesDiv.ansNumber != 0">
                                                                 <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-                                                                     <input type="text" name="radiooption{{$parent.$parent.$index}}{{$index+1}}" ng-model="optionAnsData" ng-keyup="forwardData($parent.$parent.$index, $index, optionAnsData)"class="form-control has-feedback-left"placeholder="option {{$index + 1}}..."/><br>
+                                                                     <input type="text" name="radiooption{{$parent.$parent.$index}}{{$index+1}}" ng-model="optionAnsData" ng-keyup="forwardData($parent.$parent.$index, $index, optionAnsData)"class="form-control has-feedback-left"placeholder="option {{$index + 1}}..." required/><br>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -145,14 +145,14 @@ $optcount = count($data['data']);
                             <div class="form-group">
                                 <label class=" control-label col-md-3 col-sm-3 col-xs-12">Valid From </label>
                                 <div class="col-md-9 col-sm-9 col-xs-12 form-group has-feedback">
-                                    <input type="date" name="validfrom" class="form-control has-feedback-left" placeholder="Enter Number of Questions..."/>
+                                    <input type="date" name="validfrom" class="form-control has-feedback-left" placeholder="Enter Number of Questions..." required/>
                                     <span class="fa fa-calendar form-control-feedback left" aria-hidden="true"></span>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label class=" control-label col-md-3 col-sm-3 col-xs-12">Valid Till</label>
                                 <div class="col-md-9 col-sm-9 col-xs-12 form-group has-feedback">
-                                    <input type="date" name="validtill" class="form-control has-feedback-left"placeholder="Enter Number of Questions..."/>
+                                    <input type="date" name="validtill" class="form-control has-feedback-left"placeholder="Enter Number of Questions..." required/>
                                     <span class="fa fa-calendar form-control-feedback left" aria-hidden="true"></span>
                                 </div>
                             </div>

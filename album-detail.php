@@ -2,6 +2,32 @@
 <?php include 'sidemenu.php';?>
 <?php include 'topNavigation.php';?>
  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+ <?php 
+require_once('Class_Library/class_upload_album.php');
+$objalbum = new Album();
+$clientId = $_SESSION['client_id'];
+$empId = $_SESSION['user_unique_id'];
+$user_type = $_SESSION['user_type'];
+$albumid = $_GET['albumId'];
+?>
+ <style>
+.GalleryImages{height:150px;}
+.desc{max-height:70px;font-weight:600;}
+.imgpadding{width:100%;height:150px;padding:1px 1px 1px 1px;border:1px solid #cdcdcd;}
+.fontsize{font-size:12px;padding: 0px 10px 0px 0px;}
+.border{border:1px solid #cdcdcd;}
+.padding{padding: 0px 2px 2px 3px;}
+.fontpadding{font-size:12px;padding: 0px 0px 0px 5px;}
+.check{background-color: #04809a;
+    opacity: 0.8;
+    position: absolute;
+    /* margin: 2px 0px 0px 122px; */
+    color: #fffd;
+    color: #fff;
+    padding: 3px 6px 3px 6px;
+    right: 6%;
+    margin-top: 1%;}
+</style>
 <script>
 var myIndex = 0;
 carousel();
@@ -19,7 +45,17 @@ function carousel() {
 }
 </script> 
 
-
+<?php
+/********************* image detail **********************/
+$device = "panel";
+$imageList = $objalbum->getAlbumImage($albumid,$device);
+$imageListArr = json_decode($imageList, true);
+/*echo "<pre>";
+print_r($imageListArr);
+echo "</pre>";*/
+$albumimages = $imageListArr['posts'];
+/*********************** / image detail *************************/
+?>
         <!-- page content -->
         <div class="right_col" role="main">
           <div class="">
@@ -30,6 +66,12 @@ function carousel() {
                 <div class="x_panel">
                   <div class="x_title">
                     <h2>Album Detail</h2>
+					<?php 
+					/*echo "<pre>";
+print_r($imageListArr);
+echo "</pre>";*/
+					?>
+					
                     <ul class="nav navbar-right panel_toolbox">
                       <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                       </li>
@@ -39,93 +81,125 @@ function carousel() {
                   </div>
                   <div class="x_content">
      <!--<a href="wallPredefineTemplate.php"><button class="btn btn-primary pull-right btn-round"> Use Predefined Temple</button></a>-->
-
-  
-                    <form class="myform form-horizontal form-label-left">
-
 <div class="row">
-<div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
-<div class="gallery">
-  <a target="_blank" href="#">
-    <div class="w3-content w3-section" >
-		<img class="mySlides w3-animate-fading" src="img/1.jpg" style="height:150px;">
-		<img class="mySlides w3-animate-fading" src="img/7.jpg" style="height:150px;">
-		<img class="mySlides w3-animate-fading" src="img/8.jpg" style="height:150px;">
-		<img class="mySlides w3-animate-fading" src="img/9.jpg" style="height:150px;">
+<div class="col-lg-2 col-md-3 col-sm-3 col-xs-12">
+<div class="border">
+<div class="w3-content w3-section" >
+	<?php 
+	for($i=0; $i<count($albumimages); $i++)
+	{
+				
+	?>
+		<img class="img img-responsive mySlides w3-animate-fading GalleryImages" src="<?php echo $albumimages[$i]['imgName']; ?>" >
+	<?php } ?>
 	</div>
-  </a>
-  <div class="desc" style="max-height:70px;font-weight:600;">Number  of image</div>
-  
+	 <p class="desc" ><center><b><?php echo count($imageListArr['posts']); ?></b></center></p>
+ </div>
+<!-- <p class="desc" ><center>Posted Date:18 Apr 2017</center></p>-->
 </div>
-<div class="form-group"><h5 style="float:right;">Posted Date: 6 Apr 2017</h5></div>
+
+
+<div class="col-lg-10 col-md-9 col-sm-9 col-xs-12">
+<h3><b><?php echo $imageListArr['album'][0]['title'];?></b></h3>
+<p><?php echo $imageListArr['album'][0]['description'];?></p>
+
 </div>
-<div class="col-lg-10 col-md-10 col-sm-10 col-xs-10">
+</div>
+
+
 <div class="row">
-<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12"><h3><b>This is the title of the our album.</b></h3></div>
-</div>
-Add a description of the image here Add a description of the image here Add a description of the image here Add a description of the image here Add a description of the image here Add a description of the image here Add a description of the image here Add a description of the image here Add a description of the image here Add a description of the image here
-Add a description of the image here Add a description of the image here Add a description of the image here Add a description of the image here Add a description of the image here Add a description of the image here Add a description of the image here Add a description of the image here Add a description of the image here Add a description of the image here
+<?php 
+for($i=0; $i<count($albumimages); $i++)
+{
+	$albumid = $albumimages[$i]['albumId'];
+	$imgid = $albumimages[$i]['autoId'];
+	/**************** image like *******************************/
+	$imagelike = $objalbum->getAlbumImagelike($albumid,$imgid);
+	$imagelikearray = json_decode($imagelike, true);
+	/*echo "<pre>";
+	print_r($imagelikearray);
+	*/
+	/**************** / image like *******************************/
+	/**************** / image comment *******************************/
+	$imagecomment = $objalbum->getAlbumImageComment($albumid,$imgid);
+	$imagecommentarray = json_decode($imagecomment, true);
+	$totalcomment = count($imagecommentarray['posts']);
+	/*echo "<pre>";
+	print_r($totalcomment);
+	*/
+	/**************** / image like *******************************/
+	$imagestatus = $albumimages[$i]['status'];
+	if($imagestatus == 2)
+	{
+		$imgstatus = "Pending";
+	}
+?>
+<div class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
+
+<div class="border">
+<?php if(($imagestatus == 2)){?>
+<div class="check"><?php echo $imgstatus;?></div>
+<?php } ?>
+<span data-toggle="modal" data-target="#myModal">
+<img src="<?php echo $albumimages[$i]['imgName'];?>" class="img img-responsive imgpadding" data-toggle="tooltip" title="<?php echo $albumimages[$i]['imageCaption'];?>"></span>
+<!--<p class="padding"><?php echo $albumimages[$i]['imageCaption'];?></p>-->
+
+<span class="fontpadding"><i class="fa fa-thumbs-o-up" aria-hidden="true"></i>&nbsp;<button type="button" class="btn btn-xs"><?php echo $imagelikearray['total_like'];?></button></span> 
 
 
-</div>
+
+<span  class="pull-right fontsize"><i class="glyphicon glyphicon-comment" aria-hidden="true"></i>&nbsp;<button type="button" class="btn btn-xs"><?php echo $totalcomment; ?></button></span>
 
 </div>
-<div class="row">
-<div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
-<div class="gallery">
-  <a target="_blank">
-    <img data-toggle="modal" data-target="#myModal" src="img/7.jpg" alt="Mountains" style="height:150px;padding:1px 1px 1px 1px;">
-  </a>
-  <div class="desc"><span  style="max-height:70px;">Add a description of the image here Add a description of the image.</span><br><span style="font-size:12px;padding: 0px 0px 0px 5px;"><i class="fa fa-thumbs-o-up" aria-hidden="true"></i></span> <span  class="pull-right" style="font-size:12px;padding: 0px 10px 0px 0px;"><i class="glyphicon glyphicon-comment" aria-hidden="true"></i></span></div>
-</div>
+<br>
+	<?php 
+	if($imagestatus == 2)
+	{
+	?>
+		<center>
+		<button type="button" name="approvebutton" class="btn btn-primary  btn-xs active"><a href="Link_Library/album_image_status.php?albumid=<?php echo $albumid;?>&&imageId=<?php echo $albumimages[$i]['autoId'];?>&&approvestatus=<?php echo $albumimages[$i]['status'];?>">Approve</a></button>&nbsp;
+		
+		<button type="button" name="rejectbutton" class="btn btn-danger btn-xs active"><a href="Link_Library/album_image_status.php?albumid=<?php echo $albumid;?>&&imageId=<?php echo $albumimages[$i]['autoId'];?>&&rejectstatus=<?php echo $albumimages[$i]['status'];?>">Reject</a></button>
+				
+		</center>
+	<?php 
+	}
+	if($imagestatus == 1)
+	{
+	?>
+	<center><button type="button" name="approvebutton" class="btn btn-warning  btn-xs active"><a href="Link_Library/album_image_status.php?albumid=<?php echo $albumid;?>&&imageId=<?php echo $albumimages[$i]['autoId'];?>&&unpublishimagestatus=<?php echo $albumimages[$i]['status'];?>">Unpublish</a></button>
+	
+	&nbsp;<button type="button" name="viewbutton" class="btn btn-success btn-xs active"><a href="album-image-details.php?albumid=<?php echo $albumid;?>&&imageId=<?php echo $albumimages[$i]['autoId'];?>">view</a></button>
+	
+	</center>
+	<?php
+	}
+	if($imagestatus == 0)
+	{
+	?>
+	<center><button type="button" name="approvebutton" class="btn btn-info  btn-xs active"><a href="Link_Library/album_image_status.php?albumid=<?php echo $albumid;?>&&imageId=<?php echo $albumimages[$i]['autoId'];?>&&publishimagestatus=<?php echo $albumimages[$i]['status'];?>">Publish</a></button>
+	
+	&nbsp;<button type="button" name="viewbutton" class="btn btn-success btn-xs active"><a href="album-image-details.php?albumid=<?php echo $albumid;?>&&imageId=<?php echo $albumimages[$i]['autoId'];?>">view</a></button>
+	
+	</center>
+	<?php 
+	} 
+	?>
+	
+	
 
 </div>
-<div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
-<div class="gallery">
-  <a target="_blank">
-    <img data-toggle="modal" data-target="#myModal" src="img/8.jpg" alt="Mountains" style="height:150px;padding:1px 1px 1px 1px;">
-  </a>
-  <div class="desc"><span  style="height:70px;">Add a description of the image here Add a description of the image.</span><br><span style="font-size:12px;padding: 0px 0px 0px 5px;"><i class="fa fa-thumbs-o-up" aria-hidden="true"></i></span> <span  class="pull-right" style="font-size:12px;padding: 0px 10px 0px 0px;"><i class="glyphicon glyphicon-comment" aria-hidden="true"></i></span></div>
-</div>
+<?php
+
+} ?>
 
 </div>
-<div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
-<div class="gallery">
-  <a target="_blank">
-    <img data-toggle="modal" data-target="#myModal" src="img/9.jpg" alt="Mountains" style="height:150px;padding:1px 1px 1px 1px;">
-  </a>
-  <div class="desc"><span  style="height:70px;">Add a description of the image here Add a description of the image.</span><br><span style="font-size:12px;padding: 0px 0px 0px 5px;"><i class="fa fa-thumbs-o-up" aria-hidden="true"></i></span> <span class="pull-right" style="font-size:12px;padding: 0px 10px 0px 0px;"><i class="glyphicon glyphicon-comment" aria-hidden="true"></i></span></div>
-</div>
 
-</div>
-<div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
-<div class="gallery">
-  <a target="_blank">
-    <img data-toggle="modal" data-target="#myModal" src="img/1.jpg" alt="Mountains" style="height:150px;padding:1px 1px 1px 1px;">
-  </a>
-  <div class="desc" ><span  style="height:70px;">Add a description of the image here Add a description of the image.</span><br><span style="font-size:12px;padding: 0px 0px 0px 5px;"><i class="fa fa-thumbs-o-up" aria-hidden="true"></i></span> <span  class="pull-right" style="font-size:12px;padding: 0px 10px 0px 0px;"><i class="glyphicon glyphicon-comment" aria-hidden="true"></i></span></div>
-</div>
 
-</div>
-<div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
-<div class="gallery">
-  <a target="_blank">
-    <img data-toggle="modal" data-target="#myModal" src="img/2.jpg" alt="Mountains" style="height:150px;padding:1px 1px 1px 1px;">
-  </a>
-  <div class="desc"><span  style="height:70px;">Add a description of the image here Add a description of the image.</span><br><span style="font-size:12px;padding: 0px 0px 0px 5px;"><i class="fa fa-thumbs-o-up" aria-hidden="true"></i></span> <span  class="pull-right"style="font-size:12px;padding: 0px 10px 0px 0px;"><i class="glyphicon glyphicon-comment" aria-hidden="true"></i></span></div>
-</div>
+<!---------------------------------------------------------------------->  
+ <form class="myform form-horizontal form-label-left">
 
-</div>
-<div class="col-lg-2 col-md-2 col-sm-2 col-xs-2">
-<div class="gallery">
-  <a target="_blank">
-    <img data-toggle="modal" data-target="#myModal" src="img/3.jpg" alt="Mountains" style="height:150px;padding:1px 1px 1px 1px;">
-  </a>
-  <div class="desc"><span  style="height:70px;">Add a description of the image here Add a description of the image.</span><br><span style="font-size:12px;padding: 0px 0px 0px 5px;"><i class="fa fa-thumbs-o-up" aria-hidden="true"></i></span> <span  class="pull-right"style="font-size:12px;padding: 0px 10px 0px 0px;"><i class="glyphicon glyphicon-comment" aria-hidden="true"></i></span></div>
-</div>
 
-</div>	
-</div>
 
 <div class="modal fade" id="myModal" role="dialog">
     <div class="modal-dialog">
@@ -146,26 +220,20 @@ Add a description of the image here Add a description of the image here Add a de
 
     <!-- Wrapper for slides -->
     <div class="carousel-inner" role="listbox">
-	
-      <div class="item active">
-	  <h4 style="float:left;padding:3px;">Image Caption1</h4>
-        <img src="img/1.jpg" alt="Chania" style="height:500px;width:100%;padding:0px 3px 3px 3px;">
+	<div class="item active">
+	  <h4 style="float:left;padding:3px;"><?php echo $albumimages[0]['imageCaption']; ?></h4>
+        <center><img src="<?php echo $albumimages[0]['imgName'];?>" alt="Chania" style="max-height:500px;max-width:100%;padding:0px 3px 3px 3px;" class="img img-responsive"></center>
       </div>
-
+	<?php 
+	for($k=0; $k<count($albumimages)-1; $k++)
+	{
+		
+	?>
       <div class="item">
-	  <h4 style="float:left;padding:3px;">Image Caption2</h4>
-        <img src="img/6.jpg" alt="Chania" style="height:500px;width:100%;padding:0px 3px 3px 3px;">
+	  <h4 style="float:left;padding:3px;"><?php echo $albumimages[$k]['imageCaption']; ?></h4>
+        <center><img src="<?php echo $albumimages[$k+1]['imgName'];?>" alt="Chania" style="max-height:500px;max-width:100%;padding:0px 3px 3px 3px;"></center>
       </div>
-    
-      <div class="item">
-	  <h4 style="float:left;padding:3px;">Image Caption3</h4>
-        <img src="img/7.jpg" alt="Flower" style="height:500px;width:100%;padding:0px 3px 3px 3px;">
-      </div>
-
-      <div class="item">
-	  <h4 style="float:left;padding:3px;">Image Caption4</h4>
-        <img src="img/8.jpg" alt="Flower" style="height:500px;width:100%;padding:0px 3px 3px 3px;">
-      </div>
+	<?php } ?>
     </div>
 
     <!-- Left and right controls -->
@@ -187,7 +255,7 @@ Add a description of the image here Add a description of the image here Add a de
 </div>
                     </form>
 
-
+<!--------------------------------------------------------------------------------->
 
                   </div></div>
                   </div></div>

@@ -5,7 +5,7 @@ include 'topNavigation.php';
 
 require_once('Class_Library/class_Feedback.php');
 $objFeed = new Feedback();
-session_start();
+@session_start();
 //echo'<pre>';print_r($_SESSION);die;
 $clientId = $_SESSION['client_id'];
 $empId = $_SESSION['user_unique_id'];
@@ -18,6 +18,44 @@ $feedDetailsArr = json_decode($feedDetails, true);
 
 $feedData = $feedDetailsArr['data'];
 ?>
+<input type="hidden" name="feedid" id="feedid" value="<?php echo $feedbackId; ?>">
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.11.0.js"></script>
+<script>
+    $(document).ready(function () {
+			
+		$('.deleteComment').click(function () {
+			//alert("hi");
+			
+			var feedbackid = $("#feedid").val();
+			var commentId = $(this).attr('id');
+			var flag = 23;
+			
+			//var feedbackid = "Feedback-1";
+			//var commentid = "Comment-10";
+			//alert(feedbackid);
+			//alert(commentId);
+			
+            var confirmationBox = confirm("Are you sure you want to delete this comment ?");
+            if (confirmationBox == true) {
+                $.ajax({
+                    url: "delete_comment.php",
+                    type: "POST",
+                    cache: false,
+                    data: {
+                        postId: feedbackid,
+                        commentId: commentId,
+                        flag: flag
+                    },
+                    success: function (a) {
+						//alert(a);
+                        alert("Comment deleted successfully");
+                        $("#commentDiv"+commentId).remove();
+                    }
+                });
+            }
+        });
+    });
+</script>
 
 <!-- page content -->
 <div class="right_col" role="main">
@@ -28,7 +66,7 @@ $feedData = $feedDetailsArr['data'];
             <div class="col-md-12 col-sm-12 col-xs-12">
                 <div class="x_panel">
                     <div class="x_title">
-                        <h2>Question?</h2>
+                        <h2>Question?</h2><!--<?php echo "<pre>";print_r($feedDetailsArr);?>-->
                         <ul class="nav navbar-right panel_toolbox">
                             <li class="right"><a class="collapse-link"><i class="fa fa-chevron-up "></i></a>
                             </li>
@@ -43,7 +81,7 @@ $feedData = $feedDetailsArr['data'];
                                 <h4><b><?php echo $feedDetailsArr['feedbackQuestion']; ?></b></h4>
 
                             </div>
-<div class="form-group"><h5 style="float:right;">Posted Date: 7 Apr 2017</h5></div>
+<div class="form-group"><h5 style="float:right;">Posted Date: <?php echo $feedDetailsArr['createdDate'];?></h5></div>
                         </form>
                     </div>
                 </div>
@@ -161,14 +199,30 @@ $feedData = $feedDetailsArr['data'];
                     <div class="x_content">
                         <br />
                         <form id="demo-form3" data-parsley-validate class="form-horizontal form-label-left">
-                            <?php foreach ($feedData as $feed) { ?>
-                                <div class="row">
+                            <?php 
+							if($feedDetailsArr['success']==1)
+							{
+							foreach ($feedData as $feed) { ?>
 
-                                    <div class="col-xs-9 col-sm-9 col-md-10 col-lg-11 "><p class="userresponse"><?php echo $feed['comment_text']; ?></p><p><span class="NoOflikes"><i class="fa fa-heart" aria-hidden="true"></i> <?php echo $feed['totalLikes']; ?>,<span> &nbsp; </i><?php echo date('d M Y', strtotime($feed['CommentDate'])); ?></p></div>
-
-                                                    </div>
-                                                    <hr>
-                                                <?php } ?>
+									<?php echo "<div class='row' id='commentDiv" . $feed['commentId'] . "'>"; ?>
+									
+								<div class="col-sm-1">
+								<img src="<?php echo $feed['userimage'];?>" onerror="this.src='images/user.png' "class="img img-responsive img-circle "style="border:1px solid"/>
+								</div>
+                                
+								<div style="border-bottom:1px solid #eee;padding: 0px 20px 6px 20px;"  class="col-xs-12 col-sm-11 col-md-11 col-lg-11 "><p class="userresponse"><?php echo $feed['comment_text']; ?></p><p><span class="NoOflikes"><i class="fa fa-heart" aria-hidden="true"></i> <?php echo $feed['totalLikes']; ?>,<span> &nbsp; </i><?php echo date('d M Y', strtotime($feed['CommentDate'])); ?></p>
+									
+																		
+									<?php echo "<button type='button' class='deleteComment btn btn-default btn-sm' id='" . $feed['commentId'] . "'>
+                        <span class='glyphicon glyphicon-trash'></span> Delete </button>";
+                       ?>
+									
+									</div>
+									
+									</div>
+									<!--<hr>-->
+                                                    
+							<?php }} ?>
 
 
 

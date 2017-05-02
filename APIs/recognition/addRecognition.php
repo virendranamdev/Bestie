@@ -1,9 +1,12 @@
 <?php
 
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+//error_reporting(E_ALL);ini_set('display_errors', 1);
 
 if (!class_exists("Family") && include("../../Class_Library/Api_Class/class_family.php")) {
+    include_once ('../../Class_Library/class_get_group.php');
+    include_once ('../../Class_Library/class_reading.php');
+    include_once ('../../Class_Library/class_welcomeTable.php');
+
     if (isset($_SERVER['HTTP_ORIGIN'])) {
         header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
         header('Access-Control-Allow-Credentials: true');
@@ -25,17 +28,50 @@ if (!class_exists("Family") && include("../../Class_Library/Api_Class/class_fami
 
     $jsonArr = json_decode(file_get_contents("php://input"), true);
     $obj = new Family();
+    $obj_group = new Group();                  //class_get_group.php
+    $read = new Reading();                    //   class_reading.php 
+    $welcome_obj = new WelcomePage();
 
     if ((!empty($jsonArr["clientId"])) && (!empty($jsonArr['device'])) && (!empty($jsonArr['deviceId']))) {
         extract($jsonArr);
-        $result = $obj->getUserDetail($clientId, $recognitionby);
+        if (strtolower($mesg) != $obj->filterWords($mesg)) {
+            $response['success'] = 0;
+            $response['message'] = "Your Comment contains inappropriate language";
+        } else {
+            $result = $obj->getUserDetail($clientId, $recognitionby);
+            if ($result['success'] == 1) {
+                $rzid = $obj->maxIdRecognition($clientId);
+                $response = $obj->insertUserRecognition($clientId, $recognitionto, $recognitionby, $topicId, $recognizeTitle, $mesg, $points);
 
-        if ($result['success'] == 1) {
-            $response = $obj->insertUserRecognition($clientId, $recognitionto, $recognitionby, $topicId, $recognizeTitle, $mesg, $points);
+                $type = 'Recognition';
+                $text = '';
+                $image = '';
+                date_default_timezone_set('Asia/Kolkata');
+                $post_date = date('Y-m-d, H:i:s');
+                $FLAG = '10';
+                $result1 = $welcome_obj->createWelcomeData($clientId, $rzid, $type, $text, $image, $post_date, $recognitionby, $FLAG);
+
+
+                /*                 * ************************* find group **************************** */
+                $result = $obj_group->getGroup($clientId);
+                $value = json_decode($result, true);
+                $getcat = $value['posts'];
+
+                $wholegroup = array();
+                foreach ($getcat as $groupid) {
+                    array_push($wholegroup, $groupid['groupId']);
+                }
+
+                $groupcount = count($wholegroup);
+                for ($k = 0; $k < $groupcount; $k++) {
+                    $result1 = $read->recognizeSentToGroup($clientId, $rzid, $wholegroup[$k]);
+                }
+                unset($response['rcid']);
+            }
         }
     } else {
         $response['success'] = 0;
-        $response['result'] = "Invalid json";
+        $response['message'] = "Invalid json";
     }
     header('Content-type: application/json');
     echo json_encode($response);

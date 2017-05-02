@@ -1,9 +1,9 @@
 <?php
 
-//error_reporting(E_ALL);ini_set("display_errors", 1);
+//error_reporting(E_ALL);ini_set('display_errors', 1);
 
-if (!class_exists('Feedback') && include("../../Class_Library/Api_Class/class_feedback.php")) {
-
+if (!class_exists("Recognize") && include_once("../../Class_Library/class_recognize.php")) {
+    include_once("../../Class_Library/Api_Class/class_family.php");
     if (isset($_SERVER['HTTP_ORIGIN'])) {
         header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
         header('Access-Control-Allow-Credentials: true');
@@ -11,7 +11,7 @@ if (!class_exists('Feedback') && include("../../Class_Library/Api_Class/class_fe
         //echo json_encode($response);
     }
 
-    // Access-Control headers are received during OPTIONS requests
+// Access-Control headers are received during OPTIONS requests
     if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 
         if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
@@ -24,33 +24,19 @@ if (!class_exists('Feedback') && include("../../Class_Library/Api_Class/class_fe
     }
 
     $jsonArr = json_decode(file_get_contents("php://input"), true);
+    if ((!empty($jsonArr["clientId"])) && (!empty($jsonArr['device'])) && (!empty($jsonArr['deviceId']))) {
+        $fam = new Family();
+        $obj = new Recognize();
 
-    /*
-      {
-      "clientId"  : "",
-      "empId"     : "",
-      "feedbackId": "",
-      "comment"   : "",
-      "anonymous"   : "",
-      "device"    : "",
-      "deviceId"  : ""
-      }
-     */
-
-    if ($jsonArr['clientId'] && $jsonArr['empId']) {
-        $obj = new Feedback();
         extract($jsonArr);
+        $result = $fam->getUserDetail($clientId, $employeeid);
 
-        if (strtolower($comment) != $obj->filterWords($comment)) {
-            $response['success'] = 0;
-            $response['message'] = "Your Comment contains inappropriate language";
-        } else {
-            $maxId = $obj->maxId();
-            $response = $obj->addFeedComments($clientId, $maxId, $feedbackId, $comment, $empId, $anonymous);
+        if ($result['success'] == 1) {
+            $response = $obj->recognitionLeaderboard($clientId);
         }
     } else {
         $response['success'] = 0;
-        $response['message'] = "Invalid json";
+        $response['result'] = "Invalid json";
     }
     header('Content-type: application/json');
     echo json_encode($response);

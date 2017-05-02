@@ -54,13 +54,13 @@ class Feedback {
 
     public function getSingleFeedbackDetail($clientId, $feedbackId) {
         try {
-            $feedbackQuery = "SELECT feedbackQuestion,DATE_FORMAT(publishingTime,'%m/%d/%Y') as publishingTime ,DATE_FORMAT(unpublishingTime,'%m/%d/%Y') as unpublishingTime FROM Tbl_C_Feedback WHERE feedbackId=:feedbackId";
+            $feedbackQuery = "SELECT feedbackQuestion,DATE_FORMAT(publishingTime,'%m/%d/%Y') as publishingTime ,DATE_FORMAT(unpublishingTime,'%m/%d/%Y') as unpublishingTime , DATE_FORMAT(createdDate,'%d %b %Y') as createdDate FROM Tbl_C_Feedback WHERE feedbackId=:feedbackId";
             $stmt = $this->db_connect->prepare($feedbackQuery);
             $stmt->bindParam(':feedbackId', $feedbackId, PDO::PARAM_STR);
             if ($stmt->execute()) {
                 $feedback = $stmt->fetch(PDO::FETCH_ASSOC);
             }
-            $query = "select count(commentId) as totalComments from Tbl_C_FeedbackComments where feedbackId=:feedbackId";
+            $query = "select count(commentId) as totalComments from Tbl_C_FeedbackComments where feedbackId=:feedbackId AND status = 1";
             $stmt = $this->db_connect->prepare($query);
             $stmt->bindParam(':feedbackId', $feedbackId, PDO::PARAM_STR);
             if ($stmt->execute()) {
@@ -69,7 +69,9 @@ class Feedback {
                 if ($totalComments['totalComments'] > 0) {
                     try {
                         $flagType = 23;
-                        $query = "SELECT feedComments.*,feed.feedbackQuestion, (select count(autoId) from Tbl_C_FeedbackCommentLikes where commentId=feedComments.commentId and feedbackId=:feedbackId and like_unlike_status='1') as totalLikes FROM Tbl_C_FeedbackComments as feedComments JOIN Tbl_C_Feedback as feed ON feedComments.feedbackId=feed.feedbackId WHERE feed.clientId=:clientId AND feed.flagType=:flagType AND feedComments.feedbackId=:feedbackId";
+                        //$query = "SELECT feedComments.*,feed.feedbackQuestion, (select count(autoId) from Tbl_C_FeedbackCommentLikes where commentId=feedComments.commentId and feedbackId=:feedbackId and like_unlike_status='1' and feedComments.status = 1) as totalLikes FROM Tbl_C_FeedbackComments as feedComments JOIN Tbl_C_Feedback as feed ON feedComments.feedbackId=feed.feedbackId WHERE feed.clientId=:clientId AND feed.flagType=:flagType AND feedComments.feedbackId=:feedbackId and feedComments.status = 1";
+						
+			$query = "SELECT feedComments.*,feed.feedbackQuestion, (select count(autoId) from Tbl_C_FeedbackCommentLikes where commentId=feedComments.commentId and feedbackId=:feedbackId and like_unlike_status='1' and feedComments.status = 1) as totalLikes , if((feedComments.anonymous = '1'), if(epd.avatar_image = '' OR epd.avatar_image IS NULL , '' , CONCAT('". SITE ."',epd.avatar_image)), if(epd.userimage = '' OR epd.userimage IS NULL , '' , CONCAT('". SITE ."',epd.userimage)) ) as userimage FROM Tbl_C_FeedbackComments as feedComments JOIN Tbl_C_Feedback as feed ON feedComments.feedbackId=feed.feedbackId JOIN Tbl_EmployeePersonalDetails as epd ON feedComments.commentBy = epd.employeeId WHERE feed.clientId=:clientId AND feed.flagType=:flagType AND feedComments.feedbackId=:feedbackId and feedComments.status = 1";
 
                         $stmt = $this->db_connect->prepare($query);
                         $stmt->bindParam(':clientId', $clientId, PDO::PARAM_STR);
@@ -81,8 +83,9 @@ class Feedback {
                             $result['feedbackQuestion'] = $feedback['feedbackQuestion'];
 							$result['publishingTime'] = $feedback['publishingTime'];
 							$result['unpublishingTime'] = $feedback['unpublishingTime'];
+                            $result['createdDate'] = $feedback['createdDate'];
                             $result['totalComments'] = $totalComments['totalComments'];
-                            $result['data'] = $commentResult;
+							$result['data'] = $commentResult;
                         }
                     } catch (Exception $ex) {
                         $result = $ex;
@@ -93,6 +96,7 @@ class Feedback {
 					$result['feedbackQuestion'] = $feedback['feedbackQuestion'];
 					$result['publishingTime'] = $feedback['publishingTime'];
 					$result['unpublishingTime'] = $feedback['unpublishingTime'];
+					$result['createdDate'] = $feedback['createdDate'];
                 }
             }
         } catch (Exception $ex) {

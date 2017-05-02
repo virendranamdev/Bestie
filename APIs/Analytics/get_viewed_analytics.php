@@ -1,8 +1,6 @@
 <?php
-
-//error_reporting(E_ALL);ini_set("display_errors", 1);
-
-if (!class_exists('Feedback') && include("../../Class_Library/Api_Class/class_feedback.php")) {
+error_reporting(E_ALL); ini_set('display_errors', 1);
+if (file_exists("../../Class_Library/class_reading.php") && include("../../Class_Library/class_reading.php")) {
 
     if (isset($_SERVER['HTTP_ORIGIN'])) {
         header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
@@ -24,33 +22,22 @@ if (!class_exists('Feedback') && include("../../Class_Library/Api_Class/class_fe
     }
 
     $jsonArr = json_decode(file_get_contents("php://input"), true);
+	/*{
+	 "clientid":"CO-22",
+	 "post_id":"POST-1",
+	 "employeeid":"pSNx6y5WCp1EuIOsoS3iBesrFSObKF",
+	 "flagType":"1",
+	 "device":"Ios"
+	 }*/
+	
+    if (!empty($jsonArr['clientid'])) {
+        $obj = new Reading();
 
-    /*
-      {
-      "clientId"  : "",
-      "empId"     : "",
-      "feedbackId": "",
-      "comment"   : "",
-      "anonymous"   : "",
-      "device"    : "",
-      "deviceId"  : ""
-      }
-     */
-
-    if ($jsonArr['clientId'] && $jsonArr['empId']) {
-        $obj = new Feedback();
         extract($jsonArr);
-
-        if (strtolower($comment) != $obj->filterWords($comment)) {
-            $response['success'] = 0;
-            $response['message'] = "Your Comment contains inappropriate language";
-        } else {
-            $maxId = $obj->maxId();
-            $response = $obj->addFeedComments($clientId, $maxId, $feedbackId, $comment, $empId, $anonymous);
-        }
+        $response = $obj->viewednews($clientid, $post_id, $employeeid, $flagType, $device);
     } else {
         $response['success'] = 0;
-        $response['message'] = "Invalid json";
+        $response['result'] = "Invalid json";
     }
     header('Content-type: application/json');
     echo json_encode($response);

@@ -13,6 +13,45 @@ class Family {
         $this->db_connect = $dbh->getConnection_Communication();
     }
 
+    public function filterWords($text) {
+        $text = strtolower($text);
+//        $bad = array('dirty', 'butt', 'lips', 'fuck');
+        $bad = array('Alcoholic', 'Amateur', 'Analphabet', 'Anarchist', 'Ape', 'Arse', 'Arselicker', 'Ass', 'Ass master', 'Ass-kisser', 'Ass-nugget', 'Ass-wipe', 'Asshole',
+    'Baby', 'Backwoodsman', 'Balls', 'Bandit', 'Barbar', 'Bastard', 'Beavis', 'Beginner', 'Biest', 'Bitch', 'Blubber gut', 'Bogeyman', 'Booby', 'Boozer', 'Bozo', 'Brain-fart', 'Brainless', 'Brainy', 'Brontosaurus', 'Brownie', 'Bugger', 'silly', 'Bulloks', 'Bum', 'Bum-fucker', 'Butt', 'Buttfucker', 'Butthead',
+    'Callboy', 'Callgirl', 'Camel', 'Cannibal', 'Cave man', 'Chaavanist', 'Chaot', 'Chauvi', 'Cheater', 'Chicken', 'Children fucker', 'Clit', 'Clown', 'Cock', 'Cock master', 'Cock up', 'Cockboy', 'Cockfucker', 'Cockroach', 'Coky', 'Con merchant', 'Con-man', 'Country bumpkin', 'Cow', 'Creep', 'Cretin', 'Criminal', 'Cunt', 'Cunt sucker',
+    'Daywalker', 'Deathlord', 'Derr brain', 'Desperado', 'Devil', 'Dickhead', 'Dinosaur', 'Disgusting packet', 'Diz brain', 'Do-Do', 'Dog', 'dirty', 'Dogshit', 'Donkey', 'Dracula', 'Drakula', 'Dreamer', 'Drinker', 'Drunkard', 'Dufus', 'Dulles', 'Dumbo', 'Dummy', 'Dumpy',
+    'Egoist', 'Eunuch', 'Exhibitionist',
+    'Fake', 'Fanny', 'Farmer', 'Fart', 'shitty', 'Fat', 'Fatso', 'Fibber', 'Fish', 'Fixer', 'Flake', 'Flash Harry', 'Freak', 'Frog', 'Fuck', 'Fuck face', 'Fuck head', 'Fuck noggin', 'Fucker',
+    'Gangster', 'Ghost', 'Goose', 'Gorilla', 'Grouch', 'Grumpy',
+    'Hell dog', 'Hillbilly', 'Hippie', 'Homo', 'Homosexual', 'Hooligan', 'Horse fucker',
+    'Idiot', 'Ignoramus',
+    'Jack-ass', 'Jerk', 'Joker', 'Junkey',
+    'Killer',
+    'Lard face', 'Latchkey child', 'Learner', 'Liar', 'Looser', 'Lucky', 'Lumpy', 'Luzifer',
+    'Macho', 'Macker', 'Minx', 'Missing link', 'Monkey', 'Monster', 'Motherfucker', 'Mucky pub', 'Mutant',
+    'Neanderthal', 'Nerfhearder', 'Nobody', 'Nurd', 'Nuts', 'numb',
+    'Oddball', 'Oger', 'Oil dick', 'Old fart', 'Orang-Uthan', 'Original', 'Outlaw',
+    'Pack', 'Pain in the ass', 'Pavian', 'Pencil dick', 'Pervert', 'Pig', 'Piggy-wiggy', 'Pirate', 'Pornofreak', 'Prick', 'Prolet',
+    'Queer', 'Querulant',
+    'Rat', 'Rat-fink', 'Reject', 'Retard', 'Riff-Raff', 'Ripper', 'Roboter', 'Rowdy', 'Rufian',
+    'Sack', 'Sadist', 'Saprophyt', 'Satan', 'Scarab', 'Schfincter', 'Shark', 'Shit eater', 'Shithead', 'Simulant', 'Skunk', 'Skuz bag', 'Slave', 'Sleeze', 'Sleeze bag', 'Slimer', 'Slimy bastard', 'Small pricked', 'Snail', 'Snake', 'Snob', 'Snot', 'Son of a bitch', 'Square', 'Stinker', 'Stripper', 'Stunk', 'Swindler', 'Swine',
+    'Teletubby', 'Thief', 'Toilett cleaner', 'Tussi', 'Typ',
+    'Unlike',
+    'Vampir', 'Vandale', 'Varmit',
+    'Wallflower', 'Wanker', 'bloody', 'Weeze Bag', 'Whore', 'Wierdo', 'Wino', 'Witch', 'Womanizer', 'Woody allen', 'Worm',
+    'Xena', 'Xenophebe', 'Xenophobe', 'XXX Watcher',
+    'Yak', 'Yeti',
+    'Zit face');
+
+        $rep = '***';
+
+//                '***', '***', '***', '***', '***', '***', '***', '***', '***', '***');
+        $bad = array_map('strtolower', $bad);
+//        print_r(sizeof($rep));        die;
+        $text = str_replace($bad, $rep, $text);
+        return $text;
+    }
+    
     function getUserDetail($clientid, $uuid) {
         try {
             $query = "select firstName from Tbl_EmployeeDetails_Master where clientId=:cli and employeeId=:empid";
@@ -37,7 +76,7 @@ class Family {
 
     function getUserDetails($clientid, $uuid) {
         try {
-            $query = "select Tbl_EmployeeDetails_Master.firstName,Tbl_EmployeeDetails_Master.middleName,Tbl_EmployeeDetails_Master.lastName, concat('http://admin.benepik.com/employee/virendra/benepik_admin/',Tbl_EmployeePersonalDetails.userImage) as userImage from Tbl_EmployeeDetails_Master join Tbl_EmployeePersonalDetails on Tbl_EmployeeDetails_Master.employeeId = Tbl_EmployeePersonalDetails.employeeId where Tbl_EmployeeDetails_Master.clientId=:cli and Tbl_EmployeeDetails_Master.employeeId=:empid";
+            $query = "select Tbl_EmployeeDetails_Master.firstName,Tbl_EmployeeDetails_Master.middleName,Tbl_EmployeeDetails_Master.lastName, if(Tbl_EmployeePersonalDetails.userImage IS NULL or Tbl_EmployeePersonalDetails.userImage='', '',concat('" . site_url . "',Tbl_EmployeePersonalDetails.userImage)) as userImage from Tbl_EmployeeDetails_Master join Tbl_EmployeePersonalDetails on Tbl_EmployeeDetails_Master.employeeId = Tbl_EmployeePersonalDetails.employeeId where Tbl_EmployeeDetails_Master.clientId=:cli and Tbl_EmployeeDetails_Master.employeeId=:empid";
             $stmt = $this->db_connect->prepare($query);
             $stmt->bindParam(':cli', $clientid, PDO::PARAM_STR);
             $stmt->bindParam(':empid', $uuid, PDO::PARAM_STR);
@@ -45,7 +84,7 @@ class Family {
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             if ($row) {
                 $response["success"] = 1;
-                $response["Tbl_EmployeeDetails_Master"] = $row;
+                $response["UserDetails"] = $row;
             } else {
                 $response["userName"] = "User doesn't exist";
             }
@@ -83,13 +122,7 @@ class Family {
         }
     }
 
-    /*     * ************************************************************************************* */
-
-    function insertUserRecognition($clientid, $recognitionto, $recognitionby, $topicId, $recognizeTitle, $mesg, $points) {
-        date_default_timezone_set('Asia/Kolkata');
-        $da = date('Y-m-d, H:i:s');
-        $status = "Pending";
-
+    function maxIdRecognition($clientid) {
         try {
             $max = "select max(autoId) from Tbl_RecognizedEmployeeDetails";
             $stmt = $this->db_connect->prepare($max);
@@ -103,13 +136,23 @@ class Family {
             echo $e;
             trigger_error('Error occured fetching max autoid : ' . $e->getMessage(), E_USER_ERROR);
         }
+        return $recogid;
+    }
 
+    /*     * ************************************************************************************* */
+
+    function insertUserRecognition($clientid, $recognitionto, $recognitionby, $topicId, $recognizeTitle, $mesg, $points) {
+        date_default_timezone_set('Asia/Kolkata');
+        $da = date('Y-m-d, H:i:s');
+        $status = "Approve";
+
+        $recogid = self::maxIdRecognition($clientid);
         $recognizeto = self::getUserDetails($clientid, $recognitionto);
 
-        $rto = $recognizeto['Tbl_EmployeeDetails_Master']['firstName'] . " " . $recognizeto['Tbl_EmployeeDetails_Master']['lastName'];
+        $rto = $recognizeto['UserDetails']['firstName'] . " " . $recognizeto['UserDetails']['lastName'];
         $recognizeby = self::getUserDetails($clientid, $recognitionby);
 
-        $rby = $recognizeby['Tbl_EmployeeDetails_Master']['firstName'] . " " . $recognizeby['Tbl_EmployeeDetails_Master']['lastName'];
+        $rby = $recognizeby['UserDetails']['firstName'] . " " . $recognizeby['UserDetails']['lastName'];
         try {
             $query = "insert into Tbl_RecognizedEmployeeDetails(recognitionId,clientId,recognitionBy,recognitionTo,topic,text,dateOfEntry,status,points) values(:reg,:cli,:rby,:rto,:top,:txt,:dat,:sta,:pts)";
             $stmt = $this->db_connect->prepare($query);
@@ -124,46 +167,76 @@ class Family {
             $stmt->bindParam(':pts', $points, PDO::PARAM_STR);
 
             if ($stmt->execute()) {
+                $stmtStatus = 'Credited';
+                include_once('../../Class_Library/class_recognize.php');
+                $recog = new Recognize();
+                $totalpointsdata = $recog->getMaxtotalPoints($clientid, $recognitionto);
+                $ert = json_decode($totalpointsdata, true);
 
-                $to = 'gagandeep509.singh@gmail.com';
-                $subject = 'Request for Recognisation Approval';
-                $from = 'info@benepik.com';
-                $headers = 'MIME-Version: 1.0' . "\r\n";
-                $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-                $headers .= 'From: ' . $from . "\r\n" .
-                        'Reply-To: ' . $from . "\r\n" .
-                        'X-Mailer: PHP/' . phpversion();
-
-// Compose a simple HTML email messag
-                $message = '<html><body>';
-                $message .= '<h3>Dear Sir</h3>';
-                $message .= '<p><b>' . $rby . '</b> recognize to <b> ' . $rto . '</b></p>';
-                $message .= '<p><b>Topic</b> : ' . $recognizeTitle . '</p>';
-                $message .= '<p><b>Comment </b> : ' . $mesg . '</p><br><br>';
-
-                $message .= '<p>Thanks</p>';
-                $message .= '<p>Benepik Team</p>';
-
-                $message .= '</body></html>';
-
-                if (mail($to, $subject, $message, $headers)) {
-
-                    // echo 'Your mail has been sent successfully.';
+                $flag = '0';
+                if ($ert['success'] == 1) {
+                    $totlpoint = $ert['data'][0]['totalPoints'] + $points;
                 } else {
-
-                    // echo 'Unable to send email. Please try again.';
+                    $totlpoint = $points;
                 }
+                $query = "insert into Tbl_RecognizeApprovDetails (clientId, recognizeId, userId, recognizeBy, quality, points, totalPoints, entryDate, stmtStatus, regStatus, flag) VALUES (:cli, :reg, :rto, :rby, :top, :pts, :tpts, :dat, :stmtStatus, :status, :flag)";
+                $stmt = $this->db_connect->prepare($query);
+                $stmt->bindParam(':cli', $clientid, PDO::PARAM_STR);
+                $stmt->bindParam(':reg', $recogid, PDO::PARAM_STR);
+                $stmt->bindParam(':rto', $recognitionto, PDO::PARAM_STR);
+                $stmt->bindParam(':rby', $recognitionby, PDO::PARAM_STR);
+                $stmt->bindParam(':top', $topicId, PDO::PARAM_STR);
+                $stmt->bindParam(':pts', $points, PDO::PARAM_STR);
+                $stmt->bindParam(':tpts', $totlpoint, PDO::PARAM_STR);
+                $stmt->bindParam(':dat', $da, PDO::PARAM_STR);
+                $stmt->bindParam(':stmtStatus', $stmtStatus, PDO::PARAM_STR);
+                $stmt->bindParam(':status', $status, PDO::PARAM_STR);
+                $stmt->bindParam(':flag', $flag, PDO::PARAM_STR);
+                $stmt->execute();
+
+                /*
+                  $to = 'gagandeep509.singh@gmail.com';
+                  $subject = 'Request for Recognition Approval';
+                  $from = 'info@benepik.com';
+                  $headers = 'MIME-Version: 1.0' . "\r\n";
+                  $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+                  $headers .= 'From: ' . $from . "\r\n" .
+                  'Reply-To: ' . $from . "\r\n" .
+                  'X-Mailer: PHP/' . phpversion();
+
+                  // Compose a simple HTML email messag
+                  $message = '<html><body>';
+                  $message .= '<h3>Dear Sir</h3>';
+                  $message .= '<p><b>' . $rby . '</b> recognize to <b> ' . $rto . '</b></p>';
+                  $message .= '<p><b>Topic</b> : ' . $recognizeTitle . '</p>';
+                  $message .= '<p><b>Comment </b> : ' . $mesg . '</p><br><br>';
+
+                  $message .= '<p>Thanks</p>';
+                  $message .= '<p>Benepik Team</p>';
+
+                  $message .= '</body></html>';
+
+                  if (mail($to, $subject, $message, $headers)) {
+
+                  // echo 'Your mail has been sent successfully.';
+                  } else {
+
+                  // echo 'Unable to send email. Please try again.';
+                  }
+                 */
 
 
                 $response = array();
                 $response["success"] = 1;
-                $response["message"] = "Data inserted successfully";
+                $response["message"] = "Recognition submitted successfully";
+                $response["rcid"] = $this->db_connect->lastInsertId();
+                ;
                 return $response;
             }
         }      //--------------------------------------------- end of try block
         catch (PDOException $e) {
             echo $e;
-            echo 'Unable to send email. Please try again.';
+            echo 'Please try again.';
         }
     }
 
@@ -242,7 +315,7 @@ class Family {
             if (array_filter($rows)) {
                 $response = array();
                 $response["success"] = 1;
-                $response["message"] = "Peesonal Details Found Displaying";
+                $response["message"] = "Personal Details Found Displaying";
                 $response["posts"] = $rows;
                 return $response;
             } else if (!array_filter($rows)) {
@@ -305,18 +378,33 @@ class Family {
         return $result;
     }
 
-    function getRecognisedUser($clientid, $uuid, $value) {
-        $this->value = $value;
+    function getRecognisedUser($clientid, $uuid, $value, $leader = '') {
         $sts = "Approve";
         try {
-            $query1 = "select * from Tbl_RecognizedEmployeeDetails where status =:sts and clientId=:cli order by autoId desc limit " . $this->value . ",5";
+            $query1 = "select recognition.*, badges.recognizeTitle, if(badges.image IS NULL or badges.image='', '',concat('" . site_url . "', badges.image)) as badgesImage from Tbl_RecognizedEmployeeDetails as recognition join Tbl_RecognizeTopicDetails as badges ON recognition.topic=badges.topicId where recognition.status =:sts and recognition.clientId=:cli";
+
+            if (!empty($leader)) {
+                $query1 .= " and recognition.recognitionTo='$leader' ";
+            }
+
+            $query1 .= " order by recognition.autoId desc";
+            
+            if (empty($leader)) {
+	    	$query1 .= " limit " . $value . ",5";
+	    }
+	    
             $stmt1 = $this->db_connect->prepare($query1);
             $stmt1->bindParam(':cli', $clientid, PDO::PARAM_STR);
             $stmt1->bindParam(':sts', $sts, PDO::PARAM_STR);
             $stmt1->execute();
-            $rows1 = $stmt1->fetchAll();
+            $rows1 = $stmt1->fetchAll(PDO::FETCH_ASSOC);
 
             $query2 = "select count(recognitionTo) as total_recognitions from Tbl_RecognizedEmployeeDetails where clientId=:cli and status=:sts";
+
+            if (!empty($leader)) {
+                $query2 .= " and recognitionTo='$leader'";
+            }
+
             $stmt2 = $this->db_connect->prepare($query2);
             $stmt2->bindParam(':cli', $clientid, PDO::PARAM_STR);
             $stmt2->bindParam(':sts', $sts, PDO::PARAM_STR);
@@ -330,24 +418,41 @@ class Family {
                 $response["posts"] = array();
 
                 foreach ($rows1 as $row) {
+                    $totalLikesQuery = "select count(autoId) as totalLikes from Tbl_Analytic_RecognitionLikes where recognitionId=:pt and like_unlike_status='1'";
+                    $stmt = $this->db_connect->prepare($totalLikesQuery);
+                    $stmt->bindParam(':pt', $row["recognitionId"], PDO::PARAM_STR);
+                    $stmt->execute();
+                    $totalLikes = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                    if ($totalLikes["totalLikes"] > 0) {
+                        $likeStatusQuery = "select if(employeeId=:empId, '1', '0') as likeStatus from Tbl_Analytic_RecognitionLikes where recognitionId=:pt and like_unlike_status='1'";
+                        $stmt = $this->db_connect->prepare($likeStatusQuery);
+                        $stmt->bindParam(':pt', $row["recognitionId"], PDO::PARAM_STR);
+                        $stmt->bindParam(':empId', $uuid, PDO::PARAM_STR);
+                        $stmt->execute();
+                        $likeStatus = $stmt->fetch(PDO::FETCH_ASSOC);
+                    } else {
+                        $likeStatus = '0';
+                    }
+
                     $post["recognitionId"] = $row["recognitionId"];
                     $post["recognitionBy"] = $row["recognitionBy"];
 
                     $recognitionBy = $row["recognitionBy"];
                     $user = self::getUserDetails($clientid, $recognitionBy);
-                    $post["recognitionByName"] = $user[Tbl_EmployeeDetails_Master][firstName] . " " . $user[Tbl_EmployeeDetails_Master][lastName];
-                    $post["recognitionByImage"] = $user[Tbl_EmployeeDetails_Master][userImage];
+                    $post["recognitionByName"] = $user[UserDetails][firstName] . " " . $user[UserDetails][lastName];
+                    $post["recognitionByImage"] = $user[UserDetails][userImage];
 
                     $post["recognitionTo"] = $row["recognitionTo"];
                     $recognitionTo = $row["recognitionTo"];
                     $user = self::getUserDetails($clientid, $recognitionTo);
-                    $post["recognitionToName"] = $user[Tbl_EmployeeDetails_Master][firstName] . " " . $user[Tbl_EmployeeDetails_Master][lastName];
+                    $post["recognitionToName"] = $user[UserDetails][firstName] . " " . $user[UserDetails][lastName];
 
-                    $namefirst = $user[Tbl_EmployeeDetails_Master][firstName];
-                    $namesecond = $user[Tbl_EmployeeDetails_Master][lastName];
+                    $namefirst = $user[UserDetails][firstName];
+                    $namesecond = $user[UserDetails][lastName];
 
                     $post["recognitionShortName"] = $namefirst[0] . " " . $namesecond[0];
-                    $post["recognitionToImage"] = $user[Tbl_EmployeeDetails_Master][userImage];
+                    $post["recognitionToImage"] = $user[UserDetails][userImage];
 
                     $query2 = "select count(recognitionTo) as total_approve from Tbl_RecognizedEmployeeDetails where clientId=:cli and recognitionTo=:rec and status = :sta";
                     $stmt2 = $this->db_connect->prepare($query2);
@@ -357,12 +462,16 @@ class Family {
                     $stmt2->execute();
                     $rows21 = $stmt2->fetch(PDO::FETCH_ASSOC);
 
+                    $post["likeStatus"] = $likeStatus["likeStatus"];
+                    $post["totalLikes"] = $totalLikes["totalLikes"];
                     $post["TotalApprove"] = $rows21["total_approve"];
                     $post["topic"] = $row["topic"];
                     $post["text"] = $row["text"];
+                    $post["badge"] = $row["recognizeTitle"];
+                    $post["badge_image"] = $row["badgesImage"];
                     $d1 = $row["dateOfEntry"];
                     $date = date_create($d1);
-                    $post["dateOfEntry"] = date_format($date, "d M Y h:i A");
+                    $post["dateOfEntry"] = date_format($date, "d M Y");
 
                     array_push($response["posts"], $post);
                 }

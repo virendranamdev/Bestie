@@ -1,6 +1,8 @@
 <?php
 
-include_once('class_connect_db_Communication.php');
+if (!class_exists("Connection_Communication")) {
+    include_once('class_connect_db_Communication.php');
+}
 
 class Recognize {
 
@@ -12,6 +14,8 @@ class Recognize {
     }
 
     public $idclient;
+
+    /*     * ********************************** FUNCTION FOR API *********************************** */
 
     function getRecognizeDetails($client_id) {
         $this->idclient = $client_id;
@@ -151,7 +155,7 @@ class Recognize {
         //echo "userid:-".$this->uid."<br/>";
         //echo $this->idclient;
         try {
-            $query = "select totalPoints from Tbl_RecognizeApprovDetails where autoId =(select max(autoId) from RecognizeApprovDetails where clientId=:cid and userId =:uid)";
+            $query = "select totalPoints from Tbl_RecognizeApprovDetails where autoId =(select max(autoId) from Tbl_RecognizeApprovDetails where clientId=:cid and userId =:uid)";
             $stmt = $this->DB->prepare($query);
             $stmt->bindParam(':cid', $this->idclient, PDO::PARAM_STR);
             $stmt->bindParam(':uid', $this->uid, PDO::PARAM_STR);
@@ -176,7 +180,9 @@ class Recognize {
 
     public function recognizeGetData($clientid) {
         try {
-            $query = "select topicId,recognizeTitle,points, if(image IS NULL or image='', '', concat('" . SITE_URL . "',image)) as image,createdDate from Tbl_RecognizeTopicDetails where clientId=:cli";
+            $site_url = dirname(SITE_URL) . '/';
+
+            $query = "select topicId,recognizeTitle,points, if(image IS NULL or image='', '', concat('" . $site_url . "',image)) as image,createdDate from Tbl_RecognizeTopicDetails where clientId=:cli";
             $stmt = $this->DB->prepare($query);
             $stmt->bindParam(':cli', $clientid, PDO::PARAM_STR);
             $stmt->execute();
@@ -298,6 +304,96 @@ class Recognize {
         }
     }
 
+    function like_recognition($clientId, $pid, $likedby, $status) {
+        $this->clientid = $clientId;
+        $this->postid = $pid;
+        $this->likedby = $likedby;
+        $this->status = $status;
+        $this->points = 10;
+
+        date_default_timezone_set('Asia/Kolkata');
+        $cd = date('Y-m-d H:i:s');
+
+        try {
+            $totalLikesQuery = "select count(autoId) as totalLikes from Tbl_Analytic_RecognitionLikes where recognitionId=:pt and like_unlike_status='1'";
+            $stmt = $this->DB->prepare($totalLikesQuery);
+            $stmt->bindParam(':pt', $this->postid, PDO::PARAM_STR);
+            if ($stmt->execute()) {
+                $totalLikes = $stmt->fetch(PDO::FETCH_ASSOC);
+                $flag = '1';
+                $LikesQuery = "select count(autoId) as totalLikes from Tbl_Analytic_RecognitionLikes where recognitionId=:pt and employeeId=:likedBy";
+                $stmt = $this->DB->prepare($LikesQuery);
+                $stmt->bindParam(':pt', $this->postid, PDO::PARAM_STR);
+                $stmt->bindParam(':likedBy', $this->likedby, PDO::PARAM_STR);
+
+                $stmt->execute();
+                $likeCheck = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                $query = "insert into Tbl_Analytic_RecognitionLikes(clientId, recognitionId, employeeId, like_unlike_status, created_date) values(:cli, :pt, :likedBy, :status, :cd) ON DUPLICATE KEY UPDATE like_unlike_status=:status, updated_date=:cd";
+                $stmt = $this->DB->prepare($query);
+                $stmt->bindParam(':cli', $this->clientid, PDO::PARAM_STR);
+                $stmt->bindParam(':pt', $this->postid, PDO::PARAM_STR);
+                $stmt->bindParam(':likedBy', $this->likedby, PDO::PARAM_STR);
+                $stmt->bindParam(':status', $this->status, PDO::PARAM_STR);
+                $stmt->bindParam(':cd', $cd, PDO::PARAM_STR);
+                if ($stmt->execute()) {
+                    if ($likeCheck['totalLikes'] == 0) {
+                        $getRecognizedUserQuery = "SELECT recognitionTo,topic from Tbl_RecognizedEmployeeDetails WHERE recognitionId=:pt AND clientId=:cli";
+                        $stmt = $this->DB->prepare($getRecognizedUserQuery);
+                        $stmt->bindParam(':cli', $this->clientid, PDO::PARAM_STR);
+                        $stmt->bindParam(':pt', $this->postid, PDO::PARAM_STR);
+                        $stmt->execute();
+                        $getRecognizedUser = $stmt->fetch(PDO::FETCH_ASSOC);
+                        extract($getRecognizedUser);
+
+                        $totalpointsdata = self::getMaxtotalPoints($clientId, $recognitionTo);
+                        $ert = json_decode($totalpointsdata, true);
+
+                        if ($ert['success'] == 1) {
+                            $totlpoint = $ert['data'][0]['totalPoints'] + $this->points;
+                        } else {
+                            $totlpoint = $this->points;
+                        }
+                        $stmtStatus = 'Credited';
+                        $status = "Approve";
+
+                        $query = "insert into Tbl_RecognizeApprovDetails (clientId, recognizeId, userId, recognizeBy, quality, points, totalPoints, entryDate, stmtStatus, regStatus, flag) VALUES (:cli, :reg, :rto, :rby, :top, :pts, :tpts, :dat, :stmtStatus, :status, :flag)";
+                        $stmt = $this->DB->prepare($query);
+                        $stmt->bindParam(':cli', $clientId, PDO::PARAM_STR);
+                        $stmt->bindParam(':reg', $this->postid, PDO::PARAM_STR);
+                        $stmt->bindParam(':rto', $recognitionTo, PDO::PARAM_STR);
+                        $stmt->bindParam(':rby', $this->likedby, PDO::PARAM_STR);
+                        $stmt->bindParam(':top', $topic, PDO::PARAM_STR);
+                        $stmt->bindParam(':pts', $this->points, PDO::PARAM_STR);
+                        $stmt->bindParam(':tpts', $totlpoint, PDO::PARAM_STR);
+                        $stmt->bindParam(':dat', $cd, PDO::PARAM_STR);
+                        $stmt->bindParam(':stmtStatus', $stmtStatus, PDO::PARAM_STR);
+                        $stmt->bindParam(':status', $status, PDO::PARAM_STR);
+                        $stmt->bindParam(':flag', $flag, PDO::PARAM_STR);
+                        $stmt->execute();
+                    }
+                }
+
+                $totalLikesQuery = "select count(autoId) as totalLikes from Tbl_Analytic_RecognitionLikes where recognitionId=:pt and like_unlike_status='1'";
+                $stmt = $this->DB->prepare($totalLikesQuery);
+                $stmt->bindParam(':pt', $this->postid, PDO::PARAM_STR);
+                $stmt->execute();
+                $totalLikes = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                $result['success'] = 1;
+                $result['likeStatus'] = $status;
+                $result['totalLikes'] = $totalLikes['totalLikes'];
+                $result['message'] = ($this->status == '1') ? "Recognition liked successfully" : "Recognition unliked successfully";
+            } else {
+                $result['success'] = 0;
+                $result['message'] = ($this->status == '1') ? "Recognition liked failed" : "Recognition unliked failed";
+            }
+        } catch (PDOException $e) {
+            $result = $e;
+        }
+        return $result;
+    }
+
     public function Comment_display($clientid, $postid) {
 
         $path = "http://admin.benepik.com/employee/virendra/benepik_admin/";
@@ -350,6 +446,229 @@ class Recognize {
         }
     }
 
+    public function recognitionLeaderboard($clientId, $employeeId = '', $site_url = '') {
+        try {
+            if (empty($site_url)) {
+                $site_url = ($employeeId == '') ? dirname(SITE_URL) . '/' : site_url;
+            }
+
+            $query = "SELECT distinct(recognition.recognitionTo) as recognizedUser, if(master.lastName IS NULL OR master.lastName='', master.firstName, CONCAT(master.firstName, ' ', master.lastName)) as username, if(personal.userImage IS NULL or personal.userImage='', '', CONCAT('" . $site_url . "', personal.userImage)) as user_image, master.designation, (select count(recognitionTo) from Tbl_RecognizedEmployeeDetails where recognitionTo=recognition.recognitionTo) as totalRecognition, if((select SUM(points) from Tbl_RecognizeApprovDetails where userId=recognition.recognitionTo),(select SUM(points) from Tbl_RecognizeApprovDetails where userId=recognition.recognitionTo),0) as totalPoints FROM Tbl_RecognizedEmployeeDetails as recognition RIGHT JOIN Tbl_EmployeeDetails_Master as master ON recognition.recognitionTo=master.employeeId RIGHT JOIN Tbl_EmployeePersonalDetails as personal ON master.employeeId=personal.employeeId WHERE master.clientId=:cli";
+
+            if ($employeeId != '') {
+                $query .= " and master.employeeId='$employeeId' ";
+            }
+            $query .= " ORDER BY totalPoints DESC";
+
+            $stmt = $this->DB->prepare($query);
+            $stmt->bindParam(':cli', $clientId, PDO::PARAM_STR);
+//            $stmt->bindParam(':recognizeId', $recognitionid, PDO::PARAM_STR);
+            if ($stmt->execute()) {
+                $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                $result['success'] = 1;
+                $result['data'] = $row;
+            } else {
+                $result['success'] = 0;
+                $result['message'] = "No data available";
+            }
+        } catch (Exception $ex) {
+            $result = $ex;
+        }
+        return $result;
+    }
+
+    public function recognitionLeaderboardDetail($clientId, $userId, $site_url = '') {
+        try {
+            $site_url = (!empty($site_url)) ? $site_url : site_url;
+            $query = "SELECT badges.topicId,badges.recognizeTitle, if(badges.image IS NULL or badges.image='', '', CONCAT('" . $site_url . "', badges.image)) as image FROM Tbl_RecognizedEmployeeDetails AS recognition JOIN Tbl_RecognizeTopicDetails as badges ON recognition.topic=badges.topicId WHERE recognition.clientId=:cli AND recognition.recognitionTo=:uid order by DATE_FORMAT(recognition.dateOfEntry,'%d-%m-%Y %H:%i') desc";
+            if (!empty($site_url)) {
+                $query .= " limit 0,3";
+            }
+            $stmt = $this->DB->prepare($query);
+            $stmt->bindParam(':cli', $clientId, PDO::PARAM_STR);
+            $stmt->bindParam(':uid', $userId, PDO::PARAM_STR);
+            $stmt->execute();
+            $badgesList = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+//            print_r($row);die;
+            $result['success'] = 1;
+            $result['message'] = "Recognition detail";
+            $result['data']['badges'] = $badgesList;
+        } catch (Exception $ex) {
+            $result = $ex;
+        }
+        return $result;
+    }
+
+    /*     * ********************************** / FUNCTION FOR API *********************************** */
+    /*     * ********************************** FUNCTION FOR PANEL *********************************** */
+    /*     * ******************************* get recognition list ************************************ */
+
+    function getRecognitionList($client_id) {
+        $this->idclient = $client_id;
+
+        try {
+            $query = "select recognize.* , CONCAT(edm.firstName,' ',edm.middleName,' ',edm.lastName) as recognitionByName , CONCAT(edm1.firstName,' ',edm1.middleName,' ',edm1.lastName) as recognitionToName, DATE_FORMAT(recognize.dateOfEntry,'%d %b %Y %h:%i %p') as dateOfEntry , topic.recognizeTitle as recognizefor from Tbl_RecognizedEmployeeDetails as recognize JOIN Tbl_EmployeeDetails_Master as edm ON recognize.recognitionBy = edm.employeeId JOIN Tbl_EmployeeDetails_Master as edm1 ON  recognize.recognitionTo = edm1.employeeId JOIN Tbl_RecognizeTopicDetails as topic ON recognize.topic = topic.topicId where recognize.clientId=:cid order by recognize.autoId desc";
+            $stmt = $this->DB->prepare($query);
+            $stmt->bindParam(':cid', $this->idclient, PDO::PARAM_STR);
+            $stmt->execute();
+            $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            if ($row) {
+                $response['success'] = 1;
+                $response['message'] = "reconition list fetch successfully";
+                $response['data'] = $row;
+            } else {
+                $response['success'] = 0;
+                $response['message'] = "reconition list not fetch successfully";
+            }
+        } catch (PDOException $e) {
+            $response['success'] = 0;
+            $response['message'] = "reconition list not fetch successfully" . $e;
+        }
+        return json_encode($response);
+    }
+
+    /*     * ************************************* / get recognition list *************************** */
+
+    /*     * ************************************ recognition detail ******************************** */
+
+    function getemplyeerecogdetails($regid, $clientId) {
+        $this->id_recog = $regid;
+        $path = SITE;
+        try {
+            $query = "select recognize.* , DATE_FORMAT(recognize.dateOfEntry,'%d %b %Y %h:%i %p') as dateOfEntry , CONCAT(edm.firstName,' ',edm.middleName,' ',edm.lastName) as recognitionByName  , CONCAT(edm1.firstName,' ',edm1.middleName,' ',edm1.lastName) as recognitionToName , edm1.designation as recognizetodesignation , topic.recognizeTitle , if(topic.image='' OR topic.image IS NULL , '',CONCAT('" . $path . "',topic.image)) as rimage , if(epd.userImage IS NULL OR epd.userImage ='','',CONCAT('" . $path . "',epd.userImage))as recognizebyimage , if(epd1.userImage IS NULL OR epd1.userImage ='','',CONCAT('" . $path . "',epd1.userImage))as recognizeToimage from Tbl_RecognizedEmployeeDetails as recognize JOIN Tbl_EmployeeDetails_Master as edm ON recognize.recognitionBy = edm.employeeId JOIN Tbl_EmployeeDetails_Master as edm1 ON recognize.recognitionTo = edm1.employeeId JOIN Tbl_RecognizeTopicDetails as topic ON recognize.topic = topic.topicId JOIN Tbl_EmployeePersonalDetails as epd ON edm.employeeId = epd.employeeId JOIN Tbl_EmployeePersonalDetails as epd1 ON edm1.employeeId = epd1.employeeId  where recognize.recognitionId =:rid AND recognize.clientId = :cid ";
+
+            $stmt = $this->DB->prepare($query);
+            $stmt->bindParam(':rid', $this->id_recog, PDO::PARAM_STR);
+            $stmt->bindParam(':cid', $clientId, PDO::PARAM_STR);
+            $stmt->execute();
+            $rows = $stmt->fetch();
+            if ($rows) {
+                $status = 1;
+                /*                 * ********************* get like ************************ */
+                $query1 = "select count(autoId) as likes from Tbl_Analytic_RecognitionLikes where recognitionId = :rid1 AND clientId = :cid1 AND like_unlike_status = :status1 ";
+
+                $stmt1 = $this->DB->prepare($query1);
+                $stmt1->bindParam(':rid1', $this->id_recog, PDO::PARAM_STR);
+                $stmt1->bindParam(':cid1', $clientId, PDO::PARAM_STR);
+                $stmt1->bindParam(':status1', $status, PDO::PARAM_STR);
+                $stmt1->execute();
+                $totallike = $stmt1->fetch();
+                $countlike = count($totallike);
+
+                if ($countlike > 0) {
+                    $query3 = "select DATE_FORMAT(likes.created_date,'%d %b %Y %h:%i %p') as created_date , CONCAT(edm.firstName,' ',edm.middleName,' ',edm.lastName) likeByName ,if(epd.userimage IS NULL OR epd.userimage = '','',CONCAT('" . $path . "',epd.userimage)) as likebyimage from Tbl_Analytic_RecognitionLikes as likes JOIN Tbl_EmployeeDetails_Master as edm ON likes.employeeId = edm.employeeId JOIN Tbl_EmployeePersonalDetails as epd ON edm.employeeId = epd.employeeId where likes.recognitionId = :rid3 AND likes.clientId = :cid3 and likes.like_unlike_status = :status3 ";
+
+                    $stmt3 = $this->DB->prepare($query3);
+                    $stmt3->bindParam(':rid3', $this->id_recog, PDO::PARAM_STR);
+                    $stmt3->bindParam(':cid3', $clientId, PDO::PARAM_STR);
+                    $stmt3->bindParam(':status3', $status, PDO::PARAM_STR);
+                    $stmt3->execute();
+                    $likedetails = $stmt3->fetchAll();
+                } else {
+                    $likedetails = "";
+                }
+                /*                 * ********************* / get like ********************** */
+
+                $response["success"] = 1;
+                $response["message"] = "details fetch successfully";
+                $response["totallikes"] = $totallike;
+                $response["posts"] = $rows;
+                $response["likedetails"] = $likedetails;
+            } else {
+                $response["success"] = 0;
+                $response["message"] = "details not fetch";
+            }
+        } catch (PDOException $e) {
+            $response["success"] = 0;
+            $response["message"] = "details not fetch" . $e;
+        }
+        return json_encode($response);
+    }
+
+    /*     * ************************************ / recognition detail ****************************** */
+
+    /*     * *************************** top recognize user ***************************************** */
+
+    function topRecognizeUser($clientId, $fromdate, $todate) {
+        try {
+
+            if ($fromdate == "" && $todate == "") {
+                $imagepath = SITE;
+                $query = "SELECT distinct(recognition.recognitionTo) as recognizedUser, if(master.lastName IS NULL OR master.lastName='', master.firstName, CONCAT(master.firstName, ' ',master.middleName,' ', master.lastName)) as username, if(personal.userImage IS NULL or personal.userImage='', '', CONCAT('" . $imagepath . "', personal.userImage)) as user_image, master.designation, (select count(recognitionTo) from Tbl_RecognizedEmployeeDetails where recognitionTo=recognition.recognitionTo) as totalRecognition, (select SUM(points) from Tbl_RecognizeApprovDetails where userId=recognition.recognitionTo) as totalPoints FROM Tbl_RecognizedEmployeeDetails as recognition JOIN Tbl_EmployeeDetails_Master as master ON recognition.recognitionTo=master.employeeId JOIN Tbl_EmployeePersonalDetails as personal ON master.employeeId=personal.employeeId WHERE recognition.clientId=:cli ORDER BY totalPoints DESC";
+            } else {
+
+                $query = "SELECT distinct(recognition.recognitionTo) as recognizedUser, if(master.lastName IS NULL OR master.lastName='', master.firstName, CONCAT(master.firstName, ' ',master.middleName,' ', master.lastName)) as username, if(personal.userImage IS NULL or personal.userImage='', '', CONCAT('" . SITE_URL . "', personal.userImage)) as user_image, master.designation, (select count(recognitionTo) from Tbl_RecognizedEmployeeDetails where recognitionTo=recognition.recognitionTo) as totalRecognition, (select SUM(points) from Tbl_RecognizeApprovDetails where userId=recognition.recognitionTo) as totalPoints FROM Tbl_RecognizedEmployeeDetails as recognition JOIN Tbl_EmployeeDetails_Master as master ON recognition.recognitionTo=master.employeeId JOIN Tbl_EmployeePersonalDetails as personal ON master.employeeId=personal.employeeId WHERE (DATE(recognition.dateOfEntry) BETWEEN :fromdte AND :enddte) AND recognition.clientId=:cli ORDER BY totalPoints DESC";
+            }
+
+            $stmt = $this->DB->prepare($query);
+            $stmt->bindParam(':cli', $clientId, PDO::PARAM_STR);
+            if ($fromdate != "" && $todate != "") {
+                $stmt->bindParam(':fromdte', $fromdate, PDO::PARAM_STR);
+                $stmt->bindParam(':enddte', $todate, PDO::PARAM_STR);
+            }
+            if ($stmt->execute()) {
+                $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                if ($fromdate == "" && $todate == "") {
+                    $result['success'] = 1;
+                    $result['message'] = "data available";
+                    $result['data'] = $row;
+                } else {
+                    $result = $row;
+                }
+            } else {
+                $result['success'] = 0;
+                $result['message'] = "No data available";
+            }
+        } catch (Exception $ex) {
+            $result['success'] = 0;
+            $result['message'] = "No data available" . $ex;
+        }
+        return json_encode($result);
+    }
+
+    /*     * *************************** / top recognize user *************************************** */
+
+    /*     * **************************** user recognize details **************************** */
+
+    function userrecognitionDetail($clientId, $userId) {
+        try {
+            $site_url = SITE;
+
+            $query = "SELECT CONCAT(edm.firstName,' ',edm.middleName,' ',edm.lastName) as employeename , edm.designation , if(epd.userimage = '' OR epd.userimage IS NULL , '' , CONCAT('" . $site_url . "',userimage)) as userimage from Tbl_EmployeeDetails_Master as edm JOIN Tbl_EmployeePersonalDetails as epd ON edm.employeeId = epd.employeeId where edm.employeeId = :uid AND edm.clientId = :cli";
+
+            $stmt = $this->DB->prepare($query);
+            $stmt->bindParam(':cli', $clientId, PDO::PARAM_STR);
+            $stmt->bindParam(':uid', $userId, PDO::PARAM_STR);
+            $stmt->execute();
+            $recognizeuserdetail = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($recognizeuserdetail) {
+                $query1 = "SELECT recognize.recognitionId,recognize.dateOfEntry,recognize.text , if(topic.image = '' OR topic.image IS NULL , '' , CONCAT('" . $site_url . "',topic.image)) as topicimage , topic.recognizeTitle , if(epd.userimage IS NULL OR epd.userimage = '' , '' , CONCAT('" . $site_url . "',epd.userimage)) as recognizebyimage , CONCAT(edm.firstName,' ',edm.middleName,' ',edm.lastName) as recognizebyname FROM Tbl_RecognizedEmployeeDetails as recognize JOIN Tbl_RecognizeTopicDetails as topic ON recognize.topic=topic.topicId JOIN Tbl_EmployeePersonalDetails as epd ON recognize.recognitionBy = epd.employeeId JOIN Tbl_EmployeeDetails_Master as edm ON recognize.recognitionBy = edm.employeeId where recognize.recognitionTo = :uid1 And recognize.clientId = :cli1";
+
+                $stmt1 = $this->DB->prepare($query1);
+                $stmt1->bindParam(':cli1', $clientId, PDO::PARAM_STR);
+                $stmt1->bindParam(':uid1', $userId, PDO::PARAM_STR);
+                $stmt1->execute();
+                $recognizeuser = $stmt1->fetchAll(PDO::FETCH_ASSOC);
+            } else {
+                $recognizeuser = "";
+            }
+
+
+            $result['success'] = 1;
+            $result['message'] = "Recognition detail";
+            $result['data'] = $recognizeuserdetail;
+            $result['recognizedata'] = $recognizeuser;
+        } catch (Exception $ex) {
+            $result['success'] = 0;
+            $result['message'] = "Not Fetch Recognition detail" . $ex;
+        }
+        return json_encode($result);
+    }
+
+    /*     * ****************************** / user recognize details ************************ */
+    /*     * ***************************** / FUNCTION FOR PANEL *********************************** */
 }
 
 ?>

@@ -1,5 +1,4 @@
 <?php
-
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 @session_start();
@@ -21,7 +20,7 @@ $createdby = $_SESSION['user_unique_id'];
 
 if (!empty($_POST)) {
     /**     * **************** check poll image and poll question exist or not ************************* */
-    $FLAG = 20;
+    $FLAG = 26;
     $flag_name = "Survey : ";
 
     $surveytitle = $_POST['surveytitle'];

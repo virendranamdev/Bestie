@@ -7,7 +7,15 @@
 <script async src="build/js/Chart.min.js"></script>
 <script src="https://code.highcharts.com/modules/exporting.js"></script>
 		
-
+<?php       
+require_once('Class_Library/class_notification.php');
+$notiobj = new notification();
+$clientId = $_SESSION['client_id'];
+$notificationId = $_GET['notiid'];
+$flag = $_GET['flag'];
+$notidetails = $notiobj->notificationDetails($clientId,$notificationId,$flag);
+$notidetailsarr = json_decode($notidetails , true);
+?>
 
         <!-- page content -->
         <div class="right_col" role="main">
@@ -19,7 +27,7 @@
                 <div class="x_panel">
                   <div class="x_title">
                     <h2>Notification</h2>
-                    <ul class="nav navbar-right panel_toolbox">
+					  <ul class="nav navbar-right panel_toolbox">
                       <li class="right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                       </li>
                       
@@ -30,14 +38,18 @@
                     <br />
                     <form id="demo-form2" data-parsley-validate class="form-horizontal form-label-left">
                  <div class="form-group">
-                    <h4><b>Title:  What’s its history? When was it founded? By whom? Have there been major milestones such as mergers, changes in direction, etc.?</b></h4>
+                    <h4><b><?php echo $notidetailsarr['data']['title'];?></b></h4>
                     
                   </div>
 				  <div class="form-group">
-                    <h4>Story:  What’s its history? When was it founded? By whom? Have there been major milestones such as mergers, changes in direction, etc.? What’s its history? When was it founded? By whom? Have there been major milestones such as mergers, changes in direction, etc.? What’s its history? When was it founded? By whom? Have there been major milestones such as mergers, changes in direction, etc.? What’s its history? When was it founded? By whom? Have there been major milestones such as mergers, changes in direction, etc.?</h4>
+                    <h4><?php echo $notidetailsarr['data']['content'];?></h4>
                     
                   </div>
-<div class="form-group"><h5 style="float:right;">Posted Date: 7 Apr 2017</h5></div>
+				  <div class="form-group">
+                    <img src = "<?php echo $notidetailsarr['data']['image'];?>" style="img img-responsive">
+                    
+                  </div>
+<div class="form-group"><h5 style="float:right;"><?php echo $notidetailsarr['data']['createdDate'];?></h5></div>
                     </form>
                   </div>
                 </div>

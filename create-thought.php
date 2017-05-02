@@ -29,6 +29,57 @@ if (isset($_GET['thought'])) {
         $('#imgprvw1').attr('src', thoughtImage);
     });
 </script>
+
+<script>
+    function check() {
+        if (confirm('Are You Sure, You want to publish this?')) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+</script>
+
+<script>
+function Validatethought()
+{
+    var thoughtimage = document.thoughtform.thoughtimage;
+	var content = document.thoughtform.content;
+	
+	if (thoughtimage.value == "")
+    {
+        window.alert("Please Upload Image.");
+        thoughtimage.focus();
+        return false;
+    }
+	if (content.value == "")
+    {
+        window.alert("Please Enter Content.");
+        content.focus();
+        return false;
+    }
+	
+    return true;
+}
+</script>
+
+<script>
+function Validateupdatethought()
+{
+    
+	var content = document.thoughtform.content;
+	
+	if (content.value == "")
+    {
+        window.alert("Please Enter Content.");
+        content.focus();
+        return false;
+    }
+	
+    return true;
+}
+</script>
+
 <!-- page content -->
 <div class="right_col" role="main">
     <div class="">
@@ -50,7 +101,7 @@ if (isset($_GET['thought'])) {
                         <!--<a href="wallPredefineTemplate.php"><button class="btn btn-primary pull-right btn-round"> Use Predefined Temple</button></a>-->
 
                         <br ><br ><br >
-                        <form class="myform form-horizontal form-label-left" method="post" action="Link_Library/link_add_thought.php" enctype="multipart/form-data">
+                        <form name="thoughtform" class="myform form-horizontal form-label-left" method="post" action="Link_Library/link_add_thought.php" enctype="multipart/form-data" onsubmit="return check();">
 
                             <div class="form-group">
                                 <label class=" control-label col-md-3 col-sm-3 col-xs-12">Upload Image</label>
@@ -81,14 +132,14 @@ if (isset($_GET['thought'])) {
                             <?php if (!isset($_GET['thought'])) { ?>
                                 <div class="form-group">
                                     <div class="col-md-12"><center>
-                                            <button type="submit" name="addThought" class="btn btn-round btn-primary">Submit</button>
-                                            <button type="reset" class="btn btn-round btn-warning">Cancel</button>
+                                            <button type="submit" name="addThought" class="btn btn-round btn-primary" onclick="return Validatethought();">Submit</button>
+                                            <!--<button type="reset" class="btn btn-round btn-warning">Cancel</button>-->
                                         </center></div>
                                 </div>
                             <?php } else { ?>
                                 <div class="form-group">
                                     <div class="col-md-12"><center>
-                                            <button type="submit" name="updateThought" class="btn btn-round btn-primary">Update</button>
+                                            <button type="submit" name="updateThought" class="btn btn-round btn-primary" onclick="return Validateupdatethought();">Update</button>
                                             <!--<button type="reset" class="btn btn-round btn-warning">Cancel</button>-->
                                         </center></div>
                                 </div>

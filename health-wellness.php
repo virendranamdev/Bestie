@@ -1,5 +1,6 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 <script src="js/display_group.js"></script>
+<script src="js/validation/createPostValidation.js"></script>
 <?php
 include_once ('header.php');
 include_once ('sidemenu.php');
@@ -24,16 +25,25 @@ if (isset($_GET['health'])) {
     $exerciseDetails = $objHealth->getExerciseSingle($clientId, $health_Id);
     $exercise_type = $exerciseDetails['exercise_area_id'];
     $exercise_name = $exerciseDetails['exercise_name'];
-    $img = explode("images/health_wellness/",$exerciseDetails['exercise_image']);
-    $exercise_image = "images/health_wellness/".$img[1];
+    $img = explode("images/health_wellness/", $exerciseDetails['exercise_image']);
+    $exercise_image = "images/health_wellness/" . $img[1];
     $exercise_instruction = $exerciseDetails['exercise_instruction'];
-    
 }
 ?>
 
 <link rel="stylesheet" href="build/css/health-wellness.css" >
 <script type="text/javascript" src="http://code.jquery.com/jquery-git.js"></script>
 <script type="text/javascript" src="build/js/health-wellness-group.js"></script>
+
+<script>
+    function check() {
+        if (confirm('Are You Sure, You want to publish this?')) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+</script> 
 
 <!-- page content -->
 <div class="right_col" role="main">
@@ -54,7 +64,7 @@ if (isset($_GET['health'])) {
                     </div>
                     <div class="x_content">
 
-                        <form class="myform form-horizontal form-label-left" action="Link_Library/link_add_exercise.php" method="post" enctype="multipart/form-data">
+                        <form name="healthandwellness" class="myform form-horizontal form-label-left" action="Link_Library/link_add_exercise.php" method="post" enctype="multipart/form-data" onsubmit="return check();">
 
 
                             <div class="container">
@@ -89,22 +99,28 @@ if (isset($_GET['health'])) {
                                         <div class="form-group">
                                             <label class=" control-label col-md-3 col-sm-3 col-xs-12">Title</label>
                                             <div class="col-md-9 col-sm-9 col-xs-12 form-group has-feedback">
-                                                <input type="text" class="form-control has-feedback-left" id="inputSuccess2" placeholder="Enter Title" name="exercise_name" value="<?php echo $exercise_name; ?>">
+                                                <input type="text" class="form-control has-feedback-left" id="inputSuccess2" placeholder="Enter Title" name="exercise_name" required="" value="<?php echo $exercise_name; ?>">
                                                 <span class="fa fa-question form-control-feedback left" aria-hidden="true"></span>
                                             </div>
                                         </div>
                                         <div class="form-group">
                                             <label class=" control-label col-md-3 col-sm-3 col-xs-12">Upload Image</label>
                                             <div class="col-md-9 col-sm-9 col-xs-12 form-group ">
-                                                <input type="file" class="form-control" name="exerciseImage" accept="image/*" id="exerciseImage" value="uploadimage" onchange="showimagepreview1(this)" style="padding-left:46px; "/>
-                                                <img src="<?php echo SITE.$exercise_image; ?>" id="imgprvw1" class="img-responsive"/>
-
-                                                <span class="fa  fa-file-image-o form-control-feedback left" aria-hidden="true"></span>
+                                                <input type="file" class="form-control" name="exerciseImage" accept="image/*" id="exerciseImage" value="uploadimage" onchange="showimagepreview1(this)" style="padding-left:46px;"  <?php if (!isset($_GET['health'])) { ?> required="" <?php } ?>/>
+                                                <?php if (isset($_GET['health'])) { ?>
+                                                    <img src="<?php echo SITE . $exercise_image; ?>" id="imgprvw1" class="img-responsive"/>
+                                                <?php }else{
+													?>
+												<img id="imgprvw1" class="img-responsive"/>
+													<?php
+												} ?>
+                                                <span class = "fa  fa-file-image-o form-control-feedback left" aria-hidden = "true"></span>
                                             </div>
 
-                                            <label class=" control-label col-md-3 col-sm-3 col-xs-12">Instruction</label>
-                                            <div class="col-md-9 col-sm-9 col-xs-12 form-group has-feedback">
-                                                <textarea type="text" class="form-control has-feedback-left" id="inputSuccess2" placeholder="Enter Instruction" name="exercise_instructions"><?php echo strip_tags($exercise_instruction); ?></textarea>
+                                            <label class = " control-label col-md-3 col-sm-3 col-xs-12">Instruction</label>
+                                            <div class = "col-md-9 col-sm-9 col-xs-12 form-group has-feedback">
+                                                <textarea type = "text" class = "form-control has-feedback-left" id = "inputSuccess2" placeholder = "Enter Instruction" required="" name="exercise_instructions"><?php echo strip_tags($exercise_instruction);
+                                                ?></textarea>
                                                 <span class="fa fa-question form-control-feedback left" aria-hidden="true"></span>
 
                                             </div>
@@ -118,73 +134,73 @@ if (isset($_GET['health'])) {
 
                                 <?php if (!isset($_GET['health'])) { ?>
 
-<!--                                    <div class="form-group">
-                                        <label class="control-label col-md-3 col-sm-3 col-xs-12">Group</label>
-                                        <div class="col-md-9 col-sm-9 col-xs-12">
-
-                                            <span id="inputSuccess2Status3" class="sr-only">(success)</span>
-
-
-                                            <script type='text/javascript'>
-                                            </script>
-                                            <div class="row">
-                                                <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12"><label class="radio-inline"><input type="radio" name="optradio" id="sendTOAll">Send to All Group</label>
-                                                    <label class="radio-inline"><input type="radio" name="optradio"id="sendToSelected" value="Selected">Send to Selected Group</label></div>
-
-                                                <div class="selectedGroupData">
-
-                                                    <div class="col-xs-12 col-sm-5 col-md-5 col-lg-5">
-                                                        <div class="subject-info-box-1"><center><h2>All Group</h2></center>
-                                                            <select multiple="multiple" id='lstBox1' class="form-control">
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2">
-                                                        <div >
-                                                            <br><br><br><br>
-                                                            <button type="button" class="btn newb btn-primary"id='btnAllRight'value='>>' > >> </button><br>
-                                                            <button type="button" class="btn newb btn-primary"id='btnRight'value='>' > Add </button><br>
-                                                            <button type="button" class="btn newb btn-primary"id='btnLeft'value='<' > Remove </button><br>
-                                                            <button type="button" class="btn newb btn-primary"id='btnAllLeft'value='<<' > >> </button><br>
-
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-xs-12 col-sm-5 col-md-5 col-lg-5">
-                                                        <div ><center><h2>Selected Group</h2></center>
-                                                            <select multiple="multiple" id='lstBox2' class="form-control" name="selectedvalue[]">
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                ---------------------------------
-                                                <textarea id ="allids" style="display:none" name="all_user" height="660"></textarea>
-                                                <textarea id="selectedids" style="display:none" name="selected_user"></textarea>
-                                                ---------------------------------
-
-
-
-                                            </div>
-
-                                            <div class="clearfix"></div>
-
-                                        </div>
-                                    </div>-->
+                                    <!--                                    <div class="form-group">
+                                                                            <label class="control-label col-md-3 col-sm-3 col-xs-12">Group</label>
+                                                                            <div class="col-md-9 col-sm-9 col-xs-12">
+                                    
+                                                                                <span id="inputSuccess2Status3" class="sr-only">(success)</span>
+                                    
+                                    
+                                                                                <script type='text/javascript'>
+                                                                                </script>
+                                                                                <div class="row">
+                                                                                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12"><label class="radio-inline"><input type="radio" name="optradio" id="sendTOAll">Send to All Group</label>
+                                                                                        <label class="radio-inline"><input type="radio" name="optradio"id="sendToSelected" value="Selected">Send to Selected Group</label></div>
+                                    
+                                                                                    <div class="selectedGroupData">
+                                    
+                                                                                        <div class="col-xs-12 col-sm-5 col-md-5 col-lg-5">
+                                                                                            <div class="subject-info-box-1"><center><h2>All Group</h2></center>
+                                                                                                <select multiple="multiple" id='lstBox1' class="form-control">
+                                                                                                </select>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2">
+                                                                                            <div >
+                                                                                                <br><br><br><br>
+                                                                                                <button type="button" class="btn newb btn-primary"id='btnAllRight'value='>>' > >> </button><br>
+                                                                                                <button type="button" class="btn newb btn-primary"id='btnRight'value='>' > Add </button><br>
+                                                                                                <button type="button" class="btn newb btn-primary"id='btnLeft'value='<' > Remove </button><br>
+                                                                                                <button type="button" class="btn newb btn-primary"id='btnAllLeft'value='<<' > >> </button><br>
+                                    
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div class="col-xs-12 col-sm-5 col-md-5 col-lg-5">
+                                                                                            <div ><center><h2>Selected Group</h2></center>
+                                                                                                <select multiple="multiple" id='lstBox2' class="form-control" name="selectedvalue[]">
+                                                                                                </select>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                    
+                                                                                    ---------------------------------
+                                                                                    <textarea id ="allids" style="display:none" name="all_user" height="660"></textarea>
+                                                                                    <textarea id="selectedids" style="display:none" name="selected_user"></textarea>
+                                                                                    ---------------------------------
+                                    
+                                    
+                                    
+                                                                                </div>
+                                    
+                                                                                <div class="clearfix"></div>
+                                    
+                                                                            </div>
+                                                                        </div>-->
 
                                 </div>
                                 <br><br>
 
                                 <div class="form-group">
                                     <div class="col-md-12"><center>
-                                            <button type="submit" class="btn btn-round btn-primary">Submit</button>
-                                            <button type="button" class="btn btn-round btn-warning">Cancel</button>
+                                            <button type="submit" class="btn btn-round btn-primary" onclick="return ValidateHealthAndWellness();">Submit</button>
+                                            <!--<button type="button" class="btn btn-round btn-warning">Cancel</button>-->
                                         </center></div>
                                 </div>
                             <?php } else { ?>
                                 <div class="form-group">
                                     <div class="col-md-12"><center>
                                             <input type="hidden" name="healthid" value="<?php echo $_GET['health']; ?>">
-                                            <button type="submit" name="updateHealth" class="btn btn-round btn-primary">Update</button>
+                                            <button type="submit" name="updateHealth" class="btn btn-round btn-primary" onclick="return ValidateUpdateHealthAndWellness();">Update</button>
                                         </center></div>
                                 </div>
                             <?php } ?>
@@ -215,7 +231,7 @@ if (isset($_GET['health'])) {
                     var height = this.height;
                     var width = this.width;
                     var size = parseFloat($("#exerciseImage")[0].files[0].size / 1024).toFixed(2);
-					if (size > 1500)
+                    if (size > 15000)
                     {
                         alert("Sorry, your Image Size is too large.");
                         $('#imgprvw1').attr('src', '');
@@ -225,11 +241,11 @@ if (isset($_GET['health'])) {
                     }
                     else if (height > 1200 || width > 1200) {
                         alert("Height and Width must not exceed 1200 X 1200 px.");
-                       $('#imgprvw1').attr('src', "");
-                       $('.post_img').attr('src', "");
-                       $('#exerciseImage').val("");
-                       return false;
-                   }
+                        $('#imgprvw1').attr('src', "");
+                        $('.post_img').attr('src', "");
+                        $('#exerciseImage').val("");
+                        return false;
+                    }
                     else
                     {
                         //alert ("image gud");

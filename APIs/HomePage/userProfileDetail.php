@@ -1,9 +1,8 @@
 <?php
 
-//error_reporting(E_ALL);ini_set("display_errors", 1);
+//error_reporting(E_ALL);ini_set('display_errors', 1);
 
-if (!class_exists('Feedback') && include("../../Class_Library/Api_Class/class_feedback.php")) {
-
+if (file_exists("../../Class_Library/class_recognize.php") && include_once("../../Class_Library/class_recognize.php")) {
     if (isset($_SERVER['HTTP_ORIGIN'])) {
         header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
         header('Access-Control-Allow-Credentials: true');
@@ -27,30 +26,25 @@ if (!class_exists('Feedback') && include("../../Class_Library/Api_Class/class_fe
 
     /*
       {
-      "clientId"  : "",
-      "empId"     : "",
-      "feedbackId": "",
-      "comment"   : "",
-      "anonymous"   : "",
-      "device"    : "",
-      "deviceId"  : ""
+      "clientid" : "CO-28",
+      "uid"      : "2rTntXYFWWBKKfAFQn9YduqhhJ3WHf",
+      "device"   : "2",
+      "deviceId" : "132"
       }
      */
 
-    if ($jsonArr['clientId'] && $jsonArr['empId']) {
-        $obj = new Feedback();
-        extract($jsonArr);
+    if ((!empty($jsonArr["clientId"])) && (!empty($jsonArr['device'])) && (!empty($jsonArr['deviceId']))) {
+        $rec = new Recognize();
+        $site_url = dirname(SITE_URL). '/';
+        $data = $rec->recognitionLeaderboard($jsonArr['clientId'], $jsonArr['uid'], $site_url);
+        $result = $rec->recognitionLeaderboardDetail($jsonArr['clientId'], $jsonArr['uid'], $site_url);
 
-        if (strtolower($comment) != $obj->filterWords($comment)) {
-            $response['success'] = 0;
-            $response['message'] = "Your Comment contains inappropriate language";
-        } else {
-            $maxId = $obj->maxId();
-            $response = $obj->addFeedComments($clientId, $maxId, $feedbackId, $comment, $empId, $anonymous);
-        }
+        $response['success'] = $data['success'];
+        $response['data'] = $data['data'][0];
+        $response['data']['badges'] = $result['data']['badges'];
     } else {
         $response['success'] = 0;
-        $response['message'] = "Invalid json";
+        $response['result'] = "Invalid json";
     }
     header('Content-type: application/json');
     echo json_encode($response);

@@ -1,8 +1,24 @@
 <?php include 'header.php';?>
 <?php include 'sidemenu.php';?>
 <?php include 'topNavigation.php';?>
-       
-
+<?php       
+require_once('Class_Library/class_notification.php');
+$notiobj = new notification();
+$clientId = $_SESSION['client_id'];
+$notilist = $notiobj->listNotification($clientId);
+$notilistarr = json_decode($notilist , true);
+?>
+<!----------------- use for change order of data table ----------------------------->
+<script src ="//code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('#datatable').DataTable( {
+        "order": [[ 0, "desc" ]]
+    } );
+} );
+</script>
+<!-------------------------- / use for change order ------------------------>
 
         <!-- page content -->
         <div class="right_col" role="main">
@@ -14,6 +30,11 @@
                 <div class="x_panel">
                   <div class="x_title">
                     <h2>Notification</h2>
+					<?php 
+					/*echo "<pre>";
+					print_R($notilistarr);
+					echo "</pre>";*/
+					?>
                     <ul class="nav navbar-right panel_toolbox">
                       <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                       </li>
@@ -47,50 +68,51 @@
                           <th>Date</th>
                           <th>Posted Data</th>
                           <th>Total View</th>
-                          <th></th>
+                          <!--<th></th>-->
                         </tr>
                       </thead>
 
 
                       <tbody>
+					  <?php
+					  for($i=0; $i<count($notilistarr['data']); $i++)
+					  {
+						  
+						?>
                         <tr>
-                          <td>Mar 25, 2017 </td>
+                          <td><?php echo $notilistarr['data'][$i]['createdDate'];?></td>
 
-                          <td class="questionTD"><a href="reminder-details.php"> What’s your organization’s mission? What’s the specific reason it exists? </a></td>
-                         <td>20</td>
-                           <td><ul class="wallUL">
+                          <td class="questionTD" style="text-align:justify;">
+						  <a href="reminder-details.php?notiid=<?php echo $notilistarr['data'][$i]['notificationId'];?>&&flag=<?php echo $notilistarr['data'][$i]['flagType'];?>">
+						  
+						  <?php
+						  if(!empty($notilistarr['data'][$i]['title'])){
+							  echo $notilistarr['data'][$i]['title'];
+						  }else{
+							  //$notilistarr['data'][$i]['content'];
+							   $string = strip_tags($notilistarr['data'][$i]['content']);
+                                if (strlen($string) > 50) 
+								{
+                                    $stringCut = substr($string, 0, 50);
+                                   echo $string = substr($stringCut, 0, strrpos($stringCut, ' ')) . "....";
+                                }
+								else{
+							
+									echo $notilistarr['data'][$i]['content'];
+								}
+						  }
+						  ?>
+						  
+						  </a></td>
+                        <td>20</td>
+                            <!--<td><ul class="wallUL">
 <li><i class="fa fa-edit fa-lg"></i></li>
-</ul> </td>
+</ul> </td>-->
                         </tr>
-                        <tr>
-                          <td>Mar 23, 2017</td>
-
-                           <td class="questionTD"><a href="reminder-details.php"> What’s its history? When was it founded? By whom? Have there been major milestones such as mergers, changes in direction, etc.?</a></td>
-<td>2</td>
-                         
-                          <td><ul class="wallUL">
-<li><i class="fa fa-edit fa-lg"></i></li>
-</ul> </td>
-                        </tr> <tr>
-                          <td>Mar 22, 2017 </td>
-                          <td class="questionTD"><a href="reminder-details.php">What’s your organization’s mission? What’s the specific reason it exists?</a></td>
-                        <td>0</td>
-                         
-                          <td><ul class="wallUL">
-<li><i class="fa fa-edit fa-lg"></i></li>
-</ul> </td>
-                        </tr>
-                        <tr>
-                          <td>Mar 20, 2017 </td>
-                          <td class="questionTD"><a href="reminder-details.php">What’s its history? When was it founded? By whom? Have there been major milestones such as mergers, changes in direction, etc.?</a></td>
-<td>6</td>
-                         
-                          <td><ul class="wallUL">
-<li><i class="fa fa-edit fa-lg"></i></li>
-</ul> </td>
-                        </tr>
-                       
-                       
+					  <?php 
+					  }
+					  ?>
+                        
                       </tbody>
                     </table>
 
