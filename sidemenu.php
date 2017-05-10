@@ -47,6 +47,13 @@
                    <li><a  href="view-previous-thought.php"><i class="fa fa-hourglass-start"></i> Thought Of The Day </a></li>
                    <li><a  href="recognition.php"><i class="fa fa-bar-chart-o"></i> Recognition </a>         </li>
 				   <li><a  href="health-welness-view.php"><i class="fa fa-heartbeat"></i>Health & Wellness </a></li>
+				    <li><a><i class="fa fa-user"></i> Analytics <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li><a href="activeuseranalytic.php">Active User</a></li>
+                      <li><a href="postViewAnalytic.php">Post</a></li>                    
+                    </ul>
+                  </li>
+				  
 				   </ul>
               </div>
               <!-- <div class="menu_section">

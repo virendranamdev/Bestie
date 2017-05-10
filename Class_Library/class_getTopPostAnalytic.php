@@ -1,10 +1,8 @@
 <?php
 
-//error_reporting(E_ALL);
-//ini_set('display_errors', 1);
 include_once('class_connect_db_Communication.php');
 
-class LoginAnalytic {
+class TopPostAnalytic {
 
     public $db_connect;
 
@@ -13,59 +11,30 @@ class LoginAnalytic {
         $this->db_connect = $dbh->getConnection_Communication();
     }
 
-    /*     * ********************* analytic get active user Details ******************************* */
 
-    function graphGetActiveUser($client, $fromdt, $enddte , $department) {
+ function getTopPostForAnalytic($client, $fromdt, $enddte,$department) {
+     
         try {
-
-           // $query = "SELECT count(userUniqueId) as totalview,count(distinct(userUniqueId)) as uniqueview,DATE_FORMAT(date_of_entry,'%d/%m/%Y') as date_of_entry FROM Tbl_Analytic_TrackUser where (DATE(date_of_entry) BETWEEN :fromdte AND :enddte) AND clientId = :client and description = 'Open Spalsh' group by DATE_FORMAT(date_of_entry,'%Y-%m-%d')";
-		   
-		   if($department == 'All')
-		   {
-		    $query = "SELECT count(userUniqueId) as totalview,count(distinct(userUniqueId)) as uniqueview,DATE_FORMAT(date_of_entry,'%d/%m/%Y') as date_of_entry FROM Tbl_Analytic_TrackUser where (DATE(date_of_entry) BETWEEN :fromdte AND :enddte) AND clientId = :client and description = 'Open Spalsh' group by DATE_FORMAT(date_of_entry,'%Y-%m-%d')";
-		   }
-		   else
-		   {
-			$query = "SELECT count(track.userUniqueId) as totalview,count(distinct(track.userUniqueId)) as uniqueview,DATE_FORMAT(track.date_of_entry,'%d/%m/%Y') as date_of_entry FROM Tbl_Analytic_TrackUser as track JOIN Tbl_EmployeeDetails_Master as edm ON track.userUniqueId = edm.employeeId where (DATE(track.date_of_entry) BETWEEN :fromdte AND :enddte) AND track.clientId = :client and track.description = 'Open Spalsh' AND edm.department = :department group by DATE_FORMAT(track.date_of_entry,'%Y-%m-%d')";
-		   }
+            if($department == 'All')
+            {
+            $query = "select count(userUniqueId) as totalview,post_id,date_of_entry,flagType from Tbl_Analytic_PostView where (DATE(date_of_entry) BETWEEN :fromdte AND :enddte) and clientId = :client group by post_id order by count(userUniqueId) desc";
+            }
+            else
+            {
+                  $query = "select count(tap.userUniqueId) as totalview,tap.post_id,tap.date_of_entry,tap.flagType from Tbl_Analytic_PostView as tap join Tbl_EmployeeDetails_Master as tem on tem.employeeId = tap.userUniqueId where (DATE(tap.date_of_entry) BETWEEN :fromdte AND :enddte) and tap.clientId = :client and tem.department = :department group by tap.post_id order by count(tap.userUniqueId) desc";
+            }
             $stmt = $this->db_connect->prepare($query);
             $stmt->bindParam(':client', $client, PDO::PARAM_STR);
             $stmt->bindParam(':fromdte', $fromdt, PDO::PARAM_STR);
             $stmt->bindParam(':enddte', $enddte, PDO::PARAM_STR);
-			if($department != 'All'){$stmt->bindParam(':department', $department, PDO::PARAM_STR);}
+           if($department != 'All'){$stmt->bindParam(':department', $department, PDO::PARAM_STR);}
             $stmt->execute();
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-         //     print_r($result);
-            $response["categories"] = [];
-            $response["data"] = [];
-            foreach ($result as $res) {
-                //  $response["categories"] = $res['date_of_entry'];
-                //   $response["data"] = $res['totalview'];
-                array_push($response["categories"], $res['date_of_entry']);
-                array_push($response["data"], $res['uniqueview']);
-            }
-            //   print_r($response);
-            return json_encode($response, JSON_NUMERIC_CHECK);
-        } catch (PDOException $ex) {
-            echo $ex;
-        }
-    }
-
-    /*     * ********************** end analytic graph Job Details ************************** */
-
-    function gettoppostforwelcome($clientid, $uid) {
-     
-        try {
-            $query = "select count(userUniqueId) as totalview,post_id,date_of_entry,flagType from Tbl_Analytic_PostView where clientId = :client group by post_id order by count(userUniqueId) desc limit 5";
-            $stmt = $this->db_connect->prepare($query);
-            $stmt->bindParam(':client', $clientid, PDO::PARAM_STR);
-            $stmt->execute();
-            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-//           echo "<pre>";
-//            print_r($result);
+      
+          //  print_r($result);
 //           
             $count = count($result);
-//            echo "this is count-" . $count;
+        //   echo "this is count-" . $count;
 //             
             $welcomearray = array();
             for ($k = 0; $k < $count; $k++) 
@@ -74,15 +43,15 @@ class LoginAnalytic {
                 $postid = $result[$k]['post_id'];
                 $date = $result[$k]['date_of_entry'];
                 $totalview = $result[$k]['totalview'];
-              
+          // echo "flag->".$flag."-this is post id ->".$postid."-this is date->".$date."-totalview->".$totalview."<br/>";  
                 switch ($flag) {
                     case 16:
-                        $storyquery = "select tcs.title,count(tpl.likeBy) as totallike from Tbl_C_AchiverStory as tcs join Tbl_Analytic_PostLike as tpl on tpl.postId = tcs.storyId and tpl.flagType = tcs.flagType where tpl.status = 1 and tcs.storyId = :id";
+                        $storyquery = "select tcs.title,DATE_FORMAT(tcs.createdDate,'%d %b %Y') as createdDate,count(tpl.likeBy) as totallike from Tbl_C_AchiverStory as tcs join Tbl_Analytic_PostLike as tpl on tpl.postId = tcs.storyId and tpl.flagType = tcs.flagType where tpl.status = 1 and tcs.storyId = :id";
                         $nstmt = $this->db_connect->prepare($storyquery);
                         $nstmt->bindParam(':id', $postid, PDO::PARAM_STR);
                         $nstmt->execute();
                         $data = $nstmt->fetch(PDO::FETCH_ASSOC);
-                        if ($data) {
+                        if (count($data)>0) {
                             $data['module'] = "Achiver Story";
                             $data['flag'] = $flag;
                             $data['viewdate'] = $date;
@@ -104,7 +73,7 @@ class LoginAnalytic {
                         break;
                         
                      case 11:
-                        $storyquery = "select tca.title, count(tal.userId) as totallike from Tbl_C_AlbumDetails as tca join Tbl_Analytic_AlbumLike as tal on tal.albumId = tca.albumId where tca.albumId = :id and tal.status = 1";
+                        $storyquery = "select tca.title,DATE_FORMAT(tca.createdDate,'%d %b %Y') as createdDate,count(tal.userId) as totallike from Tbl_C_AlbumDetails as tca join Tbl_Analytic_AlbumLike as tal on tal.albumId = tca.albumId where tca.albumId = :id and tal.status = 1";
                         $nstmt = $this->db_connect->prepare($storyquery);
                         $nstmt->bindParam(':id', $postid, PDO::PARAM_STR);
                         $nstmt->execute();
@@ -129,7 +98,7 @@ class LoginAnalytic {
                         break;                  
                         
                          case 23:
-                        $storyquery = "select tcf.feedbackQuestion,count(tfl.employeeId) as totallike from Tbl_C_Feedback as tcf join Tbl_C_FeedbackCommentLikes as tfl on tfl.feedbackId = tcf.feedbackId where tcf.feedbackId = :id";
+                        $storyquery = "select tcf.feedbackQuestion,DATE_FORMAT(tcf.createdDate,'%d %b %Y') as createdDate,count(tfl.employeeId) as totallike from Tbl_C_Feedback as tcf join Tbl_C_FeedbackCommentLikes as tfl on tfl.feedbackId = tcf.feedbackId where tcf.feedbackId = :id";
                         $nstmt = $this->db_connect->prepare($storyquery);
                         $nstmt->bindParam(':id', $postid, PDO::PARAM_STR);
                         $nstmt->execute();
@@ -156,7 +125,7 @@ class LoginAnalytic {
                         break;
                         
                          case 24:
-                        $storyquery = "select * from Tbl_HealthWellness where exercise_area_id = :id";
+                        $storyquery = "select *,DATE_FORMAT(create_date,'%d %b %Y') as createdDate from Tbl_HealthWellness where exercise_area_id = :id";
                         $nstmt = $this->db_connect->prepare($storyquery);
                         $nstmt->bindParam(':id', $postid, PDO::PARAM_STR);
                         $nstmt->execute();
@@ -165,9 +134,9 @@ class LoginAnalytic {
                             $data['module'] = "Health & Wellness";
                              $data['flag'] = $flag;
                             $data['viewdate'] = $date;
-                              $data['totalview'] = $totalview;
+                             $data['totalview'] = $totalview;
                              $data['totallike'] = '0';
-                             $data['totalcomment'] = '0';   
+                             $data['totalcomment'] = '0';
                             array_push($welcomearray, $data);
                         }
                         break;
@@ -181,51 +150,11 @@ class LoginAnalytic {
             } catch (Exception $exc) {
             echo $exc;
         }
-        return $welcomearray;
-    }
-    
-    /*************************************************************/
-    
-     function graphGetHappinessIndex($client, $fromdt, $enddate, $department) 
-                {
-         
-         $query = "select * from Tbl_C_HappinessQuestion where expiryDate < :enddte order by surveyId desc limit 1";
-          $stmt = $this->db_connect->prepare($query);
-           
-          $stmt->bindParam(':enddte', $enddate, PDO::PARAM_STR);
-            $stmt->execute();
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            //echo "<pre>";
-            //print_r($result);
-            $questionid = $result['surveyId'];
-			$surveyid = $result['surveyId'];
-			$clientId = $result['clientId'];
-            try {  
-			if($department == "All")
-			{
-            $query = "SELECT value as name,count(userUniqueId) as y FROM Tbl_Analytic_EmployeeHappiness where surveyId = :sid AND clientId = :client and questionId = :qid and status = 1 group by value";
-			}
-			else
-			{
-			 $query = "SELECT analytichapp.value as name,count(analytichapp.userUniqueId) as y FROM Tbl_Analytic_EmployeeHappiness as analytichapp JOIN Tbl_EmployeeDetails_Master as edm ON analytichapp.userUniqueId = edm.employeeId where analytichapp.surveyId = :sid AND analytichapp.clientId = :client and analytichapp.questionId = :qid and analytichapp.status = 1 AND edm.department = :department group by analytichapp.value";	
-			}
-            $stmt = $this->db_connect->prepare($query);
-            $stmt->bindParam(':client', $clientId, PDO::PARAM_STR);
-            $stmt->bindParam(':sid', $surveyid, PDO::PARAM_STR);
-            $stmt->bindParam(':qid', $questionid, PDO::PARAM_STR);
-			if($department != "All"){$stmt->bindParam(':department', $department, PDO::PARAM_STR);}
-            $stmt->execute();
-            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-          //  print_r($result);
-          
-            $response["data"] = $result;
-          
-        } catch (PDOException $ex) {
-            echo $ex;
-        }
-          return json_encode($response, JSON_NUMERIC_CHECK);
-    }
-
+      //  echo "<pre>";
+      //  print_r($welcomearray);
+        return json_encode($welcomearray,JSON_NUMERIC_CHECK);
+      
+        
 }
-
+}
 ?>

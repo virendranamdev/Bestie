@@ -46,7 +46,7 @@ $notidetailsarr = json_decode($notidetails , true);
                     
                   </div>
 				  <div class="form-group">
-                    <img src = "<?php echo $notidetailsarr['data']['image'];?>" style="img img-responsive">
+                    <img src = "<?php echo $notidetailsarr['data']['image'];?>" style="img-responsive">
                     
                   </div>
 <div class="form-group"><h5 style="float:right;"><?php echo $notidetailsarr['data']['createdDate'];?></h5></div>

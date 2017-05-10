@@ -1,9 +1,27 @@
 <?php include 'header.php';?>
 <?php include 'sidemenu.php';?>
 <?php include 'topNavigation.php';?>
-       
-
-
+ 
+<?php 
+require_once('Class_Library/class_recognize.php');
+$objRecognize = new Recognize();
+$clientId = $_SESSION['client_id'];
+$empId = $_SESSION['user_unique_id'];
+$user_type = $_SESSION['user_type'];
+$reconitionlist = $objRecognize->getRecognitionList($clientId);
+$recognitionlistarr = json_decode($reconitionlist , true);
+?> 
+<!----------------- use for change order of data table ----------------------------->
+<script src ="//code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('#datatable').DataTable( {
+        "order": [[ 0, "desc" ]]
+    } );
+} );
+</script>
+<!-------------------------- / use for change order ------------------------>
         <!-- page content -->
         <div class="right_col" role="main">
           <div class="">
@@ -14,7 +32,7 @@
                 <div class="x_panel">
                   <div class="x_title">
                     <h2>Recognition</h2>
-                    <ul class="nav navbar-right panel_toolbox">
+					  <ul class="nav navbar-right panel_toolbox">
                       <li class="right"><a class="collapse-link"><i class="fa fa-chevron-up "></i></a>
                       </li>
                       
@@ -42,30 +60,21 @@
 
 
                       <tbody>
+					  <?php 
+					  for($i=0; $i<count($recognitionlistarr['data']); $i++)
+					  {
+					  ?>
                          <tr>
-                          <td>Mar 25, 2017</td>
-                          <td>Ameen</td>
-                          <td>Saurabh</td>
-                          <td>xyz</td>
-						  <td>Great Work</td>
-						  <td><ul class="wallUL"><a href="recognitionDetails.php"><li>View</li></a></ul> </td>
+                          <td><?php echo $recognitionlistarr['data'][$i]['dateOfEntry']; ?></td>
+                          <td><?php echo $recognitionlistarr['data'][$i]['recognitionToName']; ?></td>
+                          <td><?php echo $recognitionlistarr['data'][$i]['recognitionByName']; ?></td>
+                          <td><?php echo $recognitionlistarr['data'][$i]['recognizefor']; ?></td>
+						  <td><?php echo $recognitionlistarr['data'][$i]['text']; ?></td>
+						  <td><ul class="wallUL"><a href="recognitionDetails.php?recognitionId=<?php echo $recognitionlistarr['data'][$i]['recognitionId']; ?>"><li>View</li></a></ul> </td>
                         </tr>
-						<tr>
-                          <td>Mar 26, 2017</td>
-                          <td>Deepak</td>
-                          <td>Vishal</td>
-                          <td>Well done</td>
-						  <td>Performance</td>
-						  <td><ul class="wallUL"><a href="recognitionDetails.php"><li>View</li></a></ul> </td>
-                        </tr>
-						 <tr>
-                          <td>Mar 27, 2017</td>
-                          <td>Rahul</td>
-                          <td>Monika</td>
-                          <td>Hard Working</td>
-						  <td>Great Work</td>
-						  <td><ul class="wallUL"><a href="recognitionDetails.php"><li>View</li></a></ul> </td>
-                        </tr>
+					    <?php 
+					    } 
+					    ?>
                        
                        
                       </tbody>

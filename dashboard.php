@@ -4,7 +4,9 @@ include_once('sidemenu.php');
 include_once('topNavigation.php');
 
 include_once("Class_Library/class_welcome_analytic.php");
+include_once("Class_Library/class_getDepartment.php");
 $welcome = new WelcomeAnalytic();
+$department = new Department();
 $client_id = $_SESSION['client_id'];
 $uid = $_SESSION['user_unique_id'];
 
@@ -13,6 +15,9 @@ $leaderboardResponse = $welcome->recognitionLeaderboard($client_id);
 
 $senderboardResponse = $welcome->recognitionSenderboard($client_id);
 //echo '<pre>';print_r($senderboardResponse);die;
+
+$getalldepartment = $department->getDepartment($client_id);
+$alldepartmentarray = json_decode($getalldepartment , true);
 ?>
 <style>
     hr{
@@ -36,14 +41,14 @@ $senderboardResponse = $welcome->recognitionSenderboard($client_id);
     $(document).ready(function () {
 
         var enddate = document.getElementById("startdate").value;
-        var startday = document.getElementById("lastday").value;;
-
+        var startday = document.getElementById("lastweek").value;
+		var department = 'All';
+        //alert(enddate);
         //alert(startday);
-        // alert(lastday);
-        showActiveUserGraph(startday, enddate, '<?php echo SITE; ?>');
-        showHappinessIndexGraph(startday, enddate,'<?php echo SITE; ?>');
+        showActiveUserGraph(startday, enddate, department, '<?php echo SITE; ?>');
+        showHappinessIndexGraph(startday, enddate, department, '<?php echo SITE; ?>');
         /**********************************/
-        $("#dsds").hide();
+       /* $("#dsds").hide();
         $("#homeActiveUser").click(function () {
             $("#dsds").show();
            
@@ -51,33 +56,84 @@ $senderboardResponse = $welcome->recognitionSenderboard($client_id);
         $(".htData").click(function () {
             $("#dsds").hide();
 
-        });
+        });*/
     });
 </script>
 
 <script>
-    function activeuser(val)
+   /* function activeuser(val)
     {
 
         var enddate = document.getElementById("startdate").value;
         var startday = val;
-
-      //  alert(startday);
-      // alert(lastday);
-        showActiveUserGraph(startday, enddate, '<?php echo SITE; ?>');
+		var department = 'All'; 
+        //alert("start "+startday);
+       //alert(enddate);
+	   
+        showActiveUserGraph(startday, enddate, department , '<?php echo SITE; ?>');
     
-    }
-    function customactiveuser(val)
+    }*/
+	
+   	
+	function customactiveuser()
     {
-
+		//alert("hello");
+		
         var  startday= document.getElementById("fromDate").value;
-        var  enddate= val;
+		var  enddate= document.getElementById("toDate").value;
+		var  department= document.getElementById("alldepartments").value;
+		
+		//alert("from" + startday);
+		//alert("end"+ enddate);
+		//alert("department"+ department);
 
-     //   alert("this is start date-"+startday);
-    //   alert("end date-"+enddate);
-        showActiveUserGraph(startday, enddate, '<?php echo SITE; ?>');
+        if (startday == "")
+		{
+        window.alert("Please select From date.");
+        document.getElementById("fromDate").focus();
+        return false;
+		}
+		if (enddate == "")
+		{
+			window.alert("Please select To date.");
+			document.getElementById("toDate").focus();
+			return false;
+		}
+		if (department == "")
+		{
+			window.alert("Please select department.");
+			document.getElementById("alldepartments").focus();
+			return false;
+		}
+		
+        showActiveUserGraph(startday, enddate, department, '<?php echo SITE; ?>');
     
     }
+	
+	/**************************** happiness index ************************/
+	
+	function lasthappinessindex()
+    {
+		var enddate = document.getElementById("startdate").value;
+        var startday = document.getElementById("lastweek").value;
+		var department= document.getElementById("departmenthapp").value;
+		
+		//alert(enddate);
+		//alert(startday);
+		//alert(department);
+		
+		if (department == "")
+		{
+			window.alert("Please select department.");
+			document.getElementById("departmenthapp").focus();
+			return false;
+		}
+		
+		showHappinessIndexGraph(startday, enddate, department, '<?php echo SITE; ?>');
+	}
+	
+	/**************************** / happiness index **********************/
+	
 </script> 
 
 <div class="right_col" role="main">
@@ -89,6 +145,10 @@ $senderboardResponse = $welcome->recognitionSenderboard($client_id);
                 <div class="x_panel">
                     <div class="x_title">
                         <h2>Happiness Index</h2>
+						<?php /*echo "<pre>";
+						print_r($alldepartmentarray);
+						echo "</pre>";*/
+						?>
                         <ul class="nav navbar-right panel_toolbox">
                             <li  class="pull-right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                             </li>
@@ -98,8 +158,36 @@ $senderboardResponse = $welcome->recognitionSenderboard($client_id);
                     </div>
                     <div class="x_content">
 
+						<!---------------------- department ----------------->
+						<form>
+						<div class="form-group">
+                                    <label for="pwd">Department:&nbsp;&nbsp;</label>
+									<select name="departmenthapp" id="departmenthapp" class="form-control">
+									<option value="All">All</option>
+									<?php 
+									for($i=0; $i<count($alldepartmentarray); $i++)
+									{
+										if($alldepartmentarray[$i]['department'] == "")
+										{
+											continue;
+										}
+									?>
+									<option value="<?php echo $alldepartmentarray[$i]['department'];?>"><?php echo $alldepartmentarray[$i]['department'];?></option>
+									<?php }?>
+									</select>
+                               
+                                </div>
+								
+								<div class="form-group">
+                                    <center><button type="button" class="btn btn-info" onclick="return lasthappinessindex();">Submit</button></center>
+                               
+                                </div>
+								</form>
+						<!----------------------- / department -------------->
+					
                         <div id="container2" style="min-width: 310px; height: 405px; max-width: 600px; margin: 0 auto"></div>
-
+						
+						
                     </div>
                 </div>
             </div>
@@ -123,7 +211,7 @@ $senderboardResponse = $welcome->recognitionSenderboard($client_id);
                             <div class="row" id="" >
                                 <hr>
                                 <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
-                                    <img src='<?php echo $data['user_image']; ?>' class="img-circle" style="height:40px; width:40px;margin-top:8px;margin-bottom:5px;"><font style="padding-left:10px;font-size:15px;"><?php echo $data['username']; ?></font>
+                                    <img src='<?php echo $data['user_image']; ?>' class="img-circle" style="height:40px; width:40px;margin-top:8px;margin-bottom:5px;" onerror="this.src='images/user.png'"/><font style="padding-left:10px;font-size:15px;"><?php echo $data['username']; ?></font>
                                 </div>
                                 <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3"><font style="float:right;padding-top:15px;"><?php echo $data['totalRecognition']; ?> received</font></div> 
                             </div>
@@ -136,7 +224,7 @@ $senderboardResponse = $welcome->recognitionSenderboard($client_id);
                             <div class="row" id="" >
                                 <hr>
                                 <div class="col-xs-12 col-sm-9 col-md-9 col-lg-9">
-                                    <img src="<?php echo $data['user_image']; ?>" class="img-circle" style="height:40px; width:40px;margin-top:8px;margin-bottom:5px;">
+                                    <img src="<?php echo $data['user_image']; ?>" class="img-circle" style="height:40px; width:40px;margin-top:8px;margin-bottom:5px;" onerror="this.src='images/user.png'"/>
                                     <font style="padding-left:10px;font-size:15px;"><?php echo $data['username']; ?></font>
                                 </div>
                                 <div class="col-xs-12 col-sm-3 col-md-3 col-lg-3"><font style="float:right;padding-top:15px;"><?php echo $data['totalRecognitionMade']; ?> sent</font></div> 
@@ -166,21 +254,54 @@ $senderboardResponse = $welcome->recognitionSenderboard($client_id);
                     </div>
                     <div class="x_content">
                         <input type="hidden" name="startdate" id="startdate" value="<?php echo date("Y-m-d"); ?>">
-                        <div class="radio htData"><label><input type="radio" id="lastday" name="activeU" value="<?php echo date('Y-m-d', strtotime("-1 days")); ?>" onchange="activeuser(this.value);" checked="checked">Last 24 hours</label></div>
-                        <div class="radio htData"><label><input type="radio"name="activeU" value="<?php echo date('Y-m-d', strtotime("-7 days")); ?>" onchange="activeuser(this.value);">Last Week</label></div>
-                        <div class="radio htData"><label><input type="radio"name="activeU" value="<?php echo date('Y-m-d', strtotime("-30 days")); ?>" onchange="activeuser(this.value);">Last Month</label></div>
-                        <div class="radio" id="homeActiveUser"><label><input type="radio" name="activeU" value = "customdate">Custom</label></div>
+						
+                        <!--<div class="radio htData"><label><input type="radio" id="lastday" name="activeU" value="<?php echo date('Y-m-d', strtotime("-7 days")); ?>" onchange="activeuser(this.value);" checked="checked">Last 24 hours</label></div>-->
+						
+                        <div class="radio htData"><label><input type="radio" style="display:none;" id="lastweek" name="activeU" value="<?php echo date('Y-m-d', strtotime("-7 days")); ?>" checked="checked"></label></div>
+						
+                        <!--<div class="radio htData"><label><input type="radio"name="activeU" value="<?php echo date('Y-m-d', strtotime("-30 days")); ?>" onchange="activeuser(this.value);">Last Month</label></div>-->
+						
+						
+                        <!--<div class="radio" id="homeActiveUser"><label><input type="radio" name="activeU" value = "customdate">Custom</label></div>-->
                         <div id="dsds"><form>
                                 <div class="form-group">
                                     <label for="usr">From:</label>
 <!--                                    <input type="date" class="form-control" id="usr">-->
-                                    <input type="date" id="fromDate" name="input1" size="20" placeholder="mm/dd/yyyy"/>
+                                    <input type="date" id="fromDate" name="input1" size="20" class="form-control" placeholder="mm/dd/yyyy"/>
                                 </div>
                                 <div class="form-group">
                                     <label for="pwd">To:&nbsp;&nbsp;</label>
 <!--                                    <input type="date" class="form-control" id="pwd">-->
-                                <input type="date" id="toDate" name="input2" size="20" onchange="customactiveuser(this.value);"  placeholder="mm/dd/yyyy"/>
-                                </div></form>
+                                <!--<input type="date" id="toDate" name="input2" size="20" onchange="customactiveuser(this.value);"  placeholder="mm/dd/yyyy"/>-->
+								
+								<input type="date" id="toDate" class="form-control" name="input2" size="20" placeholder="mm/dd/yyyy"/>
+								
+                                </div>
+								
+								<div class="form-group">
+                                    <label for="pwd">Department:&nbsp;&nbsp;</label>
+									<select name="alldepartments" id="alldepartments" class="form-control">
+									<option value="All">All</option>
+									<?php 
+									for($i=0; $i<count($alldepartmentarray); $i++)
+									{
+										if($alldepartmentarray[$i]['department'] == "")
+										{
+											continue;
+										}
+									?>
+									<option value="<?php echo $alldepartmentarray[$i]['department'];?>"><?php echo $alldepartmentarray[$i]['department'];?></option>
+									<?php }?>
+									</select>
+                               
+                                </div>
+								
+								<div class="form-group">
+                                   <center><button type="button" class="btn btn-info" onclick="return customactiveuser();">Submit</button> </center>
+                               
+                                </div>
+								
+								</form>
                         </div>
 
                     </div>
@@ -249,76 +370,23 @@ $senderboardResponse = $welcome->recognitionSenderboard($client_id);
 		                        	echo $data[$i]['title'];
 		                        }elseif($data[$i]['flag'] == 16){	// Thought of the day
 						echo $data[$i]['title'];
-		                        }elseif($data[$i]['flag'] == 20){	// Recognition
-			                        echo $data[$i]['question'];
-		                        }elseif($data[$i]['flag'] == 23){	// Album/Gallery
+		                        }elseif($data[$i]['flag'] == 23){	// Recognition
 			                        echo $data[$i]['feedbackQuestion'];
-		                        }elseif($data[$i]['flag'] == 26){	// Achiever/Colleague Story
-		                        	echo $data[$i]['surveyTitle'];
+		                        }elseif($data[$i]['flag'] == 24){	// Album/Gallery
+			                        echo $data[$i]['exercise_name'];
 		                        }
 		                        
 		                       ?></a>
                               <p><?php echo $data[$i]['module']; ?></p>
-<!--                                <a href="#"><i class="fa fa-thumbs-o-up" aria-hidden="true"></i></a>&nbsp;&nbsp;
-                                <a href="#"><i class="glyphicon glyphicon-comment" aria-hidden="true"></i></a>&nbsp;&nbsp;
-                                <a href="#"><i class="fa fa-eye" aria-hidden="true"></i></a>-->
+                              <i class="fa fa-thumbs-o-up" aria-hidden="true"><?php echo $data[$i]['totallike']; ?></i>&nbsp;&nbsp;
+                              <i class="glyphicon glyphicon-comment" aria-hidden="true"><?php echo $data[$i]['totalcomment']; ?></i>&nbsp;&nbsp;
+                                <i class="fa fa-eye" aria-hidden="true"><?php echo $data[$i]['totalview']; ?></i>
                             </div>
                         </article>
                         <?php
                         }
                         ?>
-                 <!---       <article class="media event">
-                            <a class="pull-left date">
-                                <p class="month">April</p>
-                                <p class="day">23</p>
-                            </a>
-                            <div class="media-body">
-                                <a class="title" href="#">Item Two Title</a>
-                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                                <a href="#"><i class="fa fa-thumbs-o-up" aria-hidden="true"></i></a>&nbsp;&nbsp;
-                                <a href="#"><i class="glyphicon glyphicon-comment" aria-hidden="true"></i></a>&nbsp;&nbsp;
-                                <a href="#"><i class="fa fa-eye" aria-hidden="true"></i></a>
-                            </div>
-                        </article>
-                        <article class="media event">
-                            <a class="pull-left date">
-                                <p class="month">April</p>
-                                <p class="day">23</p>
-                            </a>
-                            <div class="media-body">
-                                <a class="title" href="#">Item Two Title</a>
-                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                                <a href="#"><i class="fa fa-thumbs-o-up" aria-hidden="true"></i></a>&nbsp;&nbsp;
-                                <a href="#"><i class="glyphicon glyphicon-comment" aria-hidden="true"></i></a>&nbsp;&nbsp;
-                                <a href="#"><i class="fa fa-eye" aria-hidden="true"></i></a>
-                            </div>
-                        </article>
-                        <article class="media event">
-                            <a class="pull-left date">
-                                <p class="month">April</p>
-                                <p class="day">23</p>
-                            </a>
-                            <div class="media-body">
-                                <a class="title" href="#">Item Two Title</a>
-                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                                <a href="#"><i class="fa fa-thumbs-o-up" aria-hidden="true"></i></a>&nbsp;&nbsp;
-                                <a href="#"><i class="glyphicon glyphicon-comment" aria-hidden="true"></i></a>&nbsp;&nbsp;
-                                <a href="#"><i class="fa fa-eye" aria-hidden="true"></i></a>
-                            </div>
-                        </article>
-                        <article class="media event">
-                            <a class="pull-left date">
-                                <p class="month">April</p>
-                                <p class="day">23</p>
-                            </a>
-                            <div class="media-body">
-                                <a class="title" href="#">Item Three Title</a>
-                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                                <a href="#"><i class="fa fa-thumbs-o-up" aria-hidden="true"></i></a>&nbsp;&nbsp;
-                                <a href="#"><i class="glyphicon glyphicon-comment" aria-hidden="true"></i></a>&nbsp;&nbsp;
-                                <a href="#"><i class="fa fa-eye" aria-hidden="true"></i></a>
-                            </div>
-                        </article> ---->
+               
                     </div>
                 </div>
             </div>

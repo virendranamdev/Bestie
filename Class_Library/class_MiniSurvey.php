@@ -64,7 +64,7 @@ class MiniSurvey {
         
   function checkSurveyAvailablity($clientid, $startdate) {
             try {
-                $query1 = "select * from Tbl_C_SurveyDetails where expiryDate > '" . $startdate . "' and status = 1 and clientId=:cid";
+                $query1 = "select * from Tbl_C_SurveyDetails where expiryDate >= '" . $startdate . "' and status = 1 and clientId=:cid";
                 $stmt1 = $this->DB->prepare($query1);
                 //  $stmt1->bindParam(':dte1', $this->startdate, PDO::PARAM_STR);
                 $stmt1->bindParam(':cid', $clientid, PDO::PARAM_STR);
@@ -225,7 +225,7 @@ class MiniSurvey {
             }
         } else {
             try {
-                $query = "select *,DATE_FORMAT(startDate,'%d %b %Y') as startDate,DATE_FORMAT(expiryDate,'%d %b %Y') as expiryDate from Tbl_C_SurveyDetails where clientId=:cli order by surveyId desc";
+                $query = "select *,DATE_FORMAT(startDate,'%d %b %Y') as startDate,DATE_FORMAT(expiryDate,'%d %b %Y') as expiryDate , (select count(distinct(answeredBy)) from Tbl_Analytic_Survey where surveyId = Tbl_C_SurveyDetails.surveyId) as totalrespondents from Tbl_C_SurveyDetails where clientId=:cli order by surveyId desc";
                 $stmt = $this->DB->prepare($query);
                 $stmt->bindParam(':cli', $this->idclient, PDO::PARAM_STR);
                 $stmt->execute();

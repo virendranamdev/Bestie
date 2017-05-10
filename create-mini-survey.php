@@ -36,7 +36,7 @@ $optcount = count($data['data']);
                          <?php   
     
       date_default_timezone_set('Asia/Calcutta');
-          $post_date = date("Y-m-d");
+          //$post_date = date("Y-m-d");
       $countsurvey = $surveyObj->checkSurveyAvailablity($clientId,$post_date);
      // print_r($countsurvey);
     $value1 = json_decode($countsurvey,true);
@@ -64,10 +64,26 @@ $optcount = count($data['data']);
                                     <span class="fa fa-question form-control-feedback left" aria-hidden="true"></span>
                                 </div>
                             </div>
+                            
+                             <div class="form-group">
+                                <label class=" control-label col-md-3 col-sm-3 col-xs-12">Valid From </label>
+                                <div class="col-md-9 col-sm-9 col-xs-12 form-group has-feedback">
+                                    <input type="date" name="validfrom" id="validfrom" class="form-control has-feedback-left" placeholder="Survey Start Date" required/>
+                                    <span class="fa fa-calendar form-control-feedback left" aria-hidden="true"></span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class=" control-label col-md-3 col-sm-3 col-xs-12">Valid Till</label>
+                                <div class="col-md-9 col-sm-9 col-xs-12 form-group has-feedback">
+                                    <input type="date" name="validtill" id="validtill" class="form-control has-feedback-left"placeholder="Survey End Date" required/>
+                                    <span class="fa fa-calendar form-control-feedback left" aria-hidden="true"></span>
+                                </div>
+                            </div>
+                            
                             <div class="form-group">
                                 <label class=" control-label col-md-3 col-sm-3 col-xs-12">Questions</label>
                                 <div class="col-md-9 col-sm-9 col-xs-12 form-group has-feedback">
-                                    <input type="text" name="questionno"  ng-model="noOfquestions" ng-keyup="questionsNumber(noOfquestions)" class="form-control has-feedback-left" placeholder="Enter Number of Questions..." required/>
+                                    <input type="text" name="questionno"  ng-model="noOfquestions" ng-change="questionsNumber(noOfquestions)" class="form-control has-feedback-left" placeholder="Enter Number of Questions..." required/>
                                     <span class="fa fa-question form-control-feedback left" aria-hidden="true"></span>
                                      <div ng-if="noOfquestions>5    " style="color:red;"> No of question can not be more than 5</div>
                                 </div>
@@ -142,21 +158,8 @@ $optcount = count($data['data']);
                                 </div>-->
                                 <hr style="width:100%">
                             </div>
-                            <div class="form-group">
-                                <label class=" control-label col-md-3 col-sm-3 col-xs-12">Valid From </label>
-                                <div class="col-md-9 col-sm-9 col-xs-12 form-group has-feedback">
-                                    <input type="date" name="validfrom" class="form-control has-feedback-left" placeholder="Enter Number of Questions..." required/>
-                                    <span class="fa fa-calendar form-control-feedback left" aria-hidden="true"></span>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class=" control-label col-md-3 col-sm-3 col-xs-12">Valid Till</label>
-                                <div class="col-md-9 col-sm-9 col-xs-12 form-group has-feedback">
-                                    <input type="date" name="validtill" class="form-control has-feedback-left"placeholder="Enter Number of Questions..." required/>
-                                    <span class="fa fa-calendar form-control-feedback left" aria-hidden="true"></span>
-                                </div>
-                            </div>
-                            <div class="form-group"ng-if="noOfquestions > 0">
+                           
+                            <div class="form-group" ng-if="noOfquestions > 0">
                                 <div class="col-md-12"><center>
                                  <input type="submit" name="submitbutton" class="btn btn-round btn-primary" value ="Submit">
                                   <input type="reset" name="resetbutton" class="btn btn-round btn-warning" value ="Cancel">
@@ -178,6 +181,34 @@ $optcount = count($data['data']);
 
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
 <script src="js/angular/mini-surveyfinal.js"></script>
+
+<!--------------------- these script for custom date picker -------------------------------------------->
+<script type="text/javascript">
+    var datefield = document.createElement("input")
+    datefield.setAttribute("type", "date")
+    if (datefield.type != "date") { //if browser doesn't support input type="date", load files for jQuery UI Date Picker
+        document.write('<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css" />\n')
+        document.write('<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"><\/script>\n')
+        document.write('<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"><\/script>\n')
+    }
+</script>
+
+<script>
+    if (datefield.type != "date") { //if browser doesn't support input type="date", initialize date picker widget:
+        jQuery(function ($) { //on document.ready
+            $('#validfrom').datepicker();
+        })
+    }
+</script>
+<script>
+    if (datefield.type != "date") { //if browser doesn't support input type="date", initialize date picker widget:
+        jQuery(function ($) { //on document.ready
+            $('#validtill').datepicker();
+        })
+    }
+</script>
+
+<!--------------------- these script for custom date picker -------------------------------------------->
 
 <?php include 'footer.php'; ?>
        

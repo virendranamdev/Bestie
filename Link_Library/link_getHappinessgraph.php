@@ -27,18 +27,18 @@ if (!empty($_POST["mydata"])) {
             $user = $res['data'][$i]['name'];
            // echo  $user;
             if ($user == 10) {
-                $user = 'Overwhelming';
+                $user = 'Fabulous';
             }
             elseif($user == -5)
             {
-                $user = 'Sad';
+                $user = 'Get Me Out Of Here';
             } 
             elseif($user == 5)
             {
-                $user = 'Good';
+                $user = 'Happy';
             } 
                 else {  
-                $user = "It's Ok";
+                $user = "So - So";
             }
             $res['data'][$i]['name'] = $user;
         }

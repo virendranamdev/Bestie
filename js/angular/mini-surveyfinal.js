@@ -8,7 +8,12 @@ $scope.optionArray = [];
 
 $scope.questionsNumber = function(a)
 {
-if(a!="")
+if(a==undefined || a=="")
+{
+$scope.questionContent = [];
+	}
+	
+if(a!="" && a<6)
 {
 for(var i=0;i<a;i++)
 { 
@@ -23,7 +28,11 @@ $scope.questionContent.push(dataQuestions);
 }
 }
 else
-{ $scope.questionContent = [];$scope.optionArray = [];}
+{ 
+$scope.questionContent = [];
+$scope.optionArray = [];
+}
+
 }
 
 $scope.clickMe = function(ind,q,val)

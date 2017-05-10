@@ -11,7 +11,7 @@ $clientid=$_SESSION['client_id'];
 		.button {
      background: #fff ! important;
     background: linear-gradient(top,#f7f9fa 0,#f0f0f0 100%);
-    filter: progid: DXImageTransform.Microsoft.gradient( startColorstr='#f7f9fa', endColorstr='#f0f0f0', GradientType=0);
+    filter: DXImageTransform.Microsoft.gradient( startColorstr='#f7f9fa', endColorstr='#f0f0f0', GradientType=0);
     -ms-box-shadow: 0 1px 2px rgba(0,0,0,.1) inset;
     -o-box-shadow: 0 1px 2px rgba(0,0,0,.1) inset;
      box-shadow: 0 0px 0px rgba(0,0,0,.1) inset;

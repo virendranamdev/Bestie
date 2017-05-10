@@ -31,8 +31,38 @@ class Feedback {
         }
     }
 
-    public function createFeedback() {
-        
+    public function filterWords($text) {
+        $text = strtolower($text);
+//        $bad = array('dirty', 'butt', 'lips', 'fuck');
+        $bad = array('Alcoholic', 'Amateur', 'Analphabet', 'Anarchist', 'Ape', 'Arse', 'Arselicker', 'Ass', 'Ass master', 'Ass-kisser', 'Ass-nugget', 'Ass-wipe', 'Asshole','Baby', 'Backwoodsman', 'Balls', 'Bandit', 'Barbar', 'Bastard', 'Beavis', 'Beginner', 'Biest', 'Bitch', 'Blubber gut', 'Bogeyman', 'Booby', 'Boozer', 'Bozo', 'Brain-fart', 'Brainless', 'Brainy', 'Brontosaurus', 'Brownie', 'Bugger', 'silly', 'Bulloks', 'Bum', 'Bum-fucker', 'Butt', 'Buttfucker', 'Butthead','Callboy', 'Callgirl', 'Camel', 'Cannibal', 'Cave man', 'Chaavanist', 'Chaot', 'Chauvi', 'Cheater', 'Chicken', 'Children fucker', 'Clit', 'Clown', 'Cock', 'Cock master', 'Cock up', 'Cockboy', 'Cockfucker', 'Cockroach', 'Coky', 'Con merchant', 'Con-man', 'Country bumpkin', 'Cow', 'Creep', 'Cretin', 'Criminal', 'Cunt', 'Cunt sucker','Daywalker', 'Deathlord', 'Derr brain', 'Desperado', 'Devil', 'Dickhead', 'Dinosaur', 'Disgusting packet', 'Diz brain', 'Do-Do', 'Dog', 'dirty', 'Dogshit', 'Donkey', 'Dracula', 'Drakula', 'Dreamer', 'Drinker', 'Drunkard', 'Dufus', 'Dulles', 'Dumbo', 'Dummy', 'Dumpy',
+    'Egoist', 'Eunuch', 'Exhibitionist', 'Fake', 'Fanny', 'Farmer', 'Fart', 'shitty', 'Fat', 'Fatso', 'Fibber', 'Fish', 'Fixer', 'Flake', 'Flash Harry', 'Freak', 'Frog', 'Fuck', 'Fuck face', 'Fuck head', 'Fuck noggin', 'Fucker', 'Gangster', 'Ghost', 'Goose', 'Gorilla', 'Grouch', 'Grumpy','Hell dog', 'Hillbilly', 'Hippie', 'Homo', 'Homosexual', 'Hooligan', 'Horse fucker','Idiot', 'Ignoramus','Jack-ass', 'Jerk', 'Joker', 'Junkey',
+    'Killer','Lard face', 'Latchkey child', 'Learner', 'Liar', 'Looser', 'Lucky', 'Lumpy', 'Luzifer','Macho', 'Macker', 'Minx', 'Missing link', 'Monkey', 'Monster', 'Motherfucker', 'Mucky pub', 'Mutant','Neanderthal', 'Nerfhearder', 'Nobody', 'Nurd', 'Nuts', 'numb','Oddball', 'Oger', 'Oil dick', 'Old fart', 'Orang-Uthan', 'Original', 'Outlaw','Pack', 'Pain in the ass', 'Pavian', 'Pencil dick', 'Pervert', 'Pig', 'Piggy-wiggy', 'Pirate', 'Pornofreak', 'Prick', 'Prolet','Queer', 'Querulant','Rat', 'Rat-fink', 'Reject', 'Retard', 'Riff-Raff', 'Ripper', 'Roboter', 'Rowdy', 'Rufian','Sack', 'Sadist', 'Saprophyt', 'Satan', 'Scarab', 'Schfincter', 'Shark', 'Shit eater', 'Shithead', 'Simulant', 'Skunk', 'Skuz bag', 'Slave', 'Sleeze', 'Sleeze bag', 'Slimer', 'Slimy bastard', 'Small pricked', 'Snail', 'Snake', 'Snob', 'Snot', 'Son of a bitch', 'Square', 'Stinker', 'Stripper', 'Stunk', 'Swindler', 'Swine','Teletubby', 'Thief', 'Toilett cleaner', 'Tussi', 'Typ',
+    'Unlike','Vampir', 'Vandale', 'Varmit','Wallflower', 'Wanker', 'bloody', 'Weeze Bag', 'Whore', 'Wierdo', 'Wino', 'Witch', 'Womanizer', 'Woody allen', 'Worm','Xena', 'Xenophebe', 'Xenophobe', 'XXX Watcher','Yak', 'Yeti','Zit face',
+            
+            '2g1c','acrotomophilia','alabama hot pocket','alaskan pipeline','anal','anilingus','anus','apeshit','arsehole','ass','asshole','assmunch','auto erotic','autoerotic','babeland','baby batter','baby juice','ball gag','ball gravy','ball kicking','ball licking','ball sack','ball sucking','bangbros','bareback','barely legal','barenaked','bastard','bastardo','bastinado','bbw','bdsm','beaner','beaners','beaver cleaver','beaver lips','bestiality','big black','big breasts','big knockers','big tits','bimbos','birdlock','bitch','bitches','black cock','blonde action','blonde on blonde action','blowjob','blow job','blow your load','blue waffle','blumpkin','bollocks','bondage','boner','boob','boobs','booty call','brown showers','brunette action','bukkake','bulldyke','bullet vibe','bullshit','bung hole','bunghole','busty','butt','buttcheeks','butthole','camel toe','camgirl','camslut','camwhore','carpet muncher','carpetmuncher','chocolate rosebuds','circlejerk','cleveland steamer','clit','clitoris','clover clamps','clusterfuck','cock','cocks','coprolagnia','coprophilia','cornhole','coon','coons','creampie','cum','cumming','cunnilingus','cunt','darkie','date rape','daterape','deep throat','deepthroat','dendrophilia','dick','dildo','dingleberry','dingleberries','dirty pillows','dirty sanchez','doggie style','doggiestyle','doggy style','doggystyle','dog style','dolcett','domination','dominatrix','dommes','donkey punch','double dong','double penetration','dp action','dry hump','dvda','eat my ass','ecchi','ejaculation','erotic','erotism','escort','eunuch','faggot','fecal','felch','fellatio','feltch','female squirting','femdom','figging','fingerbang','fingering','fisting','foot fetish','footjob','frotting','fuck','fuck buttons','fuckin','fucking','fucktards','fudge packer','fudgepacker','futanari','gang bang','gay sex','genitals','giant cock','girl on','girl on top','girls gone wild','goatcx','goatse','god damn','gokkun','golden shower','goodpoop','goo girl','goregasm','grope','group sex','g-spot','guro','hand job','handjob','hard core','hardcore','hentai','homoerotic','honkey','hooker','hot carl','hot chick','how to kill','how to murder','huge fat','humping','incest','intercourse','jack off','jail bait','jailbait','jelly donut','jerk off','jigaboo','jiggaboo','jiggerboo','jizz','juggs','kike','kinbaku','kinkster','kinky','knobbing','leather restraint','leather straight jacket','lemon party','lolita','lovemaking','make me come','male squirting','masturbate','menage a trois','milf','missionary position','motherfucker','mound of venus','mr hands','muff diver','muffdiving','nambla','nawashi','negro','neonazi','nigga','nigger','nig nog','nimphomania','nipple','nipples','nsfw images','nude','nudity','nympho','nymphomania','octopussy','omorashi','one cup two girls','one guy one jar','orgasm','orgy','paedophile','paki','panties','panty','pedobear','pedophile','pegging','penis','phone sex','piece of shit','pissing','piss pig','pisspig','playboy','pleasure chest','pole smoker','ponyplay','poof','poon','poontang','punany','poop chute','poopchute','porn','porno','pornography','prince albert piercing','pthc','pubes','pussy','queaf','queef','quim','raghead','raging','boner','rape','raping','rapist','rectum','reverse cowgirl','rimjob','rimming','rosy palm','rosy palm and her 5 sisters','rusty trombone','sadism','santorum','scat','schlong','scissoring','semen','sex','sexo','sexy','shaved beaver','shaved pussy','shemale','shibari','shit','shitblimp','shitty','shota','shrimping','skeet','slanteye','slut','s&m','smut','snatch','snowballing','sodomize','sodomy','spic','splooge','splooge moose','spooge','spread legs','spunk','strap on','strapon','strappado','strip club','style doggy','suck','sucks','suicide girls','sultry women','swastika','swinger','tainted love','taste my','tea bagging','threesome','throating','tied up','tight white','tit','tits','titties','titty','tongue in a','topless','tosser','towelhead','tranny','tribadism','tub girl','tubgirl','tushy','twat','twink','twinkie','two girls one cup','undressing','upskirt','urethra play','urophilia','vagina','venus mound','vibrator','violet wand','vorarephilia','voyeur','vulva','wank','wetback','wet dream','white power','wrapping men','wrinkled starfish','xx','xxx','xxxd','yaoi','yellow showers','yiffy','zoophiliaa');
+
+        $rep = '***';
+
+        $bad = array_map('strtolower', $bad);
+//        print_r(sizeof($rep));        die;
+       // $text = str_replace($bad, $rep, $text);
+        //return $text;
+		
+	$matches = array();
+        $matchFound = preg_match_all("/\b(" . implode($bad,"|") . ")\b/i", $text, $matches);
+        //print_r($matchFound);
+                      
+                      
+        if ($matchFound) {
+           $finalresult = str_replace($bad, $rep, $text); 
+        }
+        else
+        {
+            $finalresult = $text;
+        }
+     
+       return $finalresult;
+		
     }
 
     public function getFeedbackList($clientId, $empId, $val) {
@@ -48,7 +78,7 @@ class Feedback {
                 $total = $stmt->fetch(PDO::FETCH_ASSOC);
             }
 
-            $query = "SELECT *, DATE_FORMAT(publishingTime, '%d %M %Y') as publishingTime, DATE_FORMAT(unpublishingTime, '%d %M %Y') as unpublishingTime, (select count(commentId) as totalComments from Tbl_C_FeedbackComments where feedbackId=Tbl_C_Feedback.feedbackId and Tbl_C_Feedback.status=:status) as total_comments FROM Tbl_C_Feedback WHERE clientId=:clientId AND status=:status AND flagType=:flagType LIMIT $val,10";
+            $query = "SELECT *, DATE_FORMAT(publishingTime, '%d %M %Y') as publishingTime, DATE_FORMAT(unpublishingTime, '%d %M %Y') as unpublishingTime, (select count(commentId) as totalComments from Tbl_C_FeedbackComments where feedbackId=Tbl_C_Feedback.feedbackId and Tbl_C_Feedback.status=:status) as total_comments FROM Tbl_C_Feedback WHERE clientId=:clientId AND status=:status AND flagType=:flagType  ORDER BY Tbl_C_Feedback.createdDate DESC LIMIT $val,10";
             $stmt = $this->db_connect->prepare($query);
             $stmt->bindParam(':clientId', $clientId, PDO::PARAM_STR);
             $stmt->bindParam(':flagType', $flagType, PDO::PARAM_STR);
@@ -59,6 +89,17 @@ class Feedback {
                 $result['success'] = 1;
                 $result['total'] = $total['total'];
                 $result['data'] = $feedbackResult;
+            }
+            
+            $datacount = count($result['data']);
+                    //echo $datacount;
+            if ($datacount < 1) {
+            	$result = array();
+                $result['success'] = 0;
+                $result['message'] = "No more feedback available";
+                return $result;
+            } else {
+                return $result;
             }
         } catch (Exception $ex) {
             $result = $ex;
@@ -82,13 +123,12 @@ class Feedback {
             if ($stmt->execute()) {
                 $totalComments = $stmt->fetch(PDO::FETCH_ASSOC);
 
-                if ($totalComments['totalComments'] != 0) {
-                	
+                if ($totalComments['totalComments'] != 0) {            	
                     try {
 //                $status = "Live";
                         $flagType = 23;
 
-                        $query = "SELECT feedComments.*, feed.feedbackQuestion, DATE_FORMAT(feed.unpublishingTime, '%d %M %Y') as unpublishingTime, (select count(autoId) from Tbl_C_FeedbackCommentLikes where commentId=feedComments.commentId and feedbackId=:feedbackId and like_unlike_status='1') as totalLikes, if((select count(autoId) from Tbl_C_FeedbackCommentLikes where commentId=feedComments.commentId and feedbackId=:feedbackId and employeeId=:empId and like_unlike_status='1')>0, (select if(employeeId=:empId, '1', '0') as likeStatus from Tbl_C_FeedbackCommentLikes where commentId=feedComments.commentId and feedbackId=:feedbackId and employeeId=:empId and like_unlike_status='1'), '0') as likeStatus, if(feedComments.anonymous='1', 'Anonymous', concat(master.firstName, ' ',master.lastName)) as user_name,if(feedComments.anonymous='1', if(personal.avatar_image='', '', concat('" . site_url . "', personal.avatar_image)) , if(personal.userImage='', '', concat('" . site_url . "', personal.userImage))) as avatar_image FROM Tbl_C_FeedbackComments as feedComments JOIN Tbl_C_Feedback as feed ON feedComments.feedbackId=feed.feedbackId JOIN Tbl_EmployeePersonalDetails as personal ON feedComments.commentBy=personal.employeeId JOIN Tbl_EmployeeDetails_Master as master ON master.employeeId=personal.employeeId WHERE feed.clientId=:clientId AND feed.flagType=:flagType AND feedComments.feedbackId=:feedbackId limit $val,10";
+                        $query = "SELECT feedComments.*, DATE_FORMAT(feedComments.CommentDate, '%d %M %Y') as CommentDate, feed.feedbackQuestion, DATE_FORMAT(feed.unpublishingTime, '%d %M %Y') as unpublishingTime, (select count(autoId) from Tbl_C_FeedbackCommentLikes where commentId=feedComments.commentId and feedbackId=:feedbackId and like_unlike_status='1') as totalLikes, if((select count(autoId) from Tbl_C_FeedbackCommentLikes where commentId=feedComments.commentId and feedbackId=:feedbackId and employeeId=:empId and like_unlike_status='1')>0, (select if(employeeId=:empId, '1', '0') as likeStatus from Tbl_C_FeedbackCommentLikes where commentId=feedComments.commentId and feedbackId=:feedbackId and employeeId=:empId and like_unlike_status='1'), '0') as likeStatus, if(feedComments.anonymous='1', 'Anonymous', concat(master.firstName, ' ',master.lastName)) as user_name,if(feedComments.anonymous='1', if(personal.avatar_image='', '', concat('" . site_url . "', personal.avatar_image)) , if(personal.userImage='', '', concat('" . site_url . "', personal.userImage))) as avatar_image FROM Tbl_C_FeedbackComments as feedComments JOIN Tbl_C_Feedback as feed ON feedComments.feedbackId=feed.feedbackId JOIN Tbl_EmployeePersonalDetails as personal ON feedComments.commentBy=personal.employeeId JOIN Tbl_EmployeeDetails_Master as master ON master.employeeId=personal.employeeId WHERE feed.clientId=:clientId AND feed.flagType=:flagType AND feedComments.feedbackId=:feedbackId ORDER BY feedComments.autoId desc limit $val,10";
 //            echo $query;die;
                         $stmt = $this->db_connect->prepare($query);
                         $stmt->bindParam(':clientId', $clientId, PDO::PARAM_STR);
@@ -98,21 +138,50 @@ class Feedback {
                         $stmt->bindParam(':feedbackId', $feedbackId, PDO::PARAM_STR);
                         if ($stmt->execute()) {
                             $commentResult = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
+							
+			    if(!empty($commentResult)){
                             $result['success'] = 1;
+                            $result['message'] = "Feedback comments available";
                             $result['totalComments'] = $totalComments['totalComments'];
                             $result['avatar_image'] = $avatarResult['avatar_image'];
                             $result['feedback_question'] = $commentResult[0]['feedbackQuestion'];
                             $result['unpublishing_time'] = $commentResult[0]['unpublishingTime'];
                             $result['data'] = $commentResult;
+                            }else{
+								
+							/*************************************************/
+
+							$queryfeed = "SELECT *,DATE_FORMAT(unpublishingTime, '%d %M %Y') as unpublishingTime FROM Tbl_C_Feedback WHERE feedbackId=:fbId";
+							$stmtfeed = $this->db_connect->prepare($queryfeed);
+							$stmtfeed->bindParam(':fbId', $feedbackId, PDO::PARAM_STR);
+							$stmtfeed->execute();
+							$commentResultfeed = $stmtfeed->fetchAll(PDO::FETCH_ASSOC);
+							
+							/*************************************************/
+                            $result['success'] = 0;
+                    		$result['message'] = "No more comments available";
+							$result['avatar_image'] = $avatarResult['avatar_image'];
+                            $result['feedback_question'] = $commentResultfeed[0]['feedbackQuestion'];
+							$result['unpublishing_time'] = $commentResultfeed[0]['unpublishingTime'];
+                            }
 //                print_r($result);die;
                         }
                     } catch (Exception $ex) {
                         $result = $ex;
                     }
                 } else {
+	            $query = "SELECT *,DATE_FORMAT(unpublishingTime, '%d %M %Y') as unpublishingTime FROM Tbl_C_Feedback WHERE feedbackId=:feedbackId";
+		    $stmt = $this->db_connect->prepare($query);
+		    $stmt->bindParam(':feedbackId', $feedbackId, PDO::PARAM_STR);
+		    $stmt->execute();
+		    $commentResult = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                
                     $result['success'] = 0;
                     $result['message'] = "No Comments available";
+                    $result['feedback_question'] = $commentResult[0]['feedbackQuestion'];
+                    $result['unpublishing_time'] = $commentResult[0]['unpublishingTime'];
+                    $result['totalComments'] = $totalComments['totalComments'];
+                    $result['avatar_image'] = $avatarResult['avatar_image'];
                 }
             }
         } catch (Exception $ex) {
@@ -197,8 +266,7 @@ class Feedback {
     }
 
     public function likeFeedComments($cId, $feedbackId, $empId, $commentId, $status) {
-        try {
-
+        try {   
             $query = "INSERT INTO Tbl_C_FeedbackCommentLikes (commentId, feedbackId, employeeId, like_unlike_status) VALUES (:commentId, :feedbackId, :empId, :status) ON DUPLICATE KEY UPDATE like_unlike_status=:status";
             $stmt = $this->db_connect->prepare($query);
             $stmt->bindParam(':cid', $cid, PDO::PARAM_STR);
@@ -208,7 +276,16 @@ class Feedback {
             $stmt->bindParam(':status', $status, PDO::PARAM_STR);
 
             if ($stmt->execute()) {
+                $totalLikesQuery = "select count(autoId) as totalLikes from Tbl_C_FeedbackCommentLikes where commentId=:commentId and feedbackId=:feedbackId and like_unlike_status='1'"; 
+		$stmt = $this->db_connect->prepare($totalLikesQuery);
+		$stmt->bindParam(':commentId', $commentId, PDO::PARAM_STR);
+		$stmt->bindParam(':feedbackId', $feedbackId, PDO::PARAM_STR);
+		$stmt->execute();
+		$totalLikes = $stmt->fetch(PDO::FETCH_ASSOC);
+            
                 $result['success'] = 1;
+                $result['status'] = $status;
+                $result['totalLikes'] = $totalLikes['totalLikes'];
                 $result['message'] = ($status=='1')?"liked successfully":"unliked successfully";
             } else {
                 $result['success'] = 0;

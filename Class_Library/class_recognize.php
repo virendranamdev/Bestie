@@ -456,6 +456,8 @@ class Recognize {
 
             if ($employeeId != '') {
                 $query .= " and master.employeeId='$employeeId' ";
+            } else {
+            	$query .= " and (select SUM(points) from Tbl_RecognizeApprovDetails where userId=recognition.recognitionTo)>0";
             }
             $query .= " ORDER BY totalPoints DESC";
 
@@ -480,16 +482,16 @@ class Recognize {
         try {
             $site_url = (!empty($site_url)) ? $site_url : site_url;
             $query = "SELECT badges.topicId,badges.recognizeTitle, if(badges.image IS NULL or badges.image='', '', CONCAT('" . $site_url . "', badges.image)) as image FROM Tbl_RecognizedEmployeeDetails AS recognition JOIN Tbl_RecognizeTopicDetails as badges ON recognition.topic=badges.topicId WHERE recognition.clientId=:cli AND recognition.recognitionTo=:uid order by DATE_FORMAT(recognition.dateOfEntry,'%d-%m-%Y %H:%i') desc";
-            if (!empty($site_url)) {
+            if (!empty($site_url) && ($site_url != site_url)) {
                 $query .= " limit 0,3";
             }
+            
             $stmt = $this->DB->prepare($query);
             $stmt->bindParam(':cli', $clientId, PDO::PARAM_STR);
             $stmt->bindParam(':uid', $userId, PDO::PARAM_STR);
             $stmt->execute();
             $badgesList = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-//            print_r($row);die;
             $result['success'] = 1;
             $result['message'] = "Recognition detail";
             $result['data']['badges'] = $badgesList;
@@ -589,7 +591,7 @@ class Recognize {
 
     /*     * *************************** top recognize user ***************************************** */
 
-    function topRecognizeUser($clientId, $fromdate, $todate) {
+    function topRecognizeUser($clientId, $fromdate, $todate , $path='') {
         try {
 
             if ($fromdate == "" && $todate == "") {
@@ -597,7 +599,7 @@ class Recognize {
                 $query = "SELECT distinct(recognition.recognitionTo) as recognizedUser, if(master.lastName IS NULL OR master.lastName='', master.firstName, CONCAT(master.firstName, ' ',master.middleName,' ', master.lastName)) as username, if(personal.userImage IS NULL or personal.userImage='', '', CONCAT('" . $imagepath . "', personal.userImage)) as user_image, master.designation, (select count(recognitionTo) from Tbl_RecognizedEmployeeDetails where recognitionTo=recognition.recognitionTo) as totalRecognition, (select SUM(points) from Tbl_RecognizeApprovDetails where userId=recognition.recognitionTo) as totalPoints FROM Tbl_RecognizedEmployeeDetails as recognition JOIN Tbl_EmployeeDetails_Master as master ON recognition.recognitionTo=master.employeeId JOIN Tbl_EmployeePersonalDetails as personal ON master.employeeId=personal.employeeId WHERE recognition.clientId=:cli ORDER BY totalPoints DESC";
             } else {
 
-                $query = "SELECT distinct(recognition.recognitionTo) as recognizedUser, if(master.lastName IS NULL OR master.lastName='', master.firstName, CONCAT(master.firstName, ' ',master.middleName,' ', master.lastName)) as username, if(personal.userImage IS NULL or personal.userImage='', '', CONCAT('" . SITE_URL . "', personal.userImage)) as user_image, master.designation, (select count(recognitionTo) from Tbl_RecognizedEmployeeDetails where recognitionTo=recognition.recognitionTo) as totalRecognition, (select SUM(points) from Tbl_RecognizeApprovDetails where userId=recognition.recognitionTo) as totalPoints FROM Tbl_RecognizedEmployeeDetails as recognition JOIN Tbl_EmployeeDetails_Master as master ON recognition.recognitionTo=master.employeeId JOIN Tbl_EmployeePersonalDetails as personal ON master.employeeId=personal.employeeId WHERE (DATE(recognition.dateOfEntry) BETWEEN :fromdte AND :enddte) AND recognition.clientId=:cli ORDER BY totalPoints DESC";
+                $query = "SELECT distinct(recognition.recognitionTo) as recognizedUser, if(master.lastName IS NULL OR master.lastName='', master.firstName, CONCAT(master.firstName, ' ',master.middleName,' ', master.lastName)) as username, if(personal.userImage IS NULL or personal.userImage='', '', CONCAT('" . $path . "', personal.userImage)) as user_image, master.designation, (select count(recognitionTo) from Tbl_RecognizedEmployeeDetails where recognitionTo=recognition.recognitionTo) as totalRecognition, (select SUM(points) from Tbl_RecognizeApprovDetails where userId=recognition.recognitionTo) as totalPoints FROM Tbl_RecognizedEmployeeDetails as recognition JOIN Tbl_EmployeeDetails_Master as master ON recognition.recognitionTo=master.employeeId JOIN Tbl_EmployeePersonalDetails as personal ON master.employeeId=personal.employeeId WHERE (DATE(recognition.dateOfEntry) BETWEEN :fromdte AND :enddte) AND recognition.clientId=:cli ORDER BY totalPoints DESC";
             }
 
             $stmt = $this->DB->prepare($query);

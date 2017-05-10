@@ -1,6 +1,8 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+
+error_reporting(0);
+//ini_set('display_errors', 1);
+
 @session_start();
 require_once('../Class_Library/class_MiniSurvey.php');
 require_once('../Class_Library/class_push_notification.php');
@@ -12,8 +14,8 @@ $obj_group = new Group();                  // object of class get group for cust
 $read = new Reading();
 $push_obj = new PushNotification();
 //
-date_default_timezone_set('Asia/Calcutta');
-$post_date = date("Y-m-d H:i:s A");
+date_default_timezone_set('Asia/Kolkata');
+$post_date = date("Y-m-d H:i:s");
 $username = $_SESSION['user_name'];
 $clientid = $_SESSION['client_id'];
 $createdby = $_SESSION['user_unique_id'];
@@ -25,9 +27,12 @@ if (!empty($_POST)) {
 
     $surveytitle = $_POST['surveytitle'];
     $questionno = $_POST['questionno'];
-    $surveystart = $_POST['validfrom'];
-    $surveyend = $_POST['validtill'];
+    $surveystart1 = $_POST['validfrom'];
+    $surveyend1 = $_POST['validtill'];
     $content = "";
+    $surveystart = date_format(date_create($surveystart1),"Y-m-d H:i:s");
+     $surveyend = date_format(date_create($surveyend1),"Y-m-d H:i:s");
+	
 //    echo "survey title-".$surveytitle . "<br>";
 //    echo "question no-".$questionno . "<br>";
 //    echo "valid from-".$surveystart . "<br>";
@@ -61,10 +66,11 @@ $PUSH_NOTIFICATION = "PUSH_YES";
 //    }
 
     /*********************** end find group ********************** */
+//echo "survey statrt-".$surveystart;
 $countsurvey = $survey_obj->checkSurveyAvailablity($clientid,$surveystart);
     
     $value1 = json_decode($countsurvey,true);
-   
+  
     if($value1["success"] === 1)
             {
                  echo "<script>alert('survey is Available');</script>";
@@ -75,9 +81,7 @@ $countsurvey = $survey_obj->checkSurveyAvailablity($clientid,$surveystart);
     $status = 1;
     $value = $survey_obj->createSurvey($clientid, $surveytitle, $questionno, $createdby, $createddate, $surveyend, $surveystart, $status);
 
-//    echo "<pre>";
-//    print_r($value);
-
+   
     $surveyid = $value['lastid'];
 
 
@@ -106,7 +110,7 @@ $countsurvey = $survey_obj->checkSurveyAvailablity($clientid,$surveystart);
                  
                   /*******************************/
                  $response = $survey_obj->createSurveyQuestion($surveyid, $surveyquestion,  $optionid, $optionnumber, $createddate, $createdby, $status);
-        print_r($response);
+       // print_r($response);
         
         $questionid = $response['questionid'];
                  
@@ -118,10 +122,10 @@ $countsurvey = $survey_obj->checkSurveyAvailablity($clientid,$surveystart);
                      {
                          $optionradio = "radiooption".$t.$h;
                          $optionvalue = $_POST[$optionradio];
-                         echo "this is option value-".$optionvalue;
+                        // echo "this is option value-".$optionvalue;
                          
                          $response1 = $survey_obj->createSurveyQuestionoption($questionid,$surveyid, $optionid, $optionvalue, $status, $createddate, $createdby);
-        print_r($response1);
+       // print_r($response1);
                          
                      }
                  }
@@ -146,7 +150,7 @@ $countsurvey = $survey_obj->checkSurveyAvailablity($clientid,$surveystart);
         array_push($wholegroup, $groupid['groupId']);
     }
 
-    print_r($wholegroup);
+   // print_r($wholegroup);
 
     /*     * *********************** option  start ****************** */
 
@@ -243,28 +247,30 @@ $countsurvey = $survey_obj->checkSurveyAvailablity($clientid,$surveystart);
         $hrimg = SITE_URL . $_SESSION['image_name'];
 //echo "hr image:-".$hrimg;
         $sf = "successfully send";
-        $ids = array();
-        $idsIOS = array();
         foreach ($token1 as $row) {
+		$content = $surveytitle;
+		$BY	 = "";
+		$like_val = "";
+		$comment_val = "";
+		
+            	$data = array('Id' => $surveyid, 'Title' => $content, 'Content' => $content, 'SendBy' => $BY, 'Picture' => $hrimg, 'image' => $fullpath, 'Date' => $post_date, 'flag' => $FLAG, 'flagValue' => $flag_name, 'success' => $sf, 'like' => $like_val, 'comment' => $comment_val);
+	    
+		$badgecount = $push_obj->getBadgecount($row['deviceId']);
+		$badgecount = $badgecount['badgeCount']+1;
+		$addBadgecount = $push_obj->updateBadgecount($row['deviceId'], $badgecount);
+	    
+		if ($row['deviceName'] == "3") {
+		    $data['device_token'] = $row['registrationToken'];
+		    $IOSrevert = $push_obj->sendAPNSPushCron($data, $googleapiIOSPem['iosPemfile'], '', $badgecount);        
+		} else {
+		    $data['device_token'] = $row['registrationToken'];
+		    $data['badge'] = $badgecount;
+		    $revert = $push_obj->sendGoogleCloudMessageCron($data, $googleapiIOSPem['googleApiKey']);
+		}
+	}
 
-            if ($row['deviceName'] == 3) {
-                array_push($idsIOS, $row["registrationToken"]);
-            } else {
-                array_push($ids, $row["registrationToken"]);
-            }
-        }
-
-        // $content = str_replace("\r\n", "", strip_tags($ques));
-        $data = array('Id' => $surveyid, 'Title' => $surveytitle, 'Content' => $content, 'image' => $fullpath, 'Picture' => $hrimg, 'Date' => $post_date, 'flag' => $FLAG, 'flagValue' => $flag_name, 'success' => $sf);
-
-        $IOSrevert = $push_obj->sendAPNSPush($data, $idsIOS, $googleapiIOSPem['iosPemfile']);
-        $revert = $push_obj->sendGoogleCloudMessage($data, $ids, $googleapiIOSPem['googleApiKey']);
-        $rt = json_decode($revert, true);
-//print_r($rt);
-        if ($rt) {
-
+        if ($revert['success'] == 1) {
            echo "<script>alert('Survey Successfully Created');</script>";
-            //echo $rt;
             echo "<script>window.location='../create-mini-survey.php'</script>";
         }
     } else {

@@ -1,14 +1,19 @@
-function showActiveUserGraph(startdate,enddate, SITE)
+function showActiveUserGraph(startdate,enddate, department , SITE)
 {
 
+//alert(startdate);
+//alert(enddate);
+//alert(department);
+//alert(SITE);
+//die;
     var postData =
             {
                 "startdate":startdate,
-                "enddate": enddate
-
+                "enddate": enddate,
+				"department": department
             }
     var dataString = JSON.stringify(postData);
- // alert(dataString);
+    //alert(dataString);
 
     $.ajax({
         type: "POST",
@@ -18,11 +23,13 @@ function showActiveUserGraph(startdate,enddate, SITE)
         data: {"mydata": dataString},
         success: function (response) {
             var resdata = response;
-         //   alert(resdata);
+            //alert(resdata);
+			
           //  console.log(resdata);   
 
             var jsonData = JSON.parse(resdata);
-                                             // alert(jsonData);
+                                              //alert(jsonData);
+											  
        //   console.log("this is parsed data-" + jsonData);
             /* var jsonData = JSON.parse(resdata)["data"];
              
@@ -93,17 +100,17 @@ function homeActiveUserGraph(resdata) {
 
 /****************************happiness index grapg**********************************/
 
-function showHappinessIndexGraph(startdate,enddate,SITE)
+function showHappinessIndexGraph(startdate, enddate, department , SITE)
 {
 
     var postData =
             {
-                "startdate":startdate,
-                "enddate": enddate
-
+                "startdate":startdate ,
+                "enddate": enddate , 
+				"department": department
             }
     var dataString = JSON.stringify(postData);
-  //alert(dataString);
+    //alert(dataString);
 
     $.ajax({
         type: "POST",
@@ -113,8 +120,8 @@ function showHappinessIndexGraph(startdate,enddate,SITE)
         data: {"mydata": dataString},
         success: function (response) {
             var resdata = response;
-          //  alert(resdata);
-          //  console.log(resdata);   
+            //alert(resdata);
+           // console.log(resdata);   
 
             var jsonData = JSON.parse(resdata);
                                             

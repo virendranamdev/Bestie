@@ -63,7 +63,7 @@
 <style>
 .mycontainer{padding: 0% 10% 2% 10%;}
 .recognitionUserDetailsImgHolder{}
-.recognitionUserDetailsImg{width:130px;130px;border-radius:50%;box-shadow: 1px 1px 1px 2px #f1f1f1;}
+.recognitionUserDetailsImg{width:130px;border-radius:50%;box-shadow: 1px 1px 1px 2px #f1f1f1;}
 .gradientDIV{
 background: -moz-linear-gradient(top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0) 100%); /* FF3.6-15 */
 background: -webkit-linear-gradient(top, rgba(0,0,0,0.65) 0%,rgba(0,0,0,0) 100%); /* Chrome10-25,Safari5.1-6 */

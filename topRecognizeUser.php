@@ -1,8 +1,93 @@
 <?php include 'header.php';?>
 <?php include 'sidemenu.php';?>
 <?php include 'topNavigation.php';?>
-       
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<?php 
+require_once('Class_Library/class_recognize.php');
+$objRecognize = new Recognize();
 
+$clientId = $_SESSION['client_id'];
+$empId = $_SESSION['user_unique_id'];
+$user_type = $_SESSION['user_type'];
+$fromdate = "";
+$todate="";
+$allrecognizeemployee = $objRecognize->topRecognizeUser($clientId,$fromdate,$todate);
+$allrecognizeemployeearr = json_decode($allrecognizeemployee , true);
+?>       
+<script>
+$(document).ready(function () {
+	 //alert("hi");
+	 $("button").click(function () {
+		//alert("hi");
+		var fromdte = $("#fromdate").val();
+        var enddte = $("#todate").val();
+		var clientid = $("#clientid").val();
+		var imgpath = "<?php echo SITE; ?>"
+		
+		if(fromdte == "")
+		{
+			alert("Please Select From Date");
+			fromdte.focus();
+			return false;
+		}
+		if(enddte == "")
+		{
+		alert("please Select To Date");
+		enddte.focus();
+		return false;
+		}
+		else
+		{	
+		
+		//alert(imgpath);
+		//alert(enddte);
+		//alert(clientid);
+		var postData =
+                    {
+                        "start_date": fromdte,
+                        "end_date": enddte,
+                        "client": clientid,
+						"imgpath": imgpath
+                    }
+            var dataString = JSON.stringify(postData);
+			//alert(dataString);
+			$.ajax({
+                type: "POST",
+                //dataType: "json",
+                //contentType: "application/json; charset=utf-8",
+                url: "<?php echo SITE; ?>recognizeUserAjax.php",
+                data: {"mydata": dataString},
+                success: function (response) {
+                    var resdata = response;
+					//alert(resdata);
+					
+					if (response.length !== 0)
+                    {
+					 var jsonData = JSON.parse(resdata);
+					 //alert(jsonData.length);
+                     $('#datatable tbody').remove();
+					 for (var i = 0; i < jsonData.length; i++) 
+					 {
+						//alert(jsonData[i].user_image);
+						
+						
+											var newRow = '<tbody><tr><td><img src=' + jsonData[i].user_image + ' class="img img-responsive miniCircle" ></td><td>' + jsonData[i].username + '</td><td>' + jsonData[i].designation + '</td><td>' + jsonData[i].totalRecognition + '</td><td><a href="topRecognitionDetails.php?employeeid='+jsonData[i].recognizedUser+'">View</a></td></tr><tbody>';
+					$('#datatable').append(newRow);
+
+					 }
+					 
+					}
+					else
+					{
+					var newRow = '<tbody><tr><td>No Record Available</td></tr><tbody>';
+                    $('#datatable').append(newRow);	
+					}
+				}
+			});
+	 }	
+	 });
+});
+</script>
 
         <!-- page content -->
         <div class="right_col" role="main">
@@ -14,6 +99,11 @@
                 <div class="x_panel">
                   <div class="x_title">
                     <h2>Top Recognize User</h2>
+					<?php 
+					/*echo "<pre>";
+					print_r($allrecognizeemployeearr);
+					echo "</pre>";*/
+					?>
                     <ul class="nav navbar-right panel_toolbox">
                       <li class="right"><a class="collapse-link"><i class="fa fa-chevron-up "></i></a>
                       </li>
@@ -26,12 +116,18 @@
 					<form class="form-inline">
   <div class="form-group">
     <label for="email">From:</label>
-    <input type="date" class="form-control" id="email">
+    <input type="date" required class="form-control" id="fromdate">
+	<input type="hidden" class="form-control" id="clientid" value="<?php echo $clientId;?>">
   </div>
   <div class="form-group">
     <label for="pwd">TO:</label>
-    <input type="date" class="form-control" id="pwd">
+    <input type="date" required class="form-control" id="todate" >
   </div>
+   <div class="form-group">
+    <label for="pwd"></label>
+    <button type="button" class="form-control">Submit</button>
+  </div>
+  
 </form></center>
 					
 					
@@ -50,29 +146,20 @@
 
 
                       <tbody>
+					  <?php
+						for($i=0; $i<count($allrecognizeemployeearr['data']); $i++)
+						{
+					  ?>
                          <tr>
-                          <td><img src="images/avatar_images/1.png"class="img img-responsive img-circle miniCircle"></td>
-                          <td>Ameen</td>
-                          <td>Android Developer</td>
-                          <td> <a href="#" data-placement="right"data-toggle="tooltip" title="Deepak, Vishal, Ameen, Virendra, Rajesh, Monika, Sonee">32</a></td>
-                          <td> <a href="topRecognitionDetails.php">View</a></td>
+                          <td><img src="<?php echo $allrecognizeemployeearr['data'][$i]['user_image']; ?>"class="img img-responsive img-circle miniCircle" onerror="this.src='images/user.png'"></td>
+                          <td><?php echo $allrecognizeemployeearr['data'][$i]['username']; ?></td>
+                          <td><?php echo $allrecognizeemployeearr['data'][$i]['designation']; ?></td>
+                          <td> <!--<a href="#" data-placement="right" data-toggle="tooltip" title="Deepak, Vishal, Ameen, Virendra, Rajesh, Monika, Sonee">--><?php echo $allrecognizeemployeearr['data'][$i]['totalRecognition']; ?><!--</a>--></td>
+                          <td> <a href="topRecognitionDetails.php?employeeid=<?php echo $allrecognizeemployeearr['data'][$i]['recognizedUser']; ?>">View</a></td>
                        </tr>
-						<tr>
-                          <td><img src="images/avatar_images/2.png"class="img img-responsive img-circle miniCircle"></td>
-                          <td>Deepak</td>
-                          <td>iOS Developer</td>
-                          <td> <a href="#"data-placement="right" data-toggle="tooltip" title="Deepak, Vishal, Ameen">22</a></td>
-                          <td> <a href="topRecognitionDetails.php">View</a></td>
-                       </tr>
-						 <tr>
-                          <td><img src="images/avatar_images/3.png"class="img img-responsive img-circle miniCircle"></td>
-                          <td>Rahul</td>
-                          <td>Android Developer</td>
-                          <td> <a href="#"data-placement="right" data-toggle="tooltip" title=" Rajesh, Monika, Sonee">20</a></td>
-                          <td> <a href="topRecognitionDetails.php">View</a></td>
-                      </tr>
-                       
-                       
+						<?php
+						}
+						?>
                       </tbody>
                     </table>
 <style>
