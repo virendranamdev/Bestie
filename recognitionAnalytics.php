@@ -9,9 +9,12 @@ $empId = $_SESSION['user_unique_id'];
 $user_type = $_SESSION['user_type'];
 
 require_once('Class_Library/class_getDepartment.php');
-$recogobj = new Department();
-$department1 = $recogobj->getDepartment($clientId);
+$departmentobj = new Department();
+$department1 = $departmentobj->getDepartment($clientId);
 $department = json_decode($department1, true);
+
+$locationjson = $departmentobj->getLocation($clientId);
+$locationarray = json_decode($locationjson, true);
 ?>
 <script src="js/analytic/analyticRecognizeGraph.js"></script>
 <script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
@@ -24,11 +27,15 @@ $department = json_decode($department1, true);
         var rtodte = $("#startdate").val();
 //alert("this is enddate-"+rtodte);
 // console.log("this is fromdate-"+rtodte);
-        var rdept;
-        showRecognizeUserGraph(rfromdte, rtodte, rdept, '<?php echo SITE; ?>');
-        showRecognizeTopSenderGraph(rfromdte, rtodte, rdept, '<?php echo SITE; ?>');
-          showRecognizeTopReceiverGraph(rfromdte, rtodte, rdept, '<?php echo SITE; ?>');
-            showRecognizeTopBadgesGraph(rfromdte, rtodte, rdept, '<?php echo SITE; ?>');
+        var rdept = 'All';
+		var rlocation = 'All';
+		//alert("from"+rfromdte);
+		//alert("rtodte"+rtodte);
+		//alert("rtodte"+rdept);
+        showRecognizeUserGraph(rfromdte, rtodte, rdept, rlocation, '<?php echo SITE; ?>');
+        showRecognizeTopSenderGraph(rfromdte, rtodte, rdept,rlocation, '<?php echo SITE; ?>');
+          showRecognizeTopReceiverGraph(rfromdte, rtodte, rdept,rlocation, '<?php echo SITE; ?>');
+            showRecognizeTopBadgesGraph(rfromdte, rtodte, rdept,rlocation, '<?php echo SITE; ?>');
     });
 
     function getrecognizedata()
@@ -36,7 +43,14 @@ $department = json_decode($department1, true);
         var rfromdte = $("#recognizefromDate").val();
         var rtodte = $("#recognizetoDate").val();
         var rdept = $("#rdept").val();
-
+		var rlocation = $("#rlocation").val();
+		
+		//alert("from"+ rfromdte);
+		//alert("rtodte"+ rtodte);
+		//alert("rdept"+ rdept);
+		
+		//alert(rlocation);
+		
         if (rfromdte == "")
         {
             alert("Please Select From Date");
@@ -51,7 +65,7 @@ $department = json_decode($department1, true);
         }
         else
         {
-            showRecognizeUserGraph(rfromdte, rtodte, rdept, '<?php echo SITE; ?>');
+            showRecognizeUserGraph(rfromdte, rtodte, rdept, rlocation, '<?php echo SITE; ?>');
         }
     }
     
@@ -61,6 +75,7 @@ $department = json_decode($department1, true);
         var rfromdte1 = $("#fromDate1").val();
         var rtodte1 = $("#toDate1").val();
         var rdept1 = $("#sel1").val();
+        var rlocation1 = $("#rlocation1").val();
 
         if (rfromdte1 == "")
         {
@@ -76,7 +91,7 @@ $department = json_decode($department1, true);
         }
         else
         {
-            showRecognizeTopSenderGraph(rfromdte1, rtodte1, rdept1, '<?php echo SITE; ?>');
+            showRecognizeTopSenderGraph(rfromdte1, rtodte1, rdept1, rlocation1, '<?php echo SITE; ?>');
         }
     }
     
@@ -87,6 +102,7 @@ $department = json_decode($department1, true);
         var rfromdte2 = $("#fromDate2").val();
         var rtodte2 = $("#toDate2").val();
         var rdept2 = $("#sel2").val();
+         var rlocation2 = $("#rlocation2").val();
 
         if (rfromdte2 == "")
         {
@@ -102,7 +118,7 @@ $department = json_decode($department1, true);
         }
         else
         {
-            showRecognizeTopReceiverGraph(rfromdte2, rtodte2, rdept2, '<?php echo SITE; ?>');
+            showRecognizeTopReceiverGraph(rfromdte2, rtodte2, rdept2,rlocation2, '<?php echo SITE; ?>');
         }
     }
     
@@ -112,6 +128,7 @@ $department = json_decode($department1, true);
         var rfromdte3 = $("#fromDate3").val();
         var rtodte3 = $("#toDate3").val();
         var rdept3 = $("#sel3").val();
+         var rlocation3 = $("#rlocation3").val();
 
         if (rfromdte3 == "")
         {
@@ -127,7 +144,7 @@ $department = json_decode($department1, true);
         }
         else
         {
-            showRecognizeTopBadgesGraph(rfromdte3, rtodte3, rdept3, '<?php echo SITE; ?>');
+            showRecognizeTopBadgesGraph(rfromdte3, rtodte3, rdept3, rlocation3,'<?php echo SITE; ?>');
         }
     }
 </script>
@@ -157,11 +174,11 @@ $department = json_decode($department1, true);
                             <input type="hidden" name="enddate" id="enddate" value="<?php echo date('Y-m-d', strtotime("-7 days")); ?>">
                             <!--<form id="demo-form2" data-parsley-validate class="form-inline">-->
                             <div class="row">
-                                <div class="form-group col-md-3">
+                                <div class="form-group col-md-2">
                                     <label for="usr">From:</label>
                                     <input type="date" class="form-control" id="recognizefromDate" size="20" placeholder="mm/dd/yyyy" name="fromDate"/>
                                 </div>&nbsp;&nbsp;&nbsp;&nbsp;
-                                <div class="form-group col-md-3">
+                                <div class="form-group col-md-2">
                                     <label for="pwd">To:&nbsp;&nbsp;</label>
                                     <input type="date"class="form-control" id="recognizetoDate" size="20" placeholder="mm/dd/yyyy" name="toDate"/>
                                 </div>&nbsp;&nbsp;&nbsp;&nbsp;
@@ -169,7 +186,7 @@ $department = json_decode($department1, true);
                                 <div class="form-group col-md-3">
                                     <label for="sel1">Select Department:</label>
                                     <select class="form-control" id="rdept">
-                                        <option value = "" selected="">All</option>
+                                        <option value = "All" selected="">All</option>
                                         <?php
                                         $count = count($department);
                                         for ($i = 0; $i < $count; $i++) {
@@ -178,7 +195,22 @@ $department = json_decode($department1, true);
                                         ?>
                                     </select>
                                 </div>&nbsp;&nbsp;&nbsp;&nbsp;
-                                <div class="col-md-3">
+								
+								 <div class="form-group col-md-3">
+                                    <label for="sel1">Select Location:</label>
+                                    <select class="form-control" id="rlocation">
+                                        <option value = "All" selected="">All</option>
+                                        <?php
+                                        $countloc = count($locationarray);
+                                        for ($i = 0; $i < $countloc; $i++) {
+                                            echo '<option value="' . $locationarray[$i]['location'] . '">' . $locationarray[$i]['location'] . '</option>';
+                                        }
+                                        ?>
+                                    </select>
+                                </div>&nbsp;&nbsp;&nbsp;&nbsp;
+								
+                                <div class="col-md-2">
+								
                                     <input type="submit" id="recognizeuser" onclick="getrecognizedata();" class="btn btn-primary" style="margin-top:5px" value="Submit" />
                                 </div>
                             </div>                
@@ -213,20 +245,19 @@ $department = json_decode($department1, true);
                         <div class="smallDivRecognition">
                             <!--                            <form class="form-inline">-->
 							<div class="row">
-                            <div class="form-group col-sm-6 col-lg-6 col-md-6 col-xs-12">
+                            <div class="form-group col-sm-4 col-lg-4 col-md-4 col-xs-4">
                                 <label for="usr">From:</label>
                                 <input type="date"class="form-control" id="fromDate1" name="input1" size="20" placeholder="mm/dd/yyyy"/>
                             </div>
-                            <div class="form-group col-sm-6 col-lg-6 col-md-6 col-xs-12">
+                            <div class="form-group col-sm-4 col-lg-4 col-md-4 col-xs-4">
                                 <label for="pwd">To:&nbsp;&nbsp;</label>
                                 <input type="date"class="form-control" id="toDate1" name="input2" size="20" placeholder="mm/dd/yyyy"/>
                             </div>
-                            </div>
-							<div class="row">
-                            <div class="form-group col-sm-6 col-lg-6 col-md-6 col-xs-12">
+                                                            
+                                              <div class="form-group col-sm-4 col-lg-4 col-md-4 col-xs-4">
                                 <label for="sel1">Select Department:</label>
                                 <select class="form-control" id="sel1">
-                                    <option value = "" selected="">All</option>
+                                    <option value = "All" selected="">All</option>
                                     <?php
                                     $count = count($department);
                                     for ($i = 0; $i < $count; $i++) {
@@ -234,7 +265,24 @@ $department = json_decode($department1, true);
                                     }
                                     ?>
                                 </select>
-                            </div><div class=" col-sm-6 col-lg-6 col-md-6 col-xs-12"><button type="submit" class="btn btn-primary"onclick="getrecognizetopsender();"style="margin-top:10%;" >Submit</button></div>
+                            </div>
+                            </div>
+			
+                            <div class="row">
+                             <div class="form-group col-md-6">
+                                    <label for="sel1">Select Location:</label>
+                                    <select class="form-control" id="rlocation1">
+                                        <option value = "All" selected="">All</option>
+                                        <?php
+                                        $countloc = count($locationarray);
+                                        for ($i = 0; $i < $countloc; $i++) {
+                                            echo '<option value="' . $locationarray[$i]['location'] . '">' . $locationarray[$i]['location'] . '</option>';
+                                        }
+                                        ?>
+                                    </select>
+                                </div>                         
+                                                
+                                                            <div class=" col-sm-6 col-lg-6 col-md-6 col-xs-12"><button type="submit" class="btn btn-primary"onclick="getrecognizetopsender();"style="margin-top:10%;" >Submit</button></div>
                             </div>
 							<hr>
 							<!--</form>-->
@@ -265,20 +313,18 @@ $department = json_decode($department1, true);
                         <div class="smallDivRecognition">
                             <!--                            <form class="form-inline">-->
                             <div class="row">
-                            <div class="form-group col-sm-6 col-lg-6 col-md-6 col-xs-12">
+                            <div class="form-group col-sm-4 col-lg-4 col-md-4 col-xs-4">
                                 <label for="usr">From:</label>
                                 <input type="date"class="form-control" id="fromDate2" name="input1" size="20" placeholder="mm/dd/yyyy"/>
                             </div>
-                            <div class="form-group col-sm-6 col-lg-6 col-md-6 col-xs-12">
+                            <div class="form-group col-sm-4 col-lg-4 col-md-4 col-xs-4">
                                 <label for="pwd">To:&nbsp;&nbsp;</label>
                                 <input type="date"class="form-control" id="toDate2" name="input2" size="20" placeholder="mm/dd/yyyy"/>
                             </div>
-                            </div>
-							<div class="row">
-                            <div class="form-group col-sm-6 col-lg-6 col-md-6 col-xs-12">
+                                 <div class="form-group col-sm-4 col-lg-4 col-md-4 col-xs-4">
                                 <label for="sel1">Select Department:</label>
                                 <select class="form-control" id="sel2">
-                                    <option value = "" selected="">All</option>
+                                    <option value = "All" selected="">All</option>
                                     <?php
                                     $count = count($department);
                                     for ($i = 0; $i < $count; $i++) {
@@ -286,7 +332,23 @@ $department = json_decode($department1, true);
                                     }
                                     ?>
                                 </select>
-                            </div><div class=" col-sm-6 col-lg-6 col-md-6 col-xs-12"><button type="submit" class="btn btn-primary"style="margin-top:10%" onclick="getrecognizetopreceiver();" >Submit</button></div>
+                            </div>
+                            </div>
+				<div class="row">
+                                                              <div class="form-group col-md-6">
+                                    <label for="sel1">Select Location:</label>
+                                    <select class="form-control" id="rlocation2">
+                                        <option value = "All" selected="">All</option>
+                                        <?php
+                                        $countloc = count($locationarray);
+                                        for ($i = 0; $i < $countloc; $i++) {
+                                            echo '<option value="' . $locationarray[$i]['location'] . '">' . $locationarray[$i]['location'] . '</option>';
+                                        }
+                                        ?>
+                                    </select>
+                                </div>                             
+                                                       
+                           <div class=" col-sm-6 col-lg-6 col-md-6 col-xs-12"><button type="submit" class="btn btn-primary"style="margin-top:10%" onclick="getrecognizetopreceiver();" >Submit</button></div>
 							</div><hr>
                             <!--</form>-->
 
@@ -329,10 +391,10 @@ $department = json_decode($department1, true);
                                 <input type="date"class="form-control" id="toDate3" name="input2" size="20" placeholder="mm/dd/yyyy"/>
                             </div>
 
-                            <div class="form-group col-sm-3 col-lg-3 col-md-3 col-xs-12">
+                            <div class="form-group col-sm-2 col-lg-2 col-md-2 col-xs-2">
                                 <label for="sel1">Select Department:</label>
                                 <select class="form-control" id="sel3">
-                                    <option value = "" selected="">All</option>
+                                    <option value = "All" selected="">All</option>
                                     <?php
                                     $count = count($department);
                                     for ($i = 0; $i < $count; $i++) {
@@ -341,9 +403,22 @@ $department = json_decode($department1, true);
                                     ?>
                                 </select>
                             </div>
-							
-                            <div class="form-group col-sm-3 col-lg-3 col-md-3 col-xs-12">
-							<button type="submit" class="btn btn-primary"style="margin-top:10%" onclick="getrecognizetopbadges();" >Submit</button>
+				
+                               <div class="form-group col-sm-2 col-lg-2 col-md-2 col-xs-2">
+                                 <label for="sel1">Select Location:</label>
+                                    <select class="form-control" id="rlocation3">
+                                        <option value = "All" selected="">All</option>
+                                        <?php
+                                        $countloc = count($locationarray);
+                                        for ($i = 0; $i < $countloc; $i++) {
+                                            echo '<option value="' . $locationarray[$i]['location'] . '">' . $locationarray[$i]['location'] . '</option>';
+                                        }
+                                        ?>
+                                    </select>
+                            </div>                              
+                                                            
+                            <div class="form-group col-sm-2 col-lg-2 col-md-2 col-xs-2">
+							<button type="submit" class="btn btn-primary"style="margin-top:17%" onclick="getrecognizetopbadges();" >Submit</button>
 							</div>
 							</div><hr>
                             <!--</form>-->

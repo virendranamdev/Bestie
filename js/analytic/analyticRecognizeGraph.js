@@ -1,14 +1,15 @@
-function showRecognizeUserGraph(startdate,enddate,dept, SITE)
+function showRecognizeUserGraph(startdate,enddate,dept, rlocation , SITE)
 {
 
     var postData =
             {
                 "startdate":startdate,
                 "enddate": enddate,
-                  "department": dept
+                  "department": dept,
+				  "location": rlocation
             }
     var dataString = JSON.stringify(postData);
-  //alert(dataString);
+ //alert(dataString);
 
     $.ajax({
         type: "post",
@@ -92,14 +93,15 @@ function recognizeUserGraph(resdata) {
 
 /******************************** get top sender ********************************************/
 
-function showRecognizeTopSenderGraph(startdate,enddate,dept, SITE)
+function showRecognizeTopSenderGraph(startdate,enddate,dept,location, SITE)
 {
 
     var postData =
             {
                 "startdate":startdate,
                 "enddate": enddate,
-                  "department": dept
+                  "department": dept,
+                  "location":location
             }
     var dataString = JSON.stringify(postData);
   //alert(dataString);
@@ -142,14 +144,15 @@ function showRecognizeTopSenderGraph(startdate,enddate,dept, SITE)
     });
 }
 ///*********************************************** end login analytic graph **********************************/
-function showRecognizeTopReceiverGraph(startdate,enddate,dept, SITE)
+function showRecognizeTopReceiverGraph(startdate,enddate,dept,location, SITE)
 {
 
     var postData =
             {
                 "startdate":startdate,
                 "enddate": enddate,
-                  "department": dept
+                  "department": dept,
+                  "location":location
             }
     var dataString = JSON.stringify(postData);
   //alert(dataString);
@@ -163,7 +166,7 @@ function showRecognizeTopReceiverGraph(startdate,enddate,dept, SITE)
         success: function (response) {
             var resdata = response;
          // alert(resdata);
-            //console.log(resdata);   
+            console.log(resdata);   
 
 
           document.getElementById("dynamicdatatopreceiver").innerHTML = resdata;
@@ -192,14 +195,15 @@ function showRecognizeTopReceiverGraph(startdate,enddate,dept, SITE)
     });
 }
 
-function showRecognizeTopBadgesGraph(startdate,enddate,dept, SITE)
+function showRecognizeTopBadgesGraph(startdate,enddate,dept,location, SITE)
 {
 
     var postData =
             {
                 "startdate":startdate,
                 "enddate": enddate,
-                  "department": dept
+                  "department": dept,
+                  "location":location
             }
     var dataString = JSON.stringify(postData);
   //alert(dataString);

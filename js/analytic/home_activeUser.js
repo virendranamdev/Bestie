@@ -81,12 +81,16 @@ function homeActiveUserGraph(resdata) {
                 text: 'Users'
             }
         },
+          tooltip: {
+        pointFormat: '<span style="color:{series.color}">{series.name}</span>: {point.y:,.0f}',
+        split: true
+    },
         plotOptions: {
             line: {
                 dataLabels: {
                     enabled: true
                 },
-                enableMouseTracking: false
+                enableMouseTracking: true
             }
         },
         series: [{

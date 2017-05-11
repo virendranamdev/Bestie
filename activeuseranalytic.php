@@ -12,6 +12,10 @@ require_once('Class_Library/class_getDepartment.php');
 $recogobj = new Department();
 $department1 = $recogobj->getDepartment($clientId);
 $department = json_decode($department1, true);
+
+
+$locationjson = $recogobj->getLocation($clientId);
+$locationarray = json_decode($locationjson, true);
 ?>
 <script src="js/analytic/analyticActiveUserGraph.js"></script>
 <script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
@@ -26,14 +30,15 @@ $department = json_decode($department1, true);
 //alert("this is enddate-"+rtodte);
  //console.log("this is fromdate-"+rtodte);
         var rdept = 'All';
-        analyticActiveUserGraph(rfromdte, rtodte, rdept, '<?php echo SITE; ?>');
+       // var rlocation = 'All';
+         analyticActiveUserGraph(rfromdte, rtodte, rdept, '<?php echo SITE; ?>');
          showActiveUserGraph(rfromdte, rtodte, rdept, '<?php echo SITE; ?>');
        
     });
 
 
 	function getActiveuserdata()
-    {
+       {
 	//	alert("hello iam here");
 		
         var  startday= document.getElementById("fromDate").value;
@@ -66,8 +71,6 @@ $department = json_decode($department1, true);
         showActiveUserGraph(startday, enddate, department, '<?php echo SITE; ?>');
     
     }
-	
-
 
 
     function getActiveuserdepartment()
@@ -95,10 +98,7 @@ $department = json_decode($department1, true);
         }
     }
     
-    
-   	
-
-    
+ 
    
 </script>
 <div class="right_col" role="main">
@@ -137,7 +137,7 @@ $department = json_decode($department1, true);
                                     <input type="date"class="form-control" id="toDate" size="20" placeholder="mm/dd/yyyy" name="toDate"/>
                                 </div>&nbsp;&nbsp;&nbsp;&nbsp;
 
-                                <div class="form-group col-md-3">
+                                <div class="form-group col-md-2">
                                     <label for="sel1">Select Department:</label>
                                     <select class="form-control" id="dept">
                                         <option value = "All" selected="">All</option>
@@ -149,7 +149,20 @@ $department = json_decode($department1, true);
                                         ?>
                                     </select>
                                 </div>&nbsp;&nbsp;&nbsp;&nbsp;
-                                <div class="col-md-3">
+                                
+                                 <div class="form-group col-md-2">
+                                    <label for="sel1">Select Location:</label>
+                                    <select class="form-control" id="rlocation">
+                                        <option value = "All" selected="">All</option>
+                                        <?php
+                                        $countloc = count($locationarray);
+                                        for ($i = 0; $i < $countloc; $i++) {
+                                            echo '<option value="' . $locationarray[$i]['location'] . '">' . $locationarray[$i]['location'] . '</option>';
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
                                     <input type="submit" id="recognizeuser" onclick="getActiveuserdata();" class="btn btn-primary" style="margin-top:5px" value="Submit" />
                                 </div>
                             </div>                

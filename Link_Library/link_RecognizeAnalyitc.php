@@ -6,9 +6,11 @@ $obj = new RecognizeAnalytic();
 if (!empty($_POST["mydata"])) 
     {
    $jsonArr = $_POST["mydata"];
-  //  echo $jsonArr;
+    
    $data = json_decode($jsonArr, true);
   
+ // print_r($data);
+  //die;
     if (!empty($data)) {
         $client = 'CO-28';
 
@@ -18,8 +20,9 @@ if (!empty($_POST["mydata"]))
         $enddte1 = $data['enddate'];
         $enddte = date("Y-m-d H:i:s", strtotime($enddte1));
          $department = $data['department'];
+		 $location = $data['location'];
      
-        $result = $obj->getRecognizedUser($client, $fromdt, $enddte,$department);
+        $result = $obj->getRecognizedUser($client, $fromdt, $enddte,$department , $location);
 
        
  echo $jsonres = $result;

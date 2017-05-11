@@ -18,8 +18,9 @@ if (!empty($_POST["mydata"]))
         $enddte1 = $data['enddate'];
         $enddte = date("Y-m-d H:i:s", strtotime($enddte1));
          $department = $data['department'];
+          $location = $data['location'];
      
-        $result = $obj->getRecognizedTopBades($client, $fromdt, $enddte,$department);
+        $result = $obj->getRecognizedTopBades($client, $fromdt, $enddte,$department,$location);
          $res = json_decode($result,true);
          $count = count($res);
          //echo "<pre>";
@@ -49,8 +50,8 @@ if (!empty($_POST["mydata"]))
         }
  else {
          echo '<div class="row">
-                                    <div class="col-xs-12 col-sm-12 col-md-2 col-lg-2"> 
-                                    <center><h3>No Data Found</h3></center>
+                                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12"> 
+                                    <center><h4>No Data Found</h4></center>
                                     </div></div>';   
 }
  
