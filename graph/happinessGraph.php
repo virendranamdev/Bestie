@@ -4,16 +4,7 @@
         <meta http-equiv="content-type" content="text/html; charset=UTF-8">
         <meta name="robots" content="noindex, nofollow">
         <meta name="googlebot" content="noindex, nofollow">
-
-
-
-
-
-
-
-
-
-
+		
         <script type="text/javascript" src="/js/lib/dummy.js"></script>
 
 
@@ -123,7 +114,57 @@
     </head>
 
     <body>
-        <div id="cloud"></div>
+	<div id="canvas">
+        <div id="cloud" class="movable_div"></div>
+	</div>
+		
+		<!--------------- image capture ------->
+							<div class="form-group">
+							<div id="design">
+							<div id="controls">
+							<input type="button" value="Download" id="capture" /><br /><br />	
+							</div>
+							</div>
+							</div>
+		<!--------------- image capture ------->
+		
+		<script type="text/javascript">	
+/*************************** download image *************************/
+		$(function(){
+			
+		$('#capture').click(function(){
+				//get the div content
+				div_content = document.querySelector("#canvas");
+				
+				//make it as html5 canvas
+				html2canvas(div_content).then(function(canvas) {
+					//alert('ho');
+					//change the canvas to jpeg image
+					data = canvas.toDataURL('image/jpeg');
+					
+					//then call a super hero php to save the image
+					save_img(data,'wordcloud.jpeg');
+				});
+			});			
+		});
+		
+		
+function save_img(data,imgname){
+var img = document.createElement('img');
+img.src = data;
+var a = document.createElement('a');
+//a.setAttribute("download", "wordcloud.jpeg");
+a.setAttribute("download", imgname);
+a.setAttribute("href", data);
+a.appendChild(img);
+var w = open();
+w.document.title = 'Download Image';
+w.document.body.innerHTML = 'Click On Image for Download';
+w.document.body.appendChild(a);
+}
+
+/******************************** / download image *********************/		
+</script>
 
 
     </body>

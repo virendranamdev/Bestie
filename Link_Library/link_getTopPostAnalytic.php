@@ -1,5 +1,4 @@
 <?php
-
 require_once('../Class_Library/class_getTopPostAnalytic.php');
 $obj = new TopPostAnalytic();
 
@@ -18,8 +17,9 @@ if (!empty($_POST["mydata"]))
         $enddte1 = $data['enddate'];
         $enddte = date("Y-m-d H:i:s", strtotime($enddte1));
          $department = $data['department'];
+          $location = $data['location'];
      
-        $result = $obj->getTopPostForAnalytic($client, $fromdt, $enddte,$department);
+        $result = $obj->getTopPostForAnalytic($client, $fromdt, $enddte,$department,$location);
          $data = json_decode($result,true);
          $count = count($data);
 //           echo "<pre>";

@@ -12,6 +12,9 @@ require_once('Class_Library/class_getDepartment.php');
 $recogobj = new Department();
 $department1 = $recogobj->getDepartment($clientId);
 $department = json_decode($department1, true);
+
+$locationjson = $recogobj->getLocation($clientId);
+$locationarray = json_decode($locationjson, true);
 ?>
 <script src="js/analytic/analyticTopPostGraph.js"></script>
 <script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
@@ -26,7 +29,8 @@ $department = json_decode($department1, true);
 //alert("this is enddate-"+rtodte);
  //console.log("this is fromdate-"+rtodte);
         var rdept = 'All';
-        showAnalyticTopPost(rfromdte, rtodte, rdept, '<?php echo SITE; ?>');
+        var location = 'All';
+        showAnalyticTopPost(rfromdte, rtodte, rdept,location, '<?php echo SITE; ?>');
        
     });
 
@@ -37,11 +41,8 @@ $department = json_decode($department1, true);
         var  startday= document.getElementById("fromDate").value;
 		var  enddate= document.getElementById("toDate").value;
 		var  department= document.getElementById("dept").value;
+		var  location = document.getElementById("rlocation").value;
 		
-		//alert("from" + startday);
-		//alert("end"+ enddate);
-		//      alert("department"+ department);
-
         if (startday == "")
 		{
         window.alert("Please select From date.");
@@ -61,7 +62,7 @@ $department = json_decode($department1, true);
 			return false;
 		}
 		
-        showAnalyticTopPost(startday, enddate, department, '<?php echo SITE; ?>');
+        showAnalyticTopPost(startday, enddate, department, location,'<?php echo SITE; ?>');
     
     }
 	
@@ -103,7 +104,7 @@ $department = json_decode($department1, true);
                                     <input type="date"class="form-control" id="toDate" size="20" placeholder="mm/dd/yyyy" name="toDate"/>
                                 </div>&nbsp;&nbsp;&nbsp;&nbsp;
 
-                                <div class="form-group col-md-3">
+                                <div class="form-group col-md-2">
                                     <label for="sel1">Select Department:</label>
                                     <select class="form-control" id="dept">
                                         <option value = "All" selected="">All</option>
@@ -115,7 +116,20 @@ $department = json_decode($department1, true);
                                         ?>
                                     </select>
                                 </div>&nbsp;&nbsp;&nbsp;&nbsp;
-                                <div class="col-md-3">
+                                 <div class="form-group col-md-2">
+                                    <label for="sel1">Select Location:</label>
+                                    <select class="form-control" id="rlocation">
+                                        <option value = "All" selected="">All</option>
+                                        <?php
+                                        $countloc = count($locationarray);
+                                        for ($i = 0; $i < $countloc; $i++) {
+                                            echo '<option value="' . $locationarray[$i]['location'] . '">' . $locationarray[$i]['location'] . '</option>';
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+                                
+                                <div class="col-md-2">
                                     <input type="submit" id="recognizeuser" onclick="getActiveuserdata();" class="btn btn-primary" style="margin-top:5px" value="Submit" />
                                 </div>
                             </div>                

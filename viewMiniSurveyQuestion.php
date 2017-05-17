@@ -7,6 +7,9 @@ session_start();
 $clientId = $_SESSION['client_id'];
 $sid = $_GET['sid'];
 
+
+session_start();
+$cid = $_SESSION['client_id'];
 require_once('Class_Library/class_MiniSurvey.php');
 $surveyObj = new MiniSurvey();
 $data1 = $surveyObj->surveyQuestionDetails($sid, $cid);

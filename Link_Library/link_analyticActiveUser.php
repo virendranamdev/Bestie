@@ -16,9 +16,9 @@ if (!empty($_POST["mydata"])) {
         //echo "statrt date-".$fromdt;
         $enddte1 = $data['enddate'];
         $enddte = date("Y-m-d H:i:s", strtotime($enddte1));
-       $dept = $data['department'];
+       $location = $data['location'];
         // echo "end date-".$enddte;
-        $result = $obj->graphAnalyticActiveUser($client, $fromdt, $enddte,$dept);
+        $result = $obj->graphAnalyticActiveUser($client, $fromdt, $enddte,$location);
 
         $res = json_decode($result, true);
           echo $jsonres = json_encode($res);

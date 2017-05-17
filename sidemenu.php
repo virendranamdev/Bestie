@@ -35,8 +35,10 @@
 
                 <li><a href="wall.php"><i class="fa fa-table"></i> Feedback Wall </a></li>
 
-                <li><a href="happiness.php"><i class="fa fa-smile-o"></i> Happiness Index </a></li>
-
+                <!--<li><a href="happiness.php"><i class="fa fa-smile-o"></i> Happiness Index </a></li>-->
+				
+				<li><a href="happiness-details.php"><i class="fa fa-smile-o"></i> Happiness Index </a></li>
+				
                  <li><a href="mini-survey.php"><i class="fa fa-line-chart"></i> Mini Survey</a></li>
                  <li><a href="story.php"><i class="fa fa-book"></i> Colleague Stories</a></li>
 
@@ -103,18 +105,18 @@
 
             <!-- /menu footer buttons -->
             <div class="sidebar-footer hidden-small">
-              <a data-toggle="tooltip" data-placement="top" title="Settings">
+              <a data-toggle="tooltip" data-placement="top" title="">
                 <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
               </a>
-              <a data-toggle="tooltip" data-placement="top" title="FullScreen">
+              <a data-toggle="tooltip" data-placement="top" title="">
                 <span class="glyphicon glyphicon-fullscreen" aria-hidden="true"></span>
               </a>
-              <a data-toggle="tooltip" data-placement="top" title="Lock">
+              <a data-toggle="tooltip" data-placement="top" title="">
                 <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
               </a>
-              <a data-toggle="tooltip" data-placement="top" title="Logout" href="login.html">
+                <a data-toggle="tooltip" data-placement="top" title="Logout" href="logout.php">
                 <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
-              </a>
+              </a> 
             </div>
             <!-- /menu footer buttons -->
           </div>

@@ -11,61 +11,331 @@ $department = new Department();
 
 $clientId = $_SESSION['client_id'];
 $empId = $_SESSION['user_unique_id'];
-$surveyId = $_GET['happinessQuestion'];
+//$surveyId = $_GET['happinessQuestion'];
 
 $getalldepartment = $department->getDepartment($clientId);
 $alldepartmentarray = json_decode($getalldepartment , true);
+
+$getalllocation = $department->getLocation($clientId);
+$alllocationarray = json_decode($getalllocation , true);
+
 ?>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+<!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+-->
+
+<!-------------------- for capture image ---------------->
+<script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+<script src="js/analytic/downloadanalyticimage.js"></script>
+<!------------------------ / for capture image ---------->
+
+<!--<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>-->
+
+<script src="vendors/jquery/dist/jquery.min.js"></script>
+<script src="vendors/bootstrap/dist/js/bootstrap.min.js"></script>
+
+<!--<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+--><!---------------------------------------------------->
+<!--<script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+-->
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/redmond/jquery-ui.css">
+<script src="http://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+<script>
+
+  $(function() {
+
+    $( "#fromDate" ).datepicker();
+	 $( "#toDate" ).datepicker();
+
+  });
+
+  </script>
+
+
+
+<!---------------------------------------------------->
+
 <script>
     $(document).ready(function () {
 
-        var enddate = document.getElementById("startdate").value;
         var startday = document.getElementById("lastday").value;
+		var enddate = startday;
+		//alert('start '+startday);
+		//alert('enddate '+enddate);
 		var clientid = $("#clientId").val();
 		var department = 'All';
+		var location = 'All';
 		var extraHappinessVal = 10;
-        //alert(clientid);
-        //alert("start"+startday);
+		var happinessVal = 5;
+		var neutralVal = 0;
+		var sadVal = -5;
+		var imgurl = "<?php echo SITE; ?>";
+			
+		/********************************** extra happy *******************/
 		
 		var postData =
                     {
 						"clientid": clientid,
+						"imgurl": imgurl,
                         "enddate": enddate,
                         "startday": startday,
                         "department": department,
+						"location": location,
 						"HappinessVal": extraHappinessVal
                     }
             var dataString = JSON.stringify(postData);
-			alert(dataString);
-			//alert('<?php echo SITE; ?>');
-			
 			$.ajax({
                 type: "POST",
-                //dataType: "json",
-                //contentType: "application/json; charset=utf-8",
-                url: "<?php echo SITE; ?>happinessindexfabulous.php",
+                url: "<?php echo SITE; ?>happinessIndexcustomgraph.php",
                 data: {"mydata": dataString},
                 success: function (response) {
                     var resdata = response;
-					alert(resdata);
+					//alert(resdata);
+					 var word_list = JSON.parse(resdata);
+					 $("#wordcloud").jQCloud(word_list);
 				}
 			});
+			
+			/**************************** / extra happy *********************/
+			
+			/************************ happy *************************************/
+			var postDatahappy =
+                    {
+						"clientid": clientid,
+						"imgurl": imgurl,
+                        "enddate": enddate,
+                        "startday": startday,
+                        "department": department,
+						"location": location,
+						"HappinessVal": happinessVal
+                    }
+            var dataStringhappy = JSON.stringify(postDatahappy);
+			$.ajax({
+                type: "POST",
+                url: "<?php echo SITE; ?>happinessIndexcustomgraph.php",
+                data: {"mydata": dataStringhappy},
+                success: function (response) {
+                    var resdatahappy = response;
+					//alert(resdatahappy);
+					var word_list2 = JSON.parse(resdatahappy);
+					 $("#wordcloud2").jQCloud(word_list2);
+				}
+			});
+			/*********************** / happy ************************************/
+			
+			/************************ normal *************************************/
+			var postDatanatural =
+                    {
+						"clientid": clientid,
+						"imgurl": imgurl,
+                        "enddate": enddate,
+                        "startday": startday,
+                        "department": department,
+						"location": location,
+						"HappinessVal": neutralVal
+                    }
+            var dataStringnatural = JSON.stringify(postDatanatural);
+			$.ajax({
+                type: "POST",
+                url: "<?php echo SITE; ?>happinessIndexcustomgraph.php",
+                data: {"mydata": dataStringnatural},
+                success: function (response) {
+                    var resdatanatural = response;
+					//alert(resdatanatural);
+					var word_list3 = JSON.parse(resdatanatural);
+					$("#wordcloud3").jQCloud(word_list3);
+				}
+			});
+			/*********************** / normak ************************************/
+			
+			/************************ sad *************************************/
+			var postDataSad =
+                    {
+						"clientid": clientid,
+						"imgurl": imgurl,
+                        "enddate": enddate,
+                        "startday": startday,
+                        "department": department,
+						"location": location,
+						"HappinessVal": sadVal
+                    }
+            var dataStringSad = JSON.stringify(postDataSad);
+			$.ajax({
+                type: "POST",
+                url: "<?php echo SITE; ?>happinessIndexcustomgraph.php",
+                data: {"mydata": dataStringSad},
+                success: function (response) {
+                    var resdatasad = response;
+					//alert(resdatasad);
+					var word_list4 = JSON.parse(resdatasad);
+					$("#wordcloud4").jQCloud(word_list4);
+				}
+			});
+			/*********************** / sad ************************************/
 		
-		
-		
-       // showActiveUserGraph(startday, enddate, department, '<?php echo SITE; ?>');
-       // showHappinessIndexGraph(startday, enddate, department, '<?php echo SITE; ?>');
-        /**********************************/
       
     });
 </script>
 
+<script>
+function happinessindexcustomgraph()
+    {
+		//alert("hello");
+		var startday= document.getElementById("fromDate").value;
+		var enddate= document.getElementById("toDate").value;
+		
+		//alert('start '+startday);
+		//alert('enddate '+enddate);
+		
+		var department= document.getElementById("alldepartments").value;
+		var location = document.getElementById("locationname").value;
+		if (startday == "")
+		{
+        window.alert("Please select From date.");
+        document.getElementById("fromDate").focus();
+        return false;
+		}
+		if (enddate == "")
+		{
+			window.alert("Please select To date.");
+			document.getElementById("toDate").focus();
+			return false;
+		}
+		if (department == "")
+		{
+			window.alert("Please select department.");
+			document.getElementById("alldepartments").focus();
+			return false;
+		}
+		
+		var clientid = $("#clientId").val();
+		var extraHappinessVal = 10;
+		var happinessVal = 5;
+		var neutralVal = 0;
+		var sadVal = -5;
+		var imgurl = "<?php echo SITE; ?>";
+		
+		/********************************** extra happy *******************/
+		
+		var postData =
+                    {
+						"clientid": clientid,
+						"imgurl": imgurl,
+                        "enddate": enddate,
+                        "startday": startday,
+                        "department": department,
+						"location": location,
+						"HappinessVal": extraHappinessVal
+                    }
+            var dataString = JSON.stringify(postData);
+			
+			//alert(dataString);
+			
+			$.ajax({
+                type: "POST",
+                url: "<?php echo SITE; ?>happinessIndexcustomgraph.php",
+                data: {"mydata": dataString},
+                success: function (response) {
+                    var resdata = response;
+					//alert(resdata);
+					
+					 var word_list = JSON.parse(resdata);
+					 $('#wordcloud').empty();
+					 $("#wordcloud").jQCloud(word_list);
+				}
+			});
+			
+			/**************************** / extra happy *********************/
+			
+			/************************ happy *************************************/
+			
+			/************************ happy *************************************/
+			var postDatahappy =
+                    {
+						"clientid": clientid,
+						"imgurl": imgurl,
+                        "enddate": enddate,
+                        "startday": startday,
+                        "department": department,
+						"location": location,
+						"HappinessVal": happinessVal
+                    }
+            var dataStringhappy = JSON.stringify(postDatahappy);
+			$.ajax({
+                type: "POST",
+                url: "<?php echo SITE; ?>happinessIndexcustomgraph.php",
+                data: {"mydata": dataStringhappy},
+                success: function (response) {
+                    var resdatahappy = response;
+					//alert(resdatahappy);
+					var word_list2 = JSON.parse(resdatahappy);
+					$('#wordcloud2').empty();
+					 $("#wordcloud2").jQCloud(word_list2);
+				}
+			});
+			/*********************** / happy ************************************/
+		
+			/************************ normal *************************************/
+			var postDatanatural =
+                    {
+						"clientid": clientid,
+						"imgurl": imgurl,
+                        "enddate": enddate,
+                        "startday": startday,
+                        "department": department,
+						"location": location,
+						"HappinessVal": neutralVal
+                    }
+            var dataStringnatural = JSON.stringify(postDatanatural);
+			$.ajax({
+                type: "POST",
+                url: "<?php echo SITE; ?>happinessIndexcustomgraph.php",
+                data: {"mydata": dataStringnatural},
+                success: function (response) {
+                    var resdatanatural = response;
+					//alert(resdatanatural);
+					var word_list3 = JSON.parse(resdatanatural);
+					$('#wordcloud3').empty();
+					$("#wordcloud3").jQCloud(word_list3);
+				}
+			});
+			/*********************** / normal ************************************/
+			
+			/************************ sad *************************************/
+			var postDataSad =
+                    {
+						"clientid": clientid,
+						"imgurl": imgurl,
+                        "enddate": enddate,
+                        "startday": startday,
+                        "department": department,
+						"location": location,
+						"HappinessVal": sadVal
+                    }
+            var dataStringSad = JSON.stringify(postDataSad);
+			$.ajax({
+                type: "POST",
+                url: "<?php echo SITE; ?>happinessIndexcustomgraph.php",
+                data: {"mydata": dataStringSad},
+                success: function (response) {
+                    var resdatasad = response;
+					//alert(resdatasad);
+					var word_list4 = JSON.parse(resdatasad);
+					$('#wordcloud4').empty();
+					$("#wordcloud4").jQCloud(word_list4);
+				}
+			});
+			/*********************** / sad ************************************/
+		
+	}
+</script>
+
+
+<!--
 <?php
 $extraHappinessVal = 10;
 $extraHappinessDetails = $objHappiness->getSingleHappinessDetail($clientId, $surveyId, $extraHappinessVal);
 $extraHappinessDetailsArr = json_decode($extraHappinessDetails, true);
-//echo'<pre>';print_r($extraHappinessDetailsArr);die;
+//echo'<pre>';print_r($extraHappinessDetailsArr);
 if ($extraHappinessDetailsArr['success'] == 1) {
 	$extraHappycomments = "";
     foreach ($extraHappinessDetailsArr['data'] as $extraHappyWordData) {
@@ -95,10 +365,10 @@ while ($i < sizeof($words)) {
     $i++;
     array_push($extraHappyGlobeGraph, $textGraph);
 }
+//echo "<pre>";
+//print_r($extraHappyGlobeGraph);
 ?>
-
-<textarea style="display:none;" id="extraHappyTextGlobe" ><?php echo json_encode($extraHappyGlobeGraph); ?></textarea>
-
+<textarea id="extraHappyTextGlobe"><?php echo json_encode($extraHappyGlobeGraph); ?></textarea>
 
 <?php
 $happinessVal = 5;
@@ -136,7 +406,7 @@ while ($i < sizeof($words)) {
 }
 ?>
 
-<textarea style="display:none;" id="happinessTextGlobe" ><?php echo json_encode($happinessGlobeGraph); ?></textarea>
+<textarea  id="happinessTextGlobe" ><?php echo json_encode($happinessGlobeGraph); ?></textarea>
 
 <?php
 $neutralVal = 0;
@@ -176,7 +446,7 @@ while ($i < sizeof($words)) {
 }
 ?>
 
-<textarea style="display:none;" id="neutralTextGlobe" ><?php echo json_encode($neutralGlobeGraph); ?></textarea>
+<textarea  id="neutralTextGlobe" ><?php echo json_encode($neutralGlobeGraph); ?></textarea>
 
 <?php
 $sadVal = -5;
@@ -214,7 +484,7 @@ while ($i < sizeof($words)) {
 }
 ?>
 
-<textarea style="display:none;" id="sadnessTextGlobe" ><?php echo json_encode($sadnessGlobeGraph); ?></textarea>
+<textarea  id="sadnessTextGlobe" ><?php echo json_encode($sadnessGlobeGraph); ?></textarea>
 
 <?php
 //$happinessData = $happinessDetailsArr['data'];
@@ -226,7 +496,7 @@ $all_happy_avg = array();
 $surveyid = $surveyId;
 $qid = $surveyId;
 
-/* * ********************************************************************* */
+
 $sad = -5;
 $happy = 5;
 $normal = 0;
@@ -278,10 +548,14 @@ $deptAvg = array();
 
 $graph = array($graphArr['sad'], $graphArr['neutral'], $graphArr['happy'], $graphArr['overwhelmed']);
 
-echo "<textarea style='display:none;' id='doughnutGraphData'> </textarea>";
+echo "<textarea style='display:none' id='doughnutGraphData'> </textarea>";
 
 echo "<script> document.getElementById('doughnutGraphData').value = '" . json_encode($graph) . "';   </script>";
+?>
 
+-->
+
+<?php
 
 //array_unshift($deptAvg, $overAllAvg);
 /*
@@ -367,17 +641,18 @@ echo "<script> document.getElementById('doughnutGraphData').value = '" . json_en
 							
 							<input type="hidden" style="display:none;" id="lastday" name="activeU" value="<?php echo date('Y-m-d', strtotime("-1 days")); ?>">
 							
-							<div class="col-sm-3">
+							<div class="col-sm-2">
 							 <div class="form-group">
                                     <label for="usr">From:</label>
 <!--                                    <input type="date" class="form-control" id="usr">-->
-                                    <input type="date" id="fromDate" name="input1" size="20" class="form-control" placeholder="mm/dd/yyyy"/>
+                                    <!--<input type="text" id="fromDate" name="FSDate" size="20" class="form-control input" placeholder="YYYY-MM-DD"/>-->
+									<input type="text" id="fromDate" name="FSDate" size="20" class="form-control input" placeholder="mm/dd/yyyy"/>
                                 </div>
 								</div>
-								<div class="col-sm-3">
+								<div class="col-sm-2">
                                 <div class="form-group">
                                     <label for="pwd">To:&nbsp;&nbsp;</label>
-								<input type="date" id="toDate" class="form-control" name="input2" size="20" placeholder="mm/dd/yyyy"/>
+								<input type="text" id="toDate" class="form-control" name="FSDate" size="20" placeholder="mm/dd/yyyy"/>
                                 </div>
 								</div>
 								<div class="col-sm-3">
@@ -388,10 +663,6 @@ echo "<script> document.getElementById('doughnutGraphData').value = '" . json_en
 									<?php 
 									for($i=0; $i<count($alldepartmentarray); $i++)
 									{
-										if($alldepartmentarray[$i]['department'] == "")
-										{
-											continue;
-										}
 									?>
 									<option value="<?php echo $alldepartmentarray[$i]['department'];?>"><?php echo $alldepartmentarray[$i]['department'];?></option>
 									<?php }?>
@@ -399,10 +670,27 @@ echo "<script> document.getElementById('doughnutGraphData').value = '" . json_en
                                
                                 </div>
 								</div>
+								
+								<div class="col-sm-3">
+								<div class="form-group">
+                                    <label for="pwd">Location:&nbsp;&nbsp;</label>
+									<select name="locationname" id="locationname" class="form-control">
+									<option value="All">All</option>
+									<?php 
+									for($i=0; $i<count($alllocationarray); $i++)
+									{
+									
+									?>
+									<option value="<?php echo $alllocationarray[$i]['location'];?>"><?php echo $alllocationarray[$i]['location'];?></option>
+									<?php }?>
+									</select>
+                                </div>
+								</div>								
+															
 								<div class="col-sm-2">
 								<div class="form-group">
 								  <label for="pwd">&nbsp;&nbsp;</label>
-                                   <button type="button" class="btn btn-info form-control">Submit</button> 
+                                   <button type="button" class="btn btn-info form-control" onclick="return happinessindexcustomgraph();">Submit</button> 
                                 </div>
 								</div>
 								</div>
@@ -412,18 +700,18 @@ echo "<script> document.getElementById('doughnutGraphData').value = '" . json_en
             </div>
         </div>
 
-        <input type="hidden" id="surveyId" value="<?php echo $_GET['happinessQuestion']; ?>">
-
+        <!--<input type="hidden" id="surveyId" value="<?php echo $_GET['happinessQuestion']; ?>">
+-->
 
 
         <div class="row">
             <div class="col-md-6 col-sm-6 col-xs-12 col-lg-6">
                 <div class="x_panel">
                     <div class="x_title">
-                        <a href="happinessDetails2.php?happinessQuestion=<?php echo $surveyId; ?>&happinessIndex=Fabulous"><h2>Fabulous</h2></a>
+                        <a href="happinessDetails2.php?happinessIndex=Fabulous"><h2>Fabulous</h2></a>
                         <ul class="nav navbar-right panel_toolbox">
 
-                            <li class=""><a class="collapse-link" href="happinessDetails2.php?happinessQuestion=<?php echo $surveyId; ?>&happinessIndex=Fabulous" ><i class="fa fa-info-circle VHinfoIcon" aria-hidden="true"style="font-size:19px;margin-left:18px;"></i></a></li>
+                            <li class=""><a class="collapse-link" href="happinessDetails2.php?happinessIndex=Fabulous" ><i class="fa fa-info-circle VHinfoIcon" aria-hidden="true"style="font-size:19px;margin-left:18px;"></i></a></li>
                             <li class="right"><a class="collapse-link" id="MHdemo"><i class="fa fa-chevron-up"></i></a></li>
 
                         </ul>
@@ -432,11 +720,25 @@ echo "<script> document.getElementById('doughnutGraphData').value = '" . json_en
                     <div class="x_content">
                         <br />
                         <form id="MHdemo1"  class="form-horizontal form-label-left collapse in">
-                            <div class="form-group">
-                                <div id="wordcloud" class="JMDBenepik" ></div> 
+                            
+							<div class="form-group">
+							
+                                <!--<div id="wordcloud" class="JMDBenepik" ></div> -->
+								<div id="canvas">
+								<div class="JMDBenepik movable_div" id="wordcloud" ></div>
+								</div>
 
                             </div>
-
+							<!--------------- image capture ------->
+							<div class="form-group">
+							<div id="design">
+							<div id="controls">
+							<input type="button" value="Download" id="capture" /><br /><br />	
+							</div>
+							</div>
+							</div>
+							<!--------------- image capture ------->
+							
                         </form>
                     </div>
                 </div>
@@ -444,10 +746,10 @@ echo "<script> document.getElementById('doughnutGraphData').value = '" . json_en
             <div class="col-md-6 col-sm-6 col-xs-12 col-lg-6">
                 <div class="x_panel">
                     <div class="x_title">
-                        <a href="happinessDetails2.php?happinessQuestion=<?php echo $surveyId; ?>&happinessIndex=Happy"> <h2>Happy</h2></a>
+                        <a href="happinessDetails2.php?happinessIndex=Happy"> <h2>Happy</h2></a>
                         <ul class="nav navbar-right panel_toolbox">
 
-                            <li class=""><a class="collapse-link" href="happinessDetails2.php?happinessQuestion=<?php echo $surveyId; ?>&happinessIndex=Happy" ><i class="fa fa-info-circle VHinfoIcon" aria-hidden="true"style="font-size:19px;margin-left:18px;"></i></a></li>
+                            <li class=""><a class="collapse-link" href="happinessDetails2.php?happinessIndex=Happy" ><i class="fa fa-info-circle VHinfoIcon" aria-hidden="true"style="font-size:19px;margin-left:18px;"></i></a></li>
                             <li class="right"><a class="collapse-link"id="Hdemo"><i class="fa fa-chevron-up"></i></a>
                             </li>
 
@@ -458,9 +760,22 @@ echo "<script> document.getElementById('doughnutGraphData').value = '" . json_en
                         <br />
                         <form id="Hdemo1"  class="form-horizontal form-label-left collapse in">
                             <div class="form-group">
-                                <div id="wordcloud2" class="JMDBenepik" ></div> 
-
+                                <div id="canvas1">
+								<div id="wordcloud2" class="JMDBenepik movable_div" ></div> 
+								</div>
                             </div>
+							
+							
+							
+							<!--------------- image capture ------->
+							<div class="form-group">
+							<div id="design1">
+							<div id="controls">
+							<input type="button" value="Download" id="capture1" /><br /><br />	
+							</div>
+							</div>
+							</div>
+							<!--------------- image capture ------->
 
                         </form>
                     </div>
@@ -469,10 +784,10 @@ echo "<script> document.getElementById('doughnutGraphData').value = '" . json_en
             <div class="col-md-6 col-sm-6 col-xs-12 col-lg-6">
                 <div class="x_panel">
                     <div class="x_title">
-                        <a href="happinessDetails2.php?happinessQuestion=<?php echo $surveyId; ?>&happinessIndex=So - So"><h2>So - So</h2></a>
+                        <a href="happinessDetails2.php?happinessIndex=So - So"><h2>So - So</h2></a>
                         <ul class="nav navbar-right panel_toolbox">
 
-                            <li class=""><a class="collapse-link" href="happinessDetails2.php?happinessQuestion=<?php echo $surveyId; ?>&happinessIndex=So - So" ><i class="fa fa-info-circle VHinfoIcon" aria-hidden="true"style="font-size:19px;margin-left:18px;"></i></a></li>
+                            <li class=""><a class="collapse-link" href="happinessDetails2.php?happinessIndex=So - So" ><i class="fa fa-info-circle VHinfoIcon" aria-hidden="true"style="font-size:19px;margin-left:18px;"></i></a></li>
                             <li class="right"><a class="collapse-link"id="NHdemo"><i class="fa fa-chevron-up"></i></a>
                             </li>
 
@@ -483,10 +798,21 @@ echo "<script> document.getElementById('doughnutGraphData').value = '" . json_en
                         <br />
                         <form id="NHdemo1"  class="form-horizontal form-label-left collapse in">
                             <div class="form-group">
-                                <div id="wordcloud3" class="JMDBenepik" ></div> 
-
-                            </div>
-
+							<div id="canvas2">
+                                <div id="wordcloud3" class="JMDBenepik movable_div" ></div> 
+							</div>
+							</div>
+							
+							<!--------------- image capture ------->
+							<div class="form-group">
+							<div id="design2">
+							<div id="controls2">
+							<input type="button" value="Download" id="capture2" /><br /><br />	
+							</div>
+							</div>
+							</div>
+							<!--------------- image capture ------->
+							
                         </form>
                     </div>
                 </div>
@@ -494,10 +820,10 @@ echo "<script> document.getElementById('doughnutGraphData').value = '" . json_en
             <div class="col-md-6 col-sm-6 col-xs-12 col-lg-6">
                 <div class="x_panel">
                     <div class="x_title">
-                        <a href="happinessDetails2.php?happinessQuestion=<?php echo $surveyId; ?>&happinessIndex=Get Me Out Of Here"><h2>Get Me Out Of Here</h2></a>
+                        <a href="happinessDetails2.php?happinessIndex=Get Me Out Of Here"><h2>Get Me Out Of Here</h2></a>
                         <ul class="nav navbar-right panel_toolbox">
 
-                            <li class=""><a class="collapse-link" href="happinessDetails2.php?happinessQuestion=<?php echo $surveyId; ?>&happinessIndex=Get Me Out Of Here" ><i class="fa fa-info-circle VHinfoIcon" aria-hidden="true"style="font-size:19px;margin-left:18px;"></i></a></li>
+                            <li class=""><a class="collapse-link" href="happinessDetails2.php?happinessIndex=Get Me Out Of Here" ><i class="fa fa-info-circle VHinfoIcon" aria-hidden="true"style="font-size:19px;margin-left:18px;"></i></a></li>
                             <li class="right"><a class="collapse-link"id="SHdemo"><i class="fa fa-chevron-up"></i></a>
                             </li>
 
@@ -508,9 +834,19 @@ echo "<script> document.getElementById('doughnutGraphData').value = '" . json_en
                         <br />
                         <form id="SHdemo1"  class="form-horizontal form-label-left collapse in">
                             <div class="form-group">
-                                <div id="wordcloud4" class="JMDBenepik"  ></div> 
-
+							<div id="canvas3">
+                                <div id="wordcloud4" class="JMDBenepik movable_div"></div> 
                             </div>
+							
+							<!--------------- image capture ------->
+							<div class="form-group">
+							<div id="design3">
+							<div id="controls3">
+							<input type="button" value="Download" id="capture3" /><br /><br />	
+							</div>
+							</div>
+							</div>
+							<!--------------- image capture ------->
 
                         </form>
                     </div>
@@ -520,11 +856,26 @@ echo "<script> document.getElementById('doughnutGraphData').value = '" . json_en
         </div>
     </div>
 </div>
-
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+<!--<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>-->
 
 <script type='text/javascript'src="build/js/HappinesssDetails.js"></script>
-
+<style>#canvas{
+		background-color : white;
+		border:none;
+		}	
+#canvas1{
+	background-color : white;
+	border:none;
+		}	
+#canvas2{
+		background-color : white;
+		border:none;
+		}	
+#canvas3{
+		background-color : white;
+		border:none;
+		}			
+</style>		
 <script>
     $(document).ready(function () {
         $("#NHdemo").click(function () {
@@ -549,7 +900,99 @@ echo "<script> document.getElementById('doughnutGraphData').value = '" . json_en
         });
     });
 </script>
+<!-------------------------- script for image capture ------------------->
+<script type="text/javascript">	
+		$(function(){
+			
+		$('#capture').click(function(){
+				//get the div content
+				div_content = document.querySelector("#canvas")
+				//make it as html5 canvas
+				html2canvas(div_content).then(function(canvas) {
+					//change the canvas to jpeg image
+					data = canvas.toDataURL('image/jpeg');
+					//then call a super hero php to save the image
+					save_img(data,'Fabulous.jpeg');
+				});
+			});			
+		});
+		
+		$(function(){
+			
+		$('#capture1').click(function(){
+				//get the div content
+				div_content = document.querySelector("#canvas1")
+				//make it as html5 canvas
+				html2canvas(div_content).then(function(canvas) {
+					//change the canvas to jpeg image
+					data = canvas.toDataURL('image/jpeg');
+					//then call a super hero php to save the image
+					save_img(data,'Happ.jpeg');
+				});
+			});			
+		});
+		
+		$(function(){
+			
+		$('#capture2').click(function(){
+				//get the div content
+				div_content = document.querySelector("#canvas2")
+				//alert(div_content);
+				//make it as html5 canvas
+				html2canvas(div_content).then(function(canvas) {
+					//change the canvas to jpeg image
+					data = canvas.toDataURL('image/jpeg');
+					//alert(data);
+					//then call a super hero php to save the image
+					save_img(data,'So-So.jpeg');
+				});
+			});			
+		});
+		
+		$(function(){
+			
+		$('#capture3').click(function(){
+				//get the div content
+				div_content = document.querySelector("#canvas3")
+				//make it as html5 canvas
+				html2canvas(div_content).then(function(canvas) {
+					//change the canvas to jpeg image
+					data = canvas.toDataURL('image/jpeg');
+					
+					//then call a super hero php to save the image
+					save_img(data,'Get_Me_Out_Of_Here.jpeg');
+				});
+			});			
+		});
+		
+		//to save the canvas image
+		
+		
+function save_img(data,imgname){
 
+/*****************************/			
+//var w = open();
+//w.location = data;
+/*****************************/
+//alert(data);
+/******************** new window **********************/
+var img = document.createElement('img');
+img.src = data;
+var a = document.createElement('a');
+//a.setAttribute("download", "wordcloud.jpeg");
+a.setAttribute("download", imgname);
+a.setAttribute("href", data);
+a.appendChild(img);
+var w = open();
+w.document.title = 'Download Image';
+w.document.body.innerHTML = 'Click On Image for Download';
+w.document.body.appendChild(a);
+
+/************************* new window ******************/
+}
+		
+</script>
+<!-------------------------- / script for image capture ------------------->
 <script type="text/javascript" src="http://www.lucaongaro.eu/demos/jqcloud/jqcloud-1.0.0.min.js"></script>
 <!-- footer content -->
 <footer>
@@ -558,5 +1001,7 @@ echo "<script> document.getElementById('doughnutGraphData').value = '" . json_en
     </div>
     <div class="clearfix"></div>
 </footer>
-<!-- /footer content -->
 
+ 
+
+<!-- /footer content -->

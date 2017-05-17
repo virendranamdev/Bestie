@@ -380,7 +380,7 @@ class PostDisplayWelcome {
 
 //                          Display Happiness                            
                                 case "Happiness" :
-                                    $eventquery1 = "select happiness.*,Concat('Happiness','') as type,Concat('20','') as flagCheck, DATE_FORMAT(happiness.createdDate,'%d %b %Y') as createdDate, DATE_FORMAT(happiness.startDate,'%d %b %Y') as publishingTime, if(master.lastName IS NULL or master.lastName='', master.firstName, CONCAT(master.firstName, ' ', master.lastName)) as createdBy, if(personal.userImage IS NULL or personal.userImage='', '', CONCAT('$site_url', personal.userImage)) as userImage from Tbl_C_HappinessQuestion as happiness join Tbl_EmployeeDetails_Master as master on happiness.createdBy=master.employeeId join Tbl_EmployeePersonalDetails as personal on happiness.createdBy=personal.employeeId where happiness.surveyId =:id and happiness.clientId =:cid and DATE(happiness.createdDate) = CURDATE()";
+                                    $eventquery1 = "select happiness.*,Concat('Happiness','') as type,Concat('20','') as flagCheck, DATE_FORMAT(happiness.createdDate,'%d %b %Y') as createdDate, DATE_FORMAT(happiness.startDate,'%d %b %Y') as publishingTime, if(master.lastName IS NULL or master.lastName='', master.firstName, CONCAT(master.firstName, ' ', master.lastName)) as createdBy, if(personal.userImage IS NULL or personal.userImage='', '', CONCAT('$site_url', personal.userImage)) as userImage from Tbl_C_HappinessQuestion as happiness join Tbl_EmployeeDetails_Master as master on happiness.createdBy=master.employeeId join Tbl_EmployeePersonalDetails as personal on happiness.createdBy=personal.employeeId where happiness.surveyId =:id and happiness.clientId =:cid and happiness.startDate = CURDATE()";
                                     $nstmt = $this->DB->prepare($eventquery1);
                                     $nstmt->bindParam(':cid', $this->idclient, PDO::PARAM_STR);
                                     $nstmt->bindParam(':id', $welid, PDO::PARAM_STR);
@@ -423,7 +423,6 @@ class PostDisplayWelcome {
                             	    $eventdata['imageName2'] = (!empty($albumImages[1]['imgName']))?$albumImages[1]['imgName']:"";
                             	    $eventdata['imageName3'] = (!empty($albumImages[2]['imgName']))?$albumImages[2]['imgName']:"";
                                    
-                                    
                                     $userid = $eventdata['createdby'];
 
                                     $query = "select emp_master.firstName,emp_master.lastName,if(emp_personal.userImage IS NULL or emp_personal.userImage='', '', if(emp_personal.linkedIn = '1', emp_personal.userImage, Concat('$site_url',emp_personal.userImage))) as userImage from Tbl_EmployeeDetails_Master as emp_master left join Tbl_EmployeePersonalDetails as emp_personal on emp_personal.employeeId=emp_master.employeeId where emp_master.employeeId =:eid";
@@ -513,7 +512,7 @@ class PostDisplayWelcome {
                                         {
                                         // $newsquery = "select *, Concat(:type,'') as type ,  if(thumb_post_img IS NULL or thumb_post_img='' , Concat('$site_url',post_img),Concat('$site_url',thumb_post_img) ) as post_img, DATE_FORMAT(created_date,'%d %b %Y') as created_date from Tbl_C_PostDetails  where post_id =:id and clientId =:cid";
 
-                                        $newsquery = "select *, Concat(:type,'') as type , if(post_img IS NULL or post_img = '','',Concat('$site_url',post_img)) as post_img, DATE_FORMAT(created_date,'%d %b %Y') as created_date from Tbl_C_PostDetails  where post_id =:id and clientId =:cid";
+                                        $newsquery = "select *, Concat(:type,'') as type , if(post_img IS NULL or post_img = '','',Concat('$site_url',post_img)) as post_img, DATE_FORMAT(created_date,'%d %b %Y') as createdDate from Tbl_C_PostDetails  where post_id =:id and clientId =:cid";
                                         $nstmt = $this->DB->prepare($newsquery);
                                         $nstmt->bindParam(':cid', $this->idclient, PDO::PARAM_STR);
                                         $nstmt->bindParam(':id', $welid, PDO::PARAM_STR);
@@ -542,7 +541,7 @@ class PostDisplayWelcome {
 //                          Display Notification Reminder
                                 case "Reminder" :
                                 
-				$reminderQuery = "select reminder.*,Concat('Reminder','') as type,Concat('25','') as flagCheck, DATE_FORMAT(reminder.createdDate,'%d %b %Y') as createdDate, DATE_FORMAT(reminder.createdDate,'%d %b %Y') as publishingTime, if(reminder.image IS NULL OR reminder.image ='','',Concat('$site_url', reminder.image)) as image, if(personal.userImage IS NULL or personal.userImage='', '', CONCAT('$site_url', personal.userImage)) as userImage from Tbl_C_ReminderDetails as reminder join Tbl_EmployeePersonalDetails as personal on reminder.createdBy=personal.employeeId where reminder.reminderId =:id and reminder.clientId =:cid and reminder.status=1";
+				$reminderQuery = "select reminder.*,Concat('Reminder','') as type,Concat('25','') as flagCheck, DATE_FORMAT(reminder.createdDate,'%d %b %Y') as createdDate, DATE_FORMAT(reminder.createdDate,'%d %b %Y') as publishingTime, if(reminder.image IS NULL OR reminder.image ='','',Concat('$site_url', reminder.image)) as image, if(personal.userImage IS NULL or personal.userImage='', '', CONCAT('$site_url', personal.userImage)) as userImage, if(master.lastName IS NULL or master.lastName='', master.firstName, CONCAT(master.firstName, ' ', master.lastName)) as createdBy from Tbl_C_ReminderDetails as reminder join Tbl_EmployeePersonalDetails as personal on reminder.createdBy=personal.employeeId join Tbl_EmployeeDetails_Master as master on reminder.createdBy=master.employeeId where reminder.reminderId =:id and reminder.clientId =:cid and reminder.status=1";
                                     $nstmt = $this->DB->prepare($reminderQuery);
                                     $nstmt->bindParam(':cid', $this->idclient, PDO::PARAM_STR);
                                     $nstmt->bindParam(':id', $welid, PDO::PARAM_STR);

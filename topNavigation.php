@@ -8,8 +8,8 @@
 
               <ul class="nav navbar-nav navbar-right">
                 <li class="">
-                  <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-                    <img src="<?php echo SITE.$_SESSION['image_name']; ?>" alt=""><?php echo $_SESSION['user_name']; ?>
+                  <a href="javascript:void(0);" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                    <img src="<?php echo SITE.$_SESSION['image_name']; ?>" alt="" onerror="this.src='images/user.png'"><?php echo $_SESSION['user_name']; ?>
                     <span class=" fa fa-angle-down"></span>
                   </a>
                   <ul class="dropdown-menu dropdown-usermenu pull-right">

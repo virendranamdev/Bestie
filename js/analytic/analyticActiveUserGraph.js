@@ -1,4 +1,4 @@
-function analyticActiveUserGraph(startdate,enddate, department , SITE)
+function analyticActiveUserGraph(startdate,enddate,location, SITE)
 {
 
 //alert(startdate);
@@ -10,7 +10,7 @@ function analyticActiveUserGraph(startdate,enddate, department , SITE)
             {
                 "startdate":startdate,
                 "enddate": enddate,
-	        "department": department
+	        "location": location
             }
     var dataString = JSON.stringify(postData);
    // alert(dataString);
@@ -23,7 +23,7 @@ function analyticActiveUserGraph(startdate,enddate, department , SITE)
         data: {"mydata": dataString},
         success: function (response) {
             var resdata = response;
-          //  alert(resdata);
+         //   alert(resdata);
 			
           console.log(resdata);   
 
@@ -58,64 +58,50 @@ function ActiveUserGraph(resdata) {
 console.log(resdata);
     var categorydata = resdata.categories;
      var data1 = resdata.data;
-     var inactiveusers = resdata.inactive;
+   
     //   console.log(JSON.stringify(resdata.categories));
      console.log(categorydata);
      console.log(data1);
-     console.log(inactiveusers);
+   
 
-    Highcharts.chart('ActiveUserContainer', {
+  Highcharts.chart('ActiveUserContainer', {
         chart: {
-            type: 'column'
+            type: 'line'
         },
         title: {
-            text: 'Active Users By Department'
+            text: ''
         },
         subtitle: {
-            text: 'Percentage of Active Users '
+            text: ''
         },
         xAxis: {
-           // categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+          //  categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
              categories:categorydata  
         },
         yAxis: {
-             
             title: {
                 text: 'Users'
-            },
-             stackLabels: {
-            enabled: true,
-            style: {
-                fontWeight: 'bold',
-                color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
             }
-        }
         },
-       
-         tooltip: {
-              headerFormat: '<b>{point.x}</b><br/>',
-        pointFormat: '<span style="color:{series.color}">{series.name}</span>: {point.y:,.0f}(<b>{point.percentage:.1f}%</b>)<br/>',
-       
-         shared: true
+          tooltip: {
+        pointFormat: '<span style="color:{series.color}">{series.name}</span>: {point.y:,.0f}',
+        split: true
     },
         plotOptions: {
-            column: {
-            stacking: 'normal',
-              dataLabels: {
-                enabled: true,
-                color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white'
+            line: {
+                dataLabels: {
+                    enabled: true
+                },
+                enableMouseTracking: true
             }
-        }
         },
-        series: [  {
-                name: 'InActive Users',
-              //  data: [3.9, 4.2, 5.7, 8.5, 11.9, 15.2, 17.0, 16.6, 14.2, 10.3, 6.6, 4.8]
-                 data: inactiveusers //data1
-            },{
+        series: [{
                 name: 'Active Users',
-              //  data: [3.9, 4.2, 5.7, 8.5, 11.9, 15.2, 17.0, 16.6, 14.2, 10.3, 6.6, 4.8]
+              //  data: [3.9] //, 4.2, 5.7, 8.5, 11.9, 15.2, 17.0, 16.6, 14.2, 10.3, 6.6, 4.8]
                  data: data1 //data1
-            }
-         ]
+            }]
     });
 }
+
+ 
+ 

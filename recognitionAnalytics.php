@@ -196,7 +196,7 @@ $locationarray = json_decode($locationjson, true);
                                     </select>
                                 </div>&nbsp;&nbsp;&nbsp;&nbsp;
 								
-								 <div class="form-group col-md-3">
+				 <div class="form-group col-md-3">
                                     <label for="sel1">Select Location:</label>
                                     <select class="form-control" id="rlocation">
                                         <option value = "All" selected="">All</option>

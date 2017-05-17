@@ -35,7 +35,7 @@ class RecognizeAnalytic {
 			if ($department != 'All' && $location == 'All'){
                 $query .= " AND tem.department = :dept";}
 			
-			$query .= " group by DATE_FORMAT(tre.dateOfEntry,'%Y-%m-%d')";
+		$query .= " group by DATE_FORMAT(tre.dateOfEntry,'%Y-%m-%d')";
 			
 			//echo $query;
 			
@@ -44,7 +44,7 @@ class RecognizeAnalytic {
             $stmt->bindParam(':fromdte', $fromdt, PDO::PARAM_STR);
             $stmt->bindParam(':enddte', $enddte, PDO::PARAM_STR);
             if ($department != 'All') {$stmt->bindParam(':dept', $department, PDO::PARAM_STR);}
-			if ($location != 'All') {$stmt->bindParam(':loca', $location, PDO::PARAM_STR);}
+	    if ($location != 'All') {$stmt->bindParam(':loca', $location, PDO::PARAM_STR);}
 
             $stmt->execute();
             $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -161,9 +161,7 @@ class RecognizeAnalytic {
            
                 $query = "SELECT count(tre.topic) as totalbadges,tem.recognizeTitle as badgename,((count(tre.topic) / total.totalbadge) * 100) as percentage,total.totalbadge,if(tem.image IS NULL or tem.image = '','',CONCAT('".$siteurl."',tem.image)) as badgeImage,DATE_FORMAT(tre.dateOfEntry,'%d/%m/%Y') as dateOfEntry FROM Tbl_RecognizedEmployeeDetails as tre join Tbl_RecognizeTopicDetails as tem on tre.topic = tem.topicId join Tbl_EmployeeDetails_Master as tep on tep.employeeId = tre.recognitionTo CROSS
   JOIN (SELECT COUNT(topic) AS totalbadge FROM Tbl_RecognizedEmployeeDetails where (DATE(dateOfEntry) BETWEEN :fromdte AND :enddte)) as total where (DATE(tre.dateOfEntry) BETWEEN :fromdte AND :enddte) AND tre.clientId = :client";
-                
-                
-                
+                               
                    if ($department == 'All' && $location == 'All'){
                 $query .= "";}
 				

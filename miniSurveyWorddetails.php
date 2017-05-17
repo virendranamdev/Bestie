@@ -19,15 +19,19 @@ $feedDetailsArr = json_decode($wordDetails, true);
 
 $feedData = $feedDetailsArr['data'];
 //print_r($feedData);
-
-$data1 = $obj->getSurveyquestionresponse($sid, $qid);
-$data = json_decode($data1, true);
+$department = "All";
+$location = "All";
+$data = $obj->getSurveyquestionresponse($sid, $qid,$department,$location);
+//$data = json_decode($data1, true);
 //echo "<pre>";
 //print_r($data);
 //echo "</pre>";
 $quesycount = count($data);
 //echo $quesycount;
 ?>
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.11.0.js"></script>
+
+<script src="js/analytic/downloadanalyticimage.js"></script>
 
 <!-- page content -->
 <div class="right_col" role="main">

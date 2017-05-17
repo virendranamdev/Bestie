@@ -20,6 +20,20 @@ $feedData = $feedDetailsArr['data'];
 ?>
 <input type="hidden" name="feedid" id="feedid" value="<?php echo $feedbackId; ?>">
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.0.js"></script>
+<!--<script src="js/analytic/downloadanalyticimage.js"></script>
+-->
+<script src="js/analytic/html2canvas.min.js"></script>
+
+<script>
+  // tell the embed parent frame the height of the content
+  if (window.parent && window.parent.parent){
+    window.parent.parent.postMessage(["resultsFrame", {
+      height: document.body.getBoundingClientRect().height,
+      slug: "None"
+    }], "*")
+  }
+</script>
+
 <script>
     $(document).ready(function () {
 			
@@ -124,13 +138,15 @@ $feedData = $feedDetailsArr['data'];
                     <div class="x_content wordData">
                         <br />
                         <form class="form-horizontal form-label-left input_mask">
-                            <?php
+						<div id="canvas">
+						  <?php
                             $i = 0;
                             $globeGraph = array();
                             $textGraph = array();
                             while ($i < sizeof($words)) {
                                 ?>
-                                <div class="form-group">
+                                <div  class="form-group">
+								
                                     <div class="progress">
                                         <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width:<?php echo $values[$i] * 20; ?>%">
                                             <?php
@@ -147,7 +163,18 @@ $feedData = $feedDetailsArr['data'];
                                 array_push($globeGraph, $textGraph);
                             }
                             ?>
+							</div>
+							<!--------------- image capture ------->
+							<div class="form-group">
+							<div id="design">
+							<div id="controls">
+							<input type="button" value="Download" id="capture" /><br /><br />	
+							</div>
+							</div>
+							</div>
+							<!--------------- image capture ------->
                         </form>
+						
                     </div>
                 </div>
             </div>
@@ -210,7 +237,11 @@ $feedData = $feedDetailsArr['data'];
 								<img src="<?php echo $feed['userimage'];?>" onerror="this.src='images/user.png' "class="img img-responsive img-circle "style="border:1px solid"/>
 								</div>
                                 
-								<div style="border-bottom:1px solid #eee;padding: 0px 20px 6px 20px;"  class="col-xs-12 col-sm-11 col-md-11 col-lg-11 "><p class="userresponse"><?php echo $feed['comment_text']; ?></p><p><span class="NoOflikes"><i class="fa fa-heart" aria-hidden="true"></i> <?php echo $feed['totalLikes']; ?>,<span> &nbsp; </i><?php echo date('d M Y', strtotime($feed['CommentDate'])); ?></p>
+								<div style="border-bottom:1px solid #eee;padding: 0px 20px 6px 20px;"  class="col-xs-12 col-sm-11 col-md-11 col-lg-11 "><p class="userresponse"><?php echo $feed['comment_text']; ?></p>
+								
+								<p><span class="NoOflikes"><i class="fa fa-heart" aria-hidden="true"></i> <?php echo $feed['totalLikes']; ?>,<span> &nbsp; </i>
+								
+								<?php echo date('d M Y', strtotime($feed['CommentDate'])); ?></p>
 									
 																		
 									<?php echo "<button type='button' class='deleteComment btn btn-default btn-sm' id='" . $feed['commentId'] . "'>
@@ -220,8 +251,7 @@ $feedData = $feedDetailsArr['data'];
 									</div>
 									
 									</div>
-									<!--<hr>-->
-                                                    
+									<!--<hr>-->                                                 
 							<?php }} ?>
 
 
@@ -237,5 +267,96 @@ $feedData = $feedDetailsArr['data'];
                                                 </div>
                                                 </div>
                                                 <!-- /page content -->
+<style>#canvas{
+		background-color : white;
+		}		
+</style>		
+
+<script type='text/javascript'>//<![CDATA[
+
+function renderContent() {
+    html2canvas(document.getElementById("canvas"), {
+        allowTaint: true
+    }).then(function(canvas) {
+	//alert(canvas);
+        //document.getElementById("result").appendChild(canvas);
+		data = canvas.toDataURL('image/jpeg');
+		//alert(data);
+		save_img(data,'popularword.jpeg');
+    });
+	
+	
+}
+
+document.getElementById("capture").onclick = renderContent;
+
+function save_img(data,imgname){
+	//alert('hi');
+var img = document.createElement('img');
+img.src = data;
+var a = document.createElement('a');
+//a.setAttribute("download", "wordcloud.jpeg");
+a.setAttribute("download", imgname);
+a.setAttribute("href", data);
+a.appendChild(img);
+var w = open();
+w.document.title = 'Download Image';
+w.document.body.innerHTML = 'Click On Image for Download';
+w.document.body.appendChild(a);
+}
+
+
+
+
+
+</script>
+<script type="text/javascript">	
+/*************************** download image *************************/
+		/*$(function(){
+			
+		$('#capture').click(function(){
+				//get the div content
+				div_content = document.querySelector("#canvas");
+				alert(div_content);
+				//make it as html5 canvas
+				html2canvas(div_content).then(function(canvas) {
+					alert('ho');
+					die;
+					//change the canvas to jpeg image
+					data = canvas.toDataURL('image/jpeg');
+					
+					//then call a super hero php to save the image
+					save_img(data,'wordcloud.jpeg');
+				});
+			});			
+		});
+		
+		
+function save_img(data,imgname){
+var img = document.createElement('img');
+img.src = data;
+var a = document.createElement('a');
+//a.setAttribute("download", "wordcloud.jpeg");
+a.setAttribute("download", imgname);
+a.setAttribute("href", data);
+a.appendChild(img);
+var w = open();
+w.document.title = 'Download Image';
+w.document.body.innerHTML = 'Click On Image for Download';
+w.document.body.appendChild(a);
+}
+*/
+
+/******************************** / download image *********************/		
+</script>
+<script>
+  // tell the embed parent frame the height of the content
+  if (window.parent && window.parent.parent){
+    window.parent.parent.postMessage(["resultsFrame", {
+      height: document.body.getBoundingClientRect().height,
+      slug: "None"
+    }], "*")
+  }
+</script>
 
                                                 <?php include 'footer.php'; ?>

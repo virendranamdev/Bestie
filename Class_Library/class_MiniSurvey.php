@@ -1,9 +1,9 @@
 <?php
 
-//error_reporting(E_ALL);
-//ini_set('display_errors', 1);
-include_once('class_connect_db_Communication.php');
-
+//error_reporting(E_ALL); ini_set('display_errors', 1); 
+if (!class_exists('Connection_Communication')) {
+    include_once('class_connect_db_Communication.php');
+}
 if (!class_exists('FindGroup')) {
     require_once('Api_Class/class_find_groupid.php');
 }
@@ -294,13 +294,31 @@ class MiniSurvey {
         }
     }
 
-    function getSurveyquestionresponse($sid, $qid) {
+    function getSurveyquestionresponse($sid, $qid,$department,$location) {
         try {
             $squery = "select tas.*,DATE_FORMAT(tas.answeredDate,'%d %b %Y') as answeredDate, tcs.question, tem.firstName,tem.lastName from Tbl_Analytic_Survey as tas join Tbl_EmployeeDetails_Master as tem on tem.employeeId = tas.answeredBy join Tbl_C_SurveyQuestion as tcs on tcs.questionId = tas.questionId where tas.surveyId = :sid and tas.questionId = :qid and tas.status = 1";
 
+            
+            
+             if ($department == 'All' && $location == 'All'){
+                $squery .= "";}
+				
+			if ($department != 'All' && $location != 'All'){
+                $squery .= " AND tem.department = :dept AND tem.location = :loca";}
+				
+			if ($department == 'All' && $location != 'All'){
+                $squery .= " AND tem.location = :loca";}
+				
+			if ($department != 'All' && $location == 'All'){
+                $squery .= " AND tem.department = :dept";}
+			
+		
             $stmt2 = $this->DB->prepare($squery);
             $stmt2->bindParam(':sid', $sid, PDO::PARAM_STR);
-            $stmt2->bindParam(':qid', $qid, PDO::PARAM_STR);         
+            $stmt2->bindParam(':qid', $qid, PDO::PARAM_STR);      
+            if ($department != 'All') {$stmt2->bindParam(':dept', $department, PDO::PARAM_STR);}
+	    if ($location != 'All') {$stmt2->bindParam(':loca', $location, PDO::PARAM_STR);}
+            
             $stmt2->execute();
             $rows2 = $stmt2->fetchAll(PDO::FETCH_ASSOC);
           ///  print_r($rows2);
@@ -308,7 +326,7 @@ class MiniSurvey {
         } catch (Exception $ex) {
             echo $ex;
         }
-        return json_encode($rows2);
+        return $rows2;
     }
 
     function updateSurveyStatus($sid, $sta) {
@@ -349,16 +367,71 @@ class MiniSurvey {
     /*****FOR GETTING survey analytic data for calling by surveyQuestionResult*************************** */
     
     
-    function getGraphDataforRadio($qid, $sid) {
+    function getGraphDataforRadio($qid, $sid,$department,$location) {
        
         try {
-            $query = "select answer as name,count(answeredBy) as y from Tbl_Analytic_Survey where surveyId = :sid and questionId = :qid and status = 1 group by optionId";
+            
+            /******************************get survey result graph data*******************************************/
+            
+            $query = "select tas.answer as name,count(tas.answeredBy) as y from Tbl_Analytic_Survey as tas join Tbl_EmployeeDetails_Master as edm on edm.employeeId = tas.answeredBy where tas.surveyId = :sid and tas.questionId = :qid and tas.status = 1";
+            
+             if ($department == 'All' && $location == 'All'){
+                $query .= "";}
+				
+			if ($department != 'All' && $location != 'All'){
+                $query .= " AND edm.department = :dept AND edm.location = :loca";}
+				
+			if ($department == 'All' && $location != 'All'){
+                $query .= " AND edm.location = :loca";}
+				
+			if ($department != 'All' && $location == 'All'){
+                $query .= " AND edm.department = :dept";}
+			
+		$query .= " group by tas.optionId";
+            
+         //  echo $query;
+            
+            
             $stmt = $this->DB->prepare($query);
             $stmt->bindParam(':qid', $qid, PDO::PARAM_STR);
-            $stmt->bindParam(':sid', $sid, PDO::PARAM_STR);
+            $stmt->bindParam(':sid', $sid, PDO::PARAM_STR);            
+            if ($department != 'All') {$stmt->bindParam(':dept', $department, PDO::PARAM_STR);}
+	    if ($location != 'All') {$stmt->bindParam(':loca', $location, PDO::PARAM_STR);}
+            
             $stmt->execute();
             $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
+            
+/*************************************select respondent***************************************************/
+            
+             $query = "select count(tas.answeredBy) as respondent from Tbl_Analytic_Survey as tas join Tbl_EmployeeDetails_Master as edm on edm.employeeId = tas.answeredBy where tas.surveyId = :sid and tas.questionId = :qid and tas.status = 1";
+            
+             if ($department == 'All' && $location == 'All'){
+                $query .= "";}
+				
+			if ($department != 'All' && $location != 'All'){
+                $query .= " AND edm.department = :dept AND edm.location = :loca";}
+				
+			if ($department == 'All' && $location != 'All'){
+                $query .= " AND edm.location = :loca";}
+				
+			if ($department != 'All' && $location == 'All'){
+                $query .= " AND edm.department = :dept";}
+			
+		
+           // echo $query;
+            
+            
+            $stmt = $this->DB->prepare($query);
+            $stmt->bindParam(':qid', $qid, PDO::PARAM_STR);
+            $stmt->bindParam(':sid', $sid, PDO::PARAM_STR);            
+            if ($department != 'All') {$stmt->bindParam(':dept', $department, PDO::PARAM_STR);}
+	    if ($location != 'All') {$stmt->bindParam(':loca', $location, PDO::PARAM_STR);}
+            
+            $stmt->execute();
+            $rows1 = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            /******************************************************************************/
+            
 
            $query1 = "select question from Tbl_C_SurveyQuestion where surveyId = :sid and questionId = :qid";
 
@@ -368,9 +441,13 @@ class MiniSurvey {
             $stmt1->bindParam(':sid', $sid, PDO::PARAM_STR);
             $stmt1->execute();
             $value = $stmt1->fetch(PDO::FETCH_ASSOC);
-
+/*****************************get survey comment*******************************************************/
+            $comments = self::getSurveyquestionresponse($sid, $qid,$department,$location);
+            
             $response["data"] = $rows;
              $response["question"] = $value;
+              $response["respondent"] = $rows1;
+              $response['comment'] = $comments;
         } catch (PDOException $e) {
             echo $e;
         }
@@ -381,29 +458,90 @@ class MiniSurvey {
     /******************************************************************/
     
     
-      function getGraphDataforEmoji($qid, $sid) {
-       
+      function getGraphDataforEmoji($qid, $sid,$department,$location) 
+                {  
         //  echo "surveyid-".$sid;
         //  echo "questionid-".$qid;
         try {
-            $query = "select answer as name,count(answeredBy) as y from Tbl_Analytic_Survey where surveyId = :sid and questionId = :qid and status = 1 group by answer";
+            
+            /**************************get emoji response*******************************************/
+            $query = "select tas.answer as name,count(tas.answeredBy) as y from Tbl_Analytic_Survey as tas join Tbl_EmployeeDetails_Master as edm on edm.employeeId = tas.answeredBy where tas.surveyId = :sid and tas.questionId = :qid and tas.status = 1 ";
+            
+            
+             if ($department == 'All' && $location == 'All'){
+                $query .= "";}
+				
+			if ($department != 'All' && $location != 'All'){
+                $query .= " AND edm.department = :dept AND edm.location = :loca";}
+				
+			if ($department == 'All' && $location != 'All'){
+                $query .= " AND edm.location = :loca";}
+				
+			if ($department != 'All' && $location == 'All'){
+                $query .= " AND edm.department = :dept";}
+			
+		$query .= " group by tas.answer";
+            
+              //  echo $query;
+            
             $stmt = $this->DB->prepare($query);
             $stmt->bindParam(':qid', $qid, PDO::PARAM_STR);
             $stmt->bindParam(':sid', $sid, PDO::PARAM_STR);
+            if ($department != 'All') {$stmt->bindParam(':dept', $department, PDO::PARAM_STR);}
+	    if ($location != 'All') {$stmt->bindParam(':loca', $location, PDO::PARAM_STR);}
+                       
             $stmt->execute();
             $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-
-            $query1 = "select question from Tbl_C_SurveyQuestion where surveyId = :sid and questionId = :qid";
+         /******************************************************************************/   
+            
+            
+                     
+/*************************************select respondent***************************************************/
+            
+             $query = "select count(tas.answeredBy) as respondent from Tbl_Analytic_Survey as tas join Tbl_EmployeeDetails_Master as edm on edm.employeeId = tas.answeredBy where tas.surveyId = :sid and tas.questionId = :qid and tas.status = 1";
+            
+             if ($department == 'All' && $location == 'All'){
+                $query .= "";}
+				
+			if ($department != 'All' && $location != 'All'){
+                $query .= " AND edm.department = :dept AND edm.location = :loca";}
+				
+			if ($department == 'All' && $location != 'All'){
+                $query .= " AND edm.location = :loca";}
+				
+			if ($department != 'All' && $location == 'All'){
+                $query .= " AND edm.department = :dept";}
+			
+		
+         //   echo $query;
+            
+            
+            $stmt = $this->DB->prepare($query);
+            $stmt->bindParam(':qid', $qid, PDO::PARAM_STR);
+            $stmt->bindParam(':sid', $sid, PDO::PARAM_STR);            
+            if ($department != 'All') {$stmt->bindParam(':dept', $department, PDO::PARAM_STR);}
+	    if ($location != 'All') {$stmt->bindParam(':loca', $location, PDO::PARAM_STR);}
+            
+            $stmt->execute();
+            $rows1 = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            /******************************************************************************/
+            
+          $query1 = "select question from Tbl_C_SurveyQuestion where surveyId = :sid and questionId = :qid";
 
             $stmt1 = $this->DB->prepare($query1);
             $stmt1->bindParam(':qid', $qid, PDO::PARAM_STR);
             $stmt1->bindParam(':sid', $sid, PDO::PARAM_STR);
             $stmt1->execute();
             $value = $stmt1->fetch(PDO::FETCH_ASSOC);
+    /*****************************get survey comment*******************************************************/
+            $comments = self::getSurveyquestionresponse($sid, $qid,$department,$location);
+            
           //  print_r($value);
             $response["data"] = $rows;
             $response["question"] = $value;
+            $response["respondent"] = $rows1;
+               $response['comment'] = $comments;
         } catch (PDOException $e) {
             echo $e;
         }

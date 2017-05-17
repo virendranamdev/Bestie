@@ -4,7 +4,7 @@ define('SITE', 'http://' . $_SERVER['SERVER_NAME'] . dirname($_SERVER['PHP_SELF'
 
 session_start();
 if (!isset($_SESSION['user_session']) && $_SESSION['user_session'] == "") {
-    echo "<script>window.location='login.php'</script>";
+    echo "<script>window.location='index.php'</script>";
 }
 if (!empty($_SESSION['user_session'])) {
     ?>
@@ -56,13 +56,17 @@ if (!empty($_SESSION['user_session'])) {
 
 			
 <script src="https://code.highcharts.com/modules/exporting.js"></script>
-<script src="https://code.highcharts.com/highcharts.js"></script>
+
+
+	 <script src="js/highcharts/highcharts.js"></script>
+
 <script src="https://code.highcharts.com/highcharts-3d.js"></script>
 <script src="js/highcharts/exporting.js"></script>
 <!--
 <script src="js/highcharts/highcharts-3d.js"></script>
 
-	 <script src="js/highcharts/highcharts.js"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+
 	<script src="js/highcharts/exporting.js"></script>-->
         </head>
 
@@ -72,6 +76,6 @@ if (!empty($_SESSION['user_session'])) {
                 <div class="main_container">
                     <?php
                 } else {
-                    echo "<script>window.location='login.php'</script>";
+                    echo "<script>window.location='index.php'</script>";
                 }
                 ?>

@@ -21,6 +21,10 @@ $(document).ready(function () {
 		//alert("hi");
 		var fromdte = $("#fromdate").val();
         var enddte = $("#todate").val();
+		
+		//alert('fromdte'+fromdte);
+		//alert('enddte'+enddte);
+		
 		var clientid = $("#clientid").val();
 		var imgpath = "<?php echo SITE; ?>"
 		
@@ -62,7 +66,7 @@ $(document).ready(function () {
 					//alert(resdata);
 					
 					if (response.length !== 0)
-                    {
+                               {
 					 var jsonData = JSON.parse(resdata);
 					 //alert(jsonData.length);
                      $('#datatable tbody').remove();
@@ -175,6 +179,40 @@ $(document).ready(function () {
           </div>
         </div>
         <!-- /page content -->
+		
+<!--------------------- these script for custom date picker -------------------------------------------->
+<script type="text/javascript">
+    var datefield = document.createElement("input")
+    datefield.setAttribute("type", "date")
+    if (datefield.type != "date") { //if browser doesn't support input type="date", load files for jQuery UI Date Picker
+        document.write('<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css" />\n')
+        document.write('<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"><\/script>\n')
+        document.write('<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"><\/script>\n')
+    }
+</script>
+
+<script>
+    if (datefield.type != "date") { //if browser doesn't support input type="date", initialize date picker widget:
+        jQuery(function ($) { //on document.ready
+            $('#fromdate').datepicker();
+        })
+    }
+</script>
+<script>
+    if (datefield.type != "date") { //if browser doesn't support input type="date", initialize date picker widget:
+        jQuery(function ($) { //on document.ready
+            $('#todate').datepicker();
+        })
+    }
+</script>
+<script>
+    if (datefield.type != "date") { //if browser doesn't support input type="date", initialize date picker widget:
+        jQuery(function ($) { //on document.ready
+            $('#date').datepicker();
+        })
+    }
+</script>
+<!--------------------- these script for custom date picker -------------------------------------------->
 
 <?php include 'footer.php';?>
        

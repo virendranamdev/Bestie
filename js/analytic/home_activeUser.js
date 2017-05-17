@@ -1,19 +1,15 @@
-function showActiveUserGraph(startdate,enddate, department , SITE)
+function showActiveUserGraph(startdate,enddate, department,location, SITE)
 {
 
-//alert(startdate);
-//alert(enddate);
-//alert(department);
-//alert(SITE);
-//die;
     var postData =
             {
                 "startdate":startdate,
                 "enddate": enddate,
-				"department": department
+		"department": department,
+                "location":location
             }
     var dataString = JSON.stringify(postData);
-    //alert(dataString);
+   // alert(dataString);
 
     $.ajax({
         type: "POST",
@@ -23,9 +19,9 @@ function showActiveUserGraph(startdate,enddate, department , SITE)
         data: {"mydata": dataString},
         success: function (response) {
             var resdata = response;
-            //alert(resdata);
+          //  alert(resdata);
 			
-          //  console.log(resdata);   
+         //   console.log(resdata);   
 
             var jsonData = JSON.parse(resdata);
                                               //alert(jsonData);
@@ -170,7 +166,7 @@ function homeHappinessindexGraph(resdata) {
                                     }
                                 },
                                 title: {
-                                    text: 'Last Expired Happiness Index'
+                                    text: 'Happiness Index(Previous Day)'
                                 },
                                 tooltip: {
                                     pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'

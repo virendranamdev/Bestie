@@ -43,9 +43,10 @@ $alldepartmentarray = json_decode($getalldepartment , true);
         var enddate = document.getElementById("startdate").value;
         var startday = document.getElementById("lastweek").value;
 		var department = 'All';
+                var location = 'All';
         //alert(enddate);
         //alert(startday);
-        showActiveUserGraph(startday, enddate, department, '<?php echo SITE; ?>');
+        showActiveUserGraph(startday, enddate, department,location, '<?php echo SITE; ?>');
         showHappinessIndexGraph(startday, enddate, department, '<?php echo SITE; ?>');
         /**********************************/
        /* $("#dsds").hide();
@@ -61,19 +62,7 @@ $alldepartmentarray = json_decode($getalldepartment , true);
 </script>
 
 <script>
-   /* function activeuser(val)
-    {
-
-        var enddate = document.getElementById("startdate").value;
-        var startday = val;
-		var department = 'All'; 
-        //alert("start "+startday);
-       //alert(enddate);
-	   
-        showActiveUserGraph(startday, enddate, department , '<?php echo SITE; ?>');
-    
-    }*/
-	
+   
    	
 	function customactiveuser()
     {
@@ -82,7 +71,7 @@ $alldepartmentarray = json_decode($getalldepartment , true);
         var  startday= document.getElementById("fromDate").value;
 		var  enddate= document.getElementById("toDate").value;
 		var  department= document.getElementById("alldepartments").value;
-		
+		var location = 'All';
 		//alert("from" + startday);
 		//alert("end"+ enddate);
 		//alert("department"+ department);
@@ -106,7 +95,7 @@ $alldepartmentarray = json_decode($getalldepartment , true);
 			return false;
 		}
 		
-        showActiveUserGraph(startday, enddate, department, '<?php echo SITE; ?>');
+        showActiveUserGraph(startday, enddate, department,location, '<?php echo SITE; ?>');
     
     }
 	
@@ -386,7 +375,58 @@ $alldepartmentarray = json_decode($getalldepartment , true);
                         <?php
                         }
                         ?>
-               
+                 <!---       <article class="media event">
+                            <a class="pull-left date">
+                                <p class="month">April</p>
+                                <p class="day">23</p>
+                            </a>
+                            <div class="media-body">
+                                <a class="title" href="#">Item Two Title</a>
+                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                                <a href="#"><i class="fa fa-thumbs-o-up" aria-hidden="true"></i></a>&nbsp;&nbsp;
+                                <a href="#"><i class="glyphicon glyphicon-comment" aria-hidden="true"></i></a>&nbsp;&nbsp;
+                                <a href="#"><i class="fa fa-eye" aria-hidden="true"></i></a>
+                            </div>
+                        </article>
+                        <article class="media event">
+                            <a class="pull-left date">
+                                <p class="month">April</p>
+                                <p class="day">23</p>
+                            </a>
+                            <div class="media-body">
+                                <a class="title" href="#">Item Two Title</a>
+                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                                <a href="#"><i class="fa fa-thumbs-o-up" aria-hidden="true"></i></a>&nbsp;&nbsp;
+                                <a href="#"><i class="glyphicon glyphicon-comment" aria-hidden="true"></i></a>&nbsp;&nbsp;
+                                <a href="#"><i class="fa fa-eye" aria-hidden="true"></i></a>
+                            </div>
+                        </article>
+                        <article class="media event">
+                            <a class="pull-left date">
+                                <p class="month">April</p>
+                                <p class="day">23</p>
+                            </a>
+                            <div class="media-body">
+                                <a class="title" href="#">Item Two Title</a>
+                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                                <a href="#"><i class="fa fa-thumbs-o-up" aria-hidden="true"></i></a>&nbsp;&nbsp;
+                                <a href="#"><i class="glyphicon glyphicon-comment" aria-hidden="true"></i></a>&nbsp;&nbsp;
+                                <a href="#"><i class="fa fa-eye" aria-hidden="true"></i></a>
+                            </div>
+                        </article>
+                        <article class="media event">
+                            <a class="pull-left date">
+                                <p class="month">April</p>
+                                <p class="day">23</p>
+                            </a>
+                            <div class="media-body">
+                                <a class="title" href="#">Item Three Title</a>
+                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                                <a href="#"><i class="fa fa-thumbs-o-up" aria-hidden="true"></i></a>&nbsp;&nbsp;
+                                <a href="#"><i class="glyphicon glyphicon-comment" aria-hidden="true"></i></a>&nbsp;&nbsp;
+                                <a href="#"><i class="fa fa-eye" aria-hidden="true"></i></a>
+                            </div>
+                        </article> ---->
                     </div>
                 </div>
             </div>
@@ -401,7 +441,9 @@ $alldepartmentarray = json_decode($getalldepartment , true);
 		                $value = 0;                        
 		                $response = $obj->PostDisplay($client_id, $uid, $value);
 		                $recentData = $response['welcomedata'];
-		                //echo'<pre>';print_r($response);die;
+//		                echo'<pre>';
+//                                print_r($recentData);
+//                                die;
                         ?>
                         <ul class="nav navbar-right panel_toolbox">
                             <li class="pull-right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>

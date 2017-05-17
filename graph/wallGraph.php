@@ -1,51 +1,12 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-        <meta name="robots" content="noindex, nofollow">
-        <meta name="googlebot" content="noindex, nofollow">
-
-
-
-
-
-
-
-
-
-
-        <script type="text/javascript" src="/js/lib/dummy.js"></script>
-
-
-
-
-
-
-
-
-        <link rel="stylesheet" type="text/css" href="/css/result-light.css">
-
-
-
 
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.4.11/d3.min.js"></script>
 
 
 
         <script type="text/javascript" src="https://cdn.rawgit.com/jasondavies/d3-cloud/v1.2.1/build/d3.layout.cloud.js"></script>
-
-
-
-        <style type="text/css">
-
-        </style>
-
-        <title>Tag cloud using d3-cloud and D3.js by plantface</title>
-
-
-
-
-
 
 
         <script type='text/javascript'>//<![CDATA[
@@ -55,7 +16,7 @@
                 // just copy twice for extra data, else the cloud is a little boring
 
                 var skillsToDraw = JSON.parse(textGlobe);
-                
+
                 // Next you need to use the layout script to calculate the placement, rotation and size of each word:
 
                 var width = 400;
@@ -120,13 +81,78 @@
             }//]]> 
 
         </script>
-
-
+<style>
+#canvas1{
+		background-color : white;
+		border : none;
+		}		
+</style>
     </head>
 
     <body>
-        <div id="cloud"></div>
+        <div id="canvas1" style="background-color : white;border : none;">
+            <div id="cloud"></div>
+        </div>
+        <!--------------- image capture ------->
+        <div class="form-group">
+            <div id="design1">
+                <div id="controls1">
+                    <input type="button" value="Download" id="capture1" /><br /><br />	
+                </div>
+            </div>
+        </div>
+        <!--------------- image capture ------->
 
+        <script type="text/javascript">
+            /*************************** download image *************************/
+            
+          
+            
+            $(function () {
+
+                $('#capture1').click(function () {
+                    //get the div content
+                    div_content = document.querySelector("#canvas1");
+                    //alert('hi');
+                    //make it as html5 canvas
+                  console.log(div_content);
+                    
+                  
+                    html2canvas(div_content).then(function (canvas) {
+                        background :'#FFFFFF',
+                        //alert('ho');
+                        //change the canvas to jpeg image
+                        data = canvas.toDataURL('image/jpeg');
+//window.open(data);
+                        //then call a super hero php to save the image
+                        save_img(data, 'wordcloud.jpeg');
+                    });
+                });
+            });
+
+
+
+
+
+            function save_img(data, imgname) {
+               //    alert(data);
+                var img = document.createElement('img');
+              
+                img.src = data;
+                 document.body.style.backgroundColor = "#f3f3f3";
+                var a = document.createElement('a');
+//a.setAttribute("download", "wordcloud.jpeg");
+                a.setAttribute("download", imgname);
+                a.setAttribute("href", data);
+                a.appendChild(img);
+                var w = open();
+                w.document.title = 'Download Image';
+                w.document.body.innerHTML = 'Click On Image for Download';
+                w.document.body.appendChild(a);
+            }
+
+            /******************************** / download image *********************/
+        </script>
 
     </body>
 

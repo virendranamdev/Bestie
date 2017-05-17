@@ -5,6 +5,7 @@ require_once('check_login_status.php');
 $obj = new Auth();
 //$obj->check_session();
 ?>
+<body style="background-image:url('images/bestiebackground.jpg') !important;">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
@@ -67,3 +68,4 @@ $obj = new Auth();
   
 
 <!--------------------------------- / forget popup ------------------------------->
+</body>

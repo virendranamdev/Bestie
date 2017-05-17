@@ -1,14 +1,15 @@
-function showAnalyticTopPost(startdate,enddate,dept, SITE)
+function showAnalyticTopPost(startdate,enddate,dept,loc, SITE)
 {
 
     var postData =
             {
                 "startdate":startdate,
                 "enddate": enddate,
-                  "department": dept
+                "department": dept,
+                "location":loc
             }
     var dataString = JSON.stringify(postData);
-  //    alert(dataString);
+    //    alert(dataString);
 
     $.ajax({
         type: "post",

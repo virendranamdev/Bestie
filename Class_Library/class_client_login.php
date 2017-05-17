@@ -137,8 +137,9 @@ class ClientLogin {
                 $st->bindParam(':email', $email, PDO::PARAM_STR);
                 if ($st->execute()) {
 
+					//$to1 = "monikagupta05051994@gmail.com";
                     $to1 = $email;
-                    $subject1 = "Vikas Live Password Assistance";
+                    $subject1 = "Bestie Password Assistance";
 
                     $message = '<html><body>';
 //$message .= "<h6>Dear ".$val['firstName'].", </h6>";
@@ -147,22 +148,33 @@ class ClientLogin {
                     $message .='<p>Your Password : ' . $randompassword . '</p>';
                     $message .='<p>If you did not request to have your password you can safely ignore this email. Rest assured your customer account is safe.</p>';
                     $message .= "<p>Regards,</p>";
-                    $message .= "<p>Team Vikas Live</p>";
+                    $message .= "<p>Team Bestie</p>";
                     $message .= '</body></html>';
 
-                    $headers1 = "From: Vikas Live <vikaslive@benepik.com> \r\n";
+                    $headers1 = "From: Bestie <bestie@benepik.com> \r\n";
                     $headers1 .= "MIME-Version: 1.0\r\n";
                     $headers1 .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
 
                     if (mail($to1, $subject1, $message, $headers1)) {
-                        $msg = "Password send sucessfully";
+                        $msg = "Password has been sent to your email id";
                         $resp['msg'] = $msg;
                         $resp['success'] = 1;
                         return json_encode($resp);
                     }
-                }
+					else {
+                        $msg = "Process Failed , Please try again later";
+                        $resp['msg'] = $msg;
+                        $resp['success'] = 0;
+                        return json_encode($resp);
+                    }
+                } else {
+			$msg = "Process Failed , Please try again later";
+		        $resp['msg'] = $msg;
+		        $resp['success'] = 0;
+		        return json_encode($resp);
+		}
             } else {
-                $msg = "wrong password";
+                $msg = "Please check Your Email Id";
                 $resp['msg'] = $msg;
                 $resp['success'] = 0;
                 return json_encode($resp);
@@ -175,7 +187,7 @@ class ClientLogin {
     /*     * ************************************************ Random Password generator *********************************** */
 
     function randomalpha($length) {
-        $alphabet = "abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ";
+        $alphabet = "abcdefghjkmnpqrtuwxyzABCDEFGHJKLMNPQRTUWXYZ";
         $pass = array(); //remember to declare $pass as an array
         $alphaLength = strlen($alphabet) - 1; //put the length -1 in cache
         for ($i = 0; $i < $length; $i++) {
@@ -186,7 +198,7 @@ class ClientLogin {
     }
 
     function randomdigit($length) {
-        $alphabet = "0123456789";
+        $alphabet = "2346789";
         $pass = array(); //remember to declare $pass as an array
         $alphaLength = strlen($alphabet) - 1; //put the length -1 in cache
         for ($i = 0; $i < $length; $i++) {

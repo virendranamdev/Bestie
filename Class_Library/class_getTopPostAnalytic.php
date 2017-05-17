@@ -12,22 +12,34 @@ class TopPostAnalytic {
     }
 
 
- function getTopPostForAnalytic($client, $fromdt, $enddte,$department) {
+ function getTopPostForAnalytic($client, $fromdt, $enddte,$department,$location) {
      
         try {
-            if($department == 'All')
-            {
-            $query = "select count(userUniqueId) as totalview,post_id,date_of_entry,flagType from Tbl_Analytic_PostView where (DATE(date_of_entry) BETWEEN :fromdte AND :enddte) and clientId = :client group by post_id order by count(userUniqueId) desc";
-            }
-            else
-            {
-                  $query = "select count(tap.userUniqueId) as totalview,tap.post_id,tap.date_of_entry,tap.flagType from Tbl_Analytic_PostView as tap join Tbl_EmployeeDetails_Master as tem on tem.employeeId = tap.userUniqueId where (DATE(tap.date_of_entry) BETWEEN :fromdte AND :enddte) and tap.clientId = :client and tem.department = :department group by tap.post_id order by count(tap.userUniqueId) desc";
-            }
+           
+                  $query = "select count(tap.userUniqueId) as totalview,tap.post_id,tap.date_of_entry,tap.flagType from Tbl_Analytic_PostView as tap join Tbl_EmployeeDetails_Master as tem on tem.employeeId = tap.userUniqueId where (DATE(tap.date_of_entry) BETWEEN :fromdte AND :enddte) and tap.clientId = :client";
+           
+              if ($department == 'All' && $location == 'All'){
+                $query .= "";}
+				
+			if ($department != 'All' && $location != 'All'){
+                $query .= " AND tem.department = :dept AND tem.location = :loca";}
+				
+			if ($department == 'All' && $location != 'All'){
+                $query .= " AND tem.location = :loca";}
+				
+			if ($department != 'All' && $location == 'All'){
+                $query .= " AND tem.department = :dept";}
+			
+		$query .= " group by tap.post_id order by count(tap.userUniqueId) desc";
+            
+            
+            
             $stmt = $this->db_connect->prepare($query);
             $stmt->bindParam(':client', $client, PDO::PARAM_STR);
             $stmt->bindParam(':fromdte', $fromdt, PDO::PARAM_STR);
             $stmt->bindParam(':enddte', $enddte, PDO::PARAM_STR);
-           if($department != 'All'){$stmt->bindParam(':department', $department, PDO::PARAM_STR);}
+            if ($department != 'All') {$stmt->bindParam(':dept', $department, PDO::PARAM_STR);}
+	    if ($location != 'All') {$stmt->bindParam(':loca', $location, PDO::PARAM_STR);}
             $stmt->execute();
             $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
       

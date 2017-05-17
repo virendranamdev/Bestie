@@ -30,9 +30,9 @@ $locationarray = json_decode($locationjson, true);
 //alert("this is enddate-"+rtodte);
  //console.log("this is fromdate-"+rtodte);
         var rdept = 'All';
-       // var rlocation = 'All';
-         analyticActiveUserGraph(rfromdte, rtodte, rdept, '<?php echo SITE; ?>');
-         showActiveUserGraph(rfromdte, rtodte, rdept, '<?php echo SITE; ?>');
+       var rlocation = 'All';
+         analyticActiveUserGraph(rfromdte, rtodte,rlocation, '<?php echo SITE; ?>');
+         showActiveUserGraph(rfromdte, rtodte, rdept,rlocation, '<?php echo SITE; ?>');
        
     });
 
@@ -41,10 +41,10 @@ $locationarray = json_decode($locationjson, true);
        {
 	//	alert("hello iam here");
 		
-        var  startday= document.getElementById("fromDate").value;
+                var  startday= document.getElementById("fromDate").value;
 		var  enddate= document.getElementById("toDate").value;
 		var  department= document.getElementById("dept").value;
-		
+		var  location = document.getElementById("location").value;
 		//alert("from" + startday);
 		//alert("end"+ enddate);
 		//alert("department"+ department);
@@ -68,7 +68,7 @@ $locationarray = json_decode($locationjson, true);
 			return false;
 		}
 		
-        showActiveUserGraph(startday, enddate, department, '<?php echo SITE; ?>');
+        showActiveUserGraph(startday, enddate, department,location, '<?php echo SITE; ?>');
     
     }
 
@@ -78,8 +78,8 @@ $locationarray = json_decode($locationjson, true);
       //  alert("hello");
         var rfromdte = $("#fromDate1").val();
         var rtodte = $("#toDate1").val();
-         var rdept = 'All';
-
+         var rlocation = $("#location1").val();
+       
         if (rfromdte == "")
         {
             alert("Please Select From Date");
@@ -94,7 +94,7 @@ $locationarray = json_decode($locationjson, true);
         }
         else
         {
-            analyticActiveUserGraph(rfromdte, rtodte, rdept, '<?php echo SITE; ?>');
+            analyticActiveUserGraph(rfromdte, rtodte, rlocation, '<?php echo SITE; ?>');
         }
     }
     
@@ -113,7 +113,7 @@ $locationarray = json_decode($locationjson, true);
              <div class="col-md-12 col-sm-12 col-xs-12 col-lg-12">
                 <div class="x_panel">
                     <div class="x_title">
-                        <h2>Active User Analytic</h2>
+                        <h2>Active User Analytic(Date wise)</h2>
                         <ul class="nav navbar-right panel_toolbox">
                             <li class="right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                             </li>
@@ -152,7 +152,7 @@ $locationarray = json_decode($locationjson, true);
                                 
                                  <div class="form-group col-md-2">
                                     <label for="sel1">Select Location:</label>
-                                    <select class="form-control" id="rlocation">
+                                    <select class="form-control" id="location">
                                         <option value = "All" selected="">All</option>
                                         <?php
                                         $countloc = count($locationarray);
@@ -185,7 +185,7 @@ $locationarray = json_decode($locationjson, true);
             <div class="col-md-12 col-sm-12 col-xs-12 col-lg-12">
                 <div class="x_panel">
                     <div class="x_title">
-                        <h2>Active User Analytic</h2>
+                        <h2>Active User Analytic(Department wise)</h2>
                         <ul class="nav navbar-right panel_toolbox">
                             <li class="right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                             </li>
@@ -199,17 +199,28 @@ $locationarray = json_decode($locationjson, true);
                             
                             <!--<form id="demo-form2" data-parsley-validate class="form-inline">-->
                             <div class="row">
-                                <div class="form-group col-md-4">
+                                <div class="form-group col-md-3">
                                     <label for="usr">From:</label>
                                     <input type="date" class="form-control" id="fromDate1" size="20" placeholder="mm/dd/yyyy" name="fromDate"/>
                                 </div>&nbsp;&nbsp;&nbsp;&nbsp;
-                                <div class="form-group col-md-4">
+                                <div class="form-group col-md-3">
                                     <label for="pwd">To:&nbsp;&nbsp;</label>
                                     <input type="date"class="form-control" id="toDate1" size="20" placeholder="mm/dd/yyyy" name="toDate"/>
                                 </div>&nbsp;&nbsp;&nbsp;&nbsp;
 
-                              
-                                <div class="col-md-4">
+                                 <div class="form-group col-md-3">
+                                    <label for="sel1">Select Location:</label>
+                                    <select class="form-control" id="location1">
+                                        <option value = "All" selected="">All</option>
+                                        <?php
+                                        $countloc = count($locationarray);
+                                        for ($i = 0; $i < $countloc; $i++) {
+                                            echo '<option value="' . $locationarray[$i]['location'] . '">' . $locationarray[$i]['location'] . '</option>';
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
                                     <input type="submit" id="recognizeuser" onclick="getActiveuserdepartment();" class="btn btn-primary" style="margin-top:5px" value="Submit" />
                                 </div>
                             </div>                
