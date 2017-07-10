@@ -1,7 +1,8 @@
 <?php
 
-error_reporting(E_ALL ^ E_NOTICE);
-ini_set('display_errors', 1);
+error_reporting(0);
+//ini_set('display_errors', 1);
+
 if (isset($_SERVER['HTTP_ORIGIN'])) {
     header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
     header('Access-Control-Allow-Credentials: true');
@@ -52,15 +53,16 @@ if (!empty($jsonArr)) {
 
     if ($result['success'] == 1) {
         $mail = $result['mailid'];
+	// $mail = "monikagupta05051994@gmail.com";
         $name = $result['name'];
         $progn = $result['progName'];
         $dedi = $result['dedicatedEmail'];
         $contact = $result['contact'];
 
-        $sub = "Merchant Referance Received";
+        $sub = "Merchant Reference Received";
         $msg.="Dear " . $name . ",";
         $msg.="<br/><br/>";
-        $msg.="<br/>Thank you for providing merchant reference to Vikas Live. We will soon contact the merchant for potential tie up.";
+        $msg.="<br/>Thank you for providing merchant reference to Bestie. We will soon contact the merchant for potential tie up.";
         $msg.="<br/><br/>";
         $msg.="<br/>For your information, here is a copy of your message:";
         $msg.="<br/><br/>";
@@ -69,37 +71,34 @@ if (!empty($jsonArr)) {
         $msg.="<br/>Contact Number : " . $mob;
         $msg.="<br/>Comment : " . $message;
         $msg.="<br/><br/><br/>";
-        $msg.="Regards, <br/> Team Vikas Live";
+        $msg.="Regards, <br/> Team Bestie";
 
-        $from = "From: Vikas Live <vikaslive@benepik.com>";
+        $from = "From: Bestie <support@mybestie.in>";
 
         if ($mail != "") {
             $mesg->forMail($mail, $sub, $msg, $from);
         }
 
-        $sub2 = "Merchant refered on Vikas Live ";
-        $adminMailid = "<saurabh.jain@benepik.com>,<info@benepik.com>,benepik@gmail.com";
-//        $adminMailid = "<virendra@benepik.com>";
+        $sub2 = "Merchant referred on Bestie ";
 
-        $msg2.="Dear Team Benepik,";
-        $msg2.="<br/><br/>";
-        $msg2.="Mr. " . $name . " referred merchant: <br/>";
+        // $adminMailid = "Bestie <monikagupta05051994@gmail.com>";
+	$adminMailid = "Bestie <saurabh.jain@benepik.com>,<sau_org@yahoo.co.in>,<support@mybestie.in>,<info@benepik.com>,<gagandeep@benepik.com>";
+        
         $msg2.="Email id: - " . $mail . "<br/>";
-        $msg2.="Contact No: - " . $contact;
-        $msg2.="<br/><br/>";
         $msg2.="Merchant Name : " . $mname;
         $msg2.="<br/>Merchant Location : " . $mloc;
         $msg2.="<br/>Contact Number : " . $mob;
         $msg2.="<br/>Comments : " . $message;
 
         $msg2.="<br/><br/><br/>";
-        $msg2.="Regards, <br/> Team Vikas Live";
+        $msg2.="Regards, <br/> Team Bestie";
 
-        $from = "From: Vikas Live <vikaslive@benepik.com>";
+        $from = "From: Bestie <support@mybestie.in>";
 
         $mesg->forMailToSir($adminMailid, $sub2, $msg2, $from);
     }
 
+    header('Content-type: application/json');
     echo json_encode($result);
 }
 ?>

@@ -46,7 +46,7 @@ $notidetailsarr = json_decode($notidetails , true);
                     
                   </div>
 				  <div class="form-group">
-                    <img src = "<?php echo $notidetailsarr['data']['image'];?>" style="img-responsive">
+                    <img src = "<?php echo $notidetailsarr['data']['image'];?>" style="img img-responsive">
                     
                   </div>
 <div class="form-group"><h5 style="float:right;"><?php echo $notidetailsarr['data']['createdDate'];?></h5></div>
@@ -56,7 +56,7 @@ $notidetailsarr = json_decode($notidetails , true);
               </div>
             </div>
 
-			
+			<!--
 			<div class="row">
               <div class="col-md-3 col-xs-6 col-sm-3 col-lg-3">
                 <div class="x_panel height" >
@@ -110,14 +110,14 @@ $notidetailsarr = json_decode($notidetails , true);
 				  
                 </div>
               </div>
-			</div>
+			</div>-->
 		
      
           </div>
         </div>
         <!-- /page content -->
 		
-		<script src="build/js/reminderGraph.js"></script>
+		<!--<script src="build/js/reminderGraph.js"></script>-->
 	
 		
       <?php include 'footer.php';?>

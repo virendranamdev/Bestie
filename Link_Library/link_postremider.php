@@ -5,14 +5,19 @@ require_once('../Class_Library/class_reading.php');
 require_once('../Class_Library/class_push_notification.php');
 require_once('../Class_Library/class_notification.php');
 require_once('../Class_Library/class_welcomeTable.php');
+include_once ("../Class_Library/Api_Class/class_family.php");
+include_once('../Class_Library/class_get_group.php');  // for getting all group
 
 //$obj = new Post();
 $notiobj = new notification();                                        // object of class post page
 $push = new PushNotification();                         // object of class push notification page
 $read = new Reading();
 $welcomeobj = new WelcomePage();
-date_default_timezone_set('Asia/Calcutta');
-$post_date = date('Y-m-d H:i:s A');
+$obj = new Family();
+$customGroup = new Group();                  //class_get_group.php
+
+date_default_timezone_set('Asia/Kolkata');
+$post_date = date('Y-m-d H:i:s');
 $maxid = $notiobj->maxID(); 
 $reminderid = $notiobj->remindermaxId(); 
 
@@ -23,51 +28,46 @@ $target = "images/reminder/";
 if (!isset($_GET['remindersubmit'])) {
     $status = 1 ;
     $POST_ID = $maxid;
-	$Uuid = $_REQUEST['useruniqueid'];
+    $Uuid = $_REQUEST['useruniqueid'];
     $Client_Id = $_REQUEST['clientid'];
-	$BY = $_SESSION['user_name'];
+    $BY = $_SESSION['user_name'];
     $POST_TITLE = trim($_POST['remindertitle']);
     $POST_IMG = "";
-	$thumb_img = "";
+    $thumb_img = "";
     $POST_TEASER = "";
     $DATE = $post_date;
     $FLAG = $_POST['flag'];
-	$Flagname = $_POST['flagvalue'];
-	$User_Type = $_REQUEST['optradio'];
-	$POST_CONTENT = "";
+    // $Flagname = $_POST['flagvalue'];
+    //$Flagname = "";
+    $User_Type = $_REQUEST['optradio'];
+    $POST_CONTENT = "";
     /*****************************************************************************/
 
-	$LIKE = "LIKE_YES";
-	$like = (empty($LIKE)?"":$LIKE);
-		if ($like =="") 
-		{
+    $LIKE = "LIKE_YES";
+    $like = (empty($LIKE)?"":$LIKE);
+	if ($like =="") {
             $like = 'LIKE_NO';
             $like_val = 'like_no';
-        } else 
-		{
+        } else {
             $like_val = 'like_yes';
-			$like = 'LIKE_YES';
+	    $like = 'LIKE_YES';
         }
 
-	$COMMENT = "COMMENT_YES";
+    $COMMENT = "COMMENT_YES";
     $comment = (empty($COMMENT)?"":$COMMENT);
-		if ($comment=="") 
-		{
+	if ($comment=="") {
             $comment = 'COMMENT_NO';
             $comment_val = 'comment_no';
-        } else 
-		{
+        } else {
             $comment_val = 'comment_yes';
-			$comment = 'COMMENT_YES';
+	    $comment = 'COMMENT_YES';
         }
 
-	$PUSH = "PUSH_YES";
+    $PUSH = "PUSH_YES";
     $push_noti = (empty($PUSH)?"":$PUSH);
-		if ($push_noti=="") 
-		{
+	if ($push_noti=="") {
             $PUSH_NOTIFICATION = 'PUSH_NO';
-        } else 
-		{
+        } else {
             $PUSH_NOTIFICATION = 'PUSH_YES';
         }
 		//echo $like;
@@ -77,8 +77,7 @@ if (!isset($_GET['remindersubmit'])) {
 /*****************************************************************************/
 
 /************************ user group ***********************************************/
-	if ($User_Type == 'Selected') 
-	{
+	if ($User_Type == 'Selected') {
 		$user1 = $_POST['selected_user'];
 		$user2 = rtrim($user1, ',');
 		$myArray = explode(',', $user2);
@@ -86,9 +85,7 @@ if (!isset($_GET['remindersubmit'])) {
 		echo "<pre>";
 	    print_r($myArray)."<br/>";
     	echo "</pre>";*/
-	}
-	else 
-	{
+	} else {
 		//echo "all user"."<br/>";
 		$User_Type = "Selected";
 		//  echo "user type:-".$User_Type;
@@ -112,16 +109,20 @@ $googleapiIOSPem = $push->getKeysPem($Client_Id);
 /************************ get keypem ************************************/
 
 /******************** save image ****************************************/
-$reminderimage = $_FILES['remiderimage']['name'];
-$rimg = str_replace(" ", "", $_FILES['remiderimage']['name']);
-$rimgtemp = $_FILES['remiderimage']['tmp_name'];
-$image_name = "reminder-".$reminderid . "-" . $rimg;
+if ($_FILES['remiderimage']['name'] != "") {
+	$reminderimage = $_FILES['remiderimage']['name'];
+	$rimg = str_replace(" ", "", $_FILES['remiderimage']['name']);
+	$rimgtemp = $_FILES['remiderimage']['tmp_name'];
+	$image_name = "reminder-".$reminderid . "-" . $rimg;
 
 	$imagepath = $folder . $image_name;
 	$dbimage = $target . $image_name;
-    $url = $notiobj->compress_image($rimgtemp, $imagepath, 30);
-    $fullpath = SITE_URL . $target . $image_name;
-	
+	$url = $notiobj->compress_image($rimgtemp, $imagepath, 30);
+	$fullpath = SITE_URL . $target . $image_name;
+} else {
+        $fullpath = "";
+        $dbimage = "";
+}
 /********************** / save image ************************************/
 
 /********************* insert into tbl c post details *****************************/
@@ -138,34 +139,53 @@ $device = 1;
 
 /**************************** post sent to group *****************************/
     $groupcount = count($myArray);
+    $general_group = array();
+    $custom_group = array();
     for ($k = 0; $k < $groupcount; $k++) {
 	//echo "group id".$myArray[$k];
         $result1 = $read->postSentToGroup($Client_Id, $lastreminderid, $myArray[$k], $FLAG);
-//echo $result1;
+ /***********************  custom group *********************/
+         $groupdetails = $read->getGroupDetails($Client_Id, $myArray[$k]);  //get all groupdetails
+
+        if ($groupdetails['groupType'] == 2) {
+            array_push($custom_group, $myArray[$k]);
+        } else {
+            array_push($general_group, $myArray[$k]);
+        }
     }
 /******************************* / post sent to group ***********************************/
+ /******************  fetch all user employee id from user detail start **************************** */
+if (count($general_group) > 0) {
+       
+        $gcm_value = $push->get_Employee_details($User_Type, $general_group, $Client_Id);
     
-/****************** fetch all user employee id from user detail start *************************/
-    $gcm_value = $push->get_Employee_details($User_Type, $myArray, $Client_Id);
-    $token = json_decode($gcm_value, true);
-    /*echo "hello user  id";
-    echo "<pre>";
-    print_r($token);
-    echo "</pre>";*/
+        $generaluserid = json_decode($gcm_value, true);
 
-/*********get group admin uuid  form group admin table if user type not= all **************/
+    }
+    else{   
+               $generaluserid = array();
+    }
+    if (count($custom_group) > 0) {
+        $gcm_value1 = $customGroup->getCustomGroupUser($Client_Id, $custom_group);
+        $customuserid = json_decode($gcm_value1, true);
+
+    }
+     else{
+              $customuserid = array();
+    }
+    /*************get group admin uuid  form group admin table if user type not= all ************** */
 
 		if ($User_Type != 'All') 
 		{
-			$groupadminuuid = $push->getGroupAdminUUId($myArray, $Client_Id);
-            $adminuuid = json_decode($groupadminuuid, true);
+		//	$groupadminuuid = $push->getGroupAdminUUId($myArray, $Client_Id);
+          //  $adminuuid = json_decode($groupadminuuid, true);
               /*echo "hello groupm admin id";
               echo "<pre>";
               print_r($adminuuid)."<br/>";
               echo "</pre>";
               echo "--------------all employee id---------";*/
 
-            $allempid = array_merge($token, $adminuuid);
+            $allempid = array_merge($generaluserid, $customuserid);
               /*echo "<pre>";
               print_r($allempid);
               echo "<pre>";
@@ -179,11 +199,8 @@ $device = 1;
  
 		} else 
 		{
-			$allempid1 = $token;
-			/*echo "user unique id";
-              echo "<pre>";
-              print_r($allempid1);
-              echo "<pre>";*/
+			$allempid1 = $generaluserid;
+			
 		}
 		/*echo "user unique id";
               echo "<pre>";
@@ -235,44 +252,37 @@ $type = 'Reminder';
     /*********************check push notificaticon enabale or disable******************** */
     if ($PUSH_NOTIFICATION == 'PUSH_YES') 
 	{
-        $hrimg = ($image == "")?"":SITE_URL . $image;
+        $hrimg = ($dbimage == "")?"":SITE_URL . $dbimage;
         $sf = "successfully send";
         $ids = array();
         $idsIOS = array();
 
         foreach ($token1 as $row) {
-            if ($row['deviceName'] == 3) {
-                array_push($idsIOS, $row["registrationToken"]);
-            } else {
-                array_push($ids, $row["registrationToken"]);
-            }
-            //array_push($ids,$row["registrationToken"]);
-        }
-
-        $data = array('Id' => $lastreminderid, 'Title' => $POST_TITLE, 'Content' => $POST_TITLE, 'SendBy' => $BY, 'Picture' => $hrimg, 'Image' => $fullpath, 'Date' => $post_date, 'flag' => $FLAG, 'flagValue' => $Flagname, 'success' => $sf, 'like' => $like_val, 'comment' => $comment_val);
+        	$userdetails = $obj->getUserDetails($Client_Id, $row['userUniqueId'], SITE_URL);
+		$Flagname = "Hey ". $userdetails['UserDetails']['firstName'] .", ";
+		// $content = $POST_TITLE;
 		
-		$IOSrevert = $push->sendAPNSPush($data, $idsIOS, $googleapiIOSPem['iosPemfile']);
-        $revert = $push->sendGoogleCloudMessage($data, $ids, $googleapiIOSPem['googleApiKey']);
-        
-		$rt = json_decode($revert, true);
-        $iosrt = json_decode($IOSrevert, true);
+    	        $data = array('Id' => $lastreminderid, 'Title' => $POST_TITLE, 'Content' => $POST_TITLE, 'SendBy' => $BY, 'Picture' => $hrimg, 'Image' => $fullpath, 'Date' => $post_date, 'flag' => $FLAG, 'flagValue' => $Flagname, 'success' => $sf, 'like' => $like_val, 'comment' => $comment_val);
+	    
+		$badgecount = $push->getBadgecount($row['deviceId']);
+		$badgecount = $badgecount['badgeCount']+1;
+		$addBadgecount = $push->updateBadgecount($row['deviceId'], $badgecount);
+	    
+                if ($row['deviceName'] == "3") {
+                    $data['device_token'] = $row['registrationToken'];
+            	    $IOSrevert = $push->sendAPNSPushCron($data, $googleapiIOSPem['iosPemfile'], '', $badgecount);        
+                } else {
+                    $data['device_token'] = $row['registrationToken'];
+                    $data['badge'] = $badgecount;
+                    $revert = $push->sendGoogleCloudMessageCron($data, $googleapiIOSPem['googleApiKey']);
+		}
+	}     
 		
-		/*echo "<pre>";
-		print_r($data);
-		print_r($rt);
-		print_r($iosrt);
-		echo "</pre>";*/
-		
-        if ($rt['success'] == 1) 
+        if ($revert['success'] == 1) 
 		{
             echo "<script>alert('Post Successfully Send');</script>";
             echo "<script>window.location='../create-reminder.php'</script>";
         } 
-		else
-		{
-            echo "<script>alert('Post Successfully Send');</script>";
-            echo "<script>window.location='../create-reminder.php'</script>";
-        }
     }
     else 
 	{

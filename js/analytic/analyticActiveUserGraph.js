@@ -79,6 +79,7 @@ console.log(resdata);
              categories:categorydata  
         },
         yAxis: {
+            allowDecimals: false,
             title: {
                 text: 'Users'
             }

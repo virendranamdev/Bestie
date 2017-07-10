@@ -1,9 +1,9 @@
 <?php
 
-//error_reporting(E_ALL);ini_set("display_errors", 1);
+error_reporting(E_ALL);ini_set("display_errors", 1);
 
 if (!class_exists('Feedback') && include("../../Class_Library/Api_Class/class_feedback.php")) {
-
+   require_once('../../Class_Library/Api_Class/class_AppAnalytic.php');
     if (isset($_SERVER['HTTP_ORIGIN'])) {
         header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
         header('Access-Control-Allow-Credentials: true');
@@ -26,24 +26,32 @@ if (!class_exists('Feedback') && include("../../Class_Library/Api_Class/class_fe
     $jsonArr = json_decode(file_get_contents("php://input"), true);
 
     /*
-      {
-      "clientId" : "CO-28",
-      "empId"    : "HGLF3M0DfwFdqWP3AbWPUWA0cD03O61",
-      "device"   : "",
-      "deviceId"   : "",
-      "value"    : "0"
-      }
-     */
+    $json = '
+	{
+	"clientId" : "CO-28",
+	"empId"    : "HGLF3M0DfwFdqWP3AbWPUWA0cD03O61",
+	"device"   : "3",
+	"deviceId" : "34567u8i9",
+	"val"      : "0"
+	}';
+     
+    $jsonArr = json_decode($json, true);
+    */
 
     if ($jsonArr['clientId'] && $jsonArr['empId']) {
         $obj = new Feedback();
+         $analytic_obj = new AppAnalytic();
         extract($jsonArr);
 
         $response = $obj->getFeedbackList($clientId, $empId, $val);
+        /************* analytic purpose seve data *****************/
+            $flagtype = 23;
+         $analytic_obj->listAppview($clientId, $empId, $device, $deviceId, $flagtype);
     } else {
         $response['success'] = 0;
         $response['result'] = "Invalid json";
     }
+    
     header('Content-type: application/json');
     echo json_encode($response);
 }

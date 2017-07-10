@@ -65,24 +65,51 @@ class Feedback {
 		
     }
 
+    public function getLatestFeedback(){
+    	try{
+    		$query = "SELECT feedbackId from Tbl_C_Feedback ORDER BY autoId DESC limit 0,1";
+    		$stmt = $this->db_connect->prepare($query);
+		if ($stmt->execute()) {
+                	$response = $stmt->fetch(PDO::FETCH_ASSOC);
+                }
+    		
+    	} catch(Exception $ex){
+    		$response = $ex;
+    	}
+    	return $response;
+    }
+
     public function getFeedbackList($clientId, $empId, $val) {
         try {
-            $status = "Live";
             $flagType = 23;
-            $query = "select count(autoId) as total from Tbl_C_Feedback WHERE clientId=:clientId AND status=:status AND flagType=:flagType";
+            $query = "select feedbackId from Tbl_C_Feedback WHERE unpublishingTime <= CURDATE() AND unpublishingTime != '0000-00-00 00:00:00' AND status='Live' AND clientId=:clientId AND flagType=:flagType";
             $stmt = $this->db_connect->prepare($query);
             $stmt->bindParam(':clientId', $clientId, PDO::PARAM_STR);
             $stmt->bindParam(':flagType', $flagType, PDO::PARAM_STR);
-            $stmt->bindParam(':status', $status, PDO::PARAM_STR);
+            if ($stmt->execute()) {
+            	$feedbackList = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            }
+            
+            foreach($feedbackList as $feeds) {
+            	$fstatus = "Expired";
+            	self::status_FeedbackWall($feeds['feedbackId'], $fstatus);
+            }
+            
+        
+            $query = "select count(autoId) as total from Tbl_C_Feedback WHERE clientId=:clientId AND flagType=:flagType";
+            $stmt = $this->db_connect->prepare($query);
+            $stmt->bindParam(':clientId', $clientId, PDO::PARAM_STR);
+            $stmt->bindParam(':flagType', $flagType, PDO::PARAM_STR);
+            //$stmt->bindParam(':status', $status, PDO::PARAM_STR);
             if ($stmt->execute()) {
                 $total = $stmt->fetch(PDO::FETCH_ASSOC);
             }
 
-            $query = "SELECT *, DATE_FORMAT(publishingTime, '%d %M %Y') as publishingTime, DATE_FORMAT(unpublishingTime, '%d %M %Y') as unpublishingTime, (select count(commentId) as totalComments from Tbl_C_FeedbackComments where feedbackId=Tbl_C_Feedback.feedbackId and Tbl_C_Feedback.status=:status) as total_comments FROM Tbl_C_Feedback WHERE clientId=:clientId AND status=:status AND flagType=:flagType  ORDER BY Tbl_C_Feedback.createdDate DESC LIMIT $val,10";
+            $query = "SELECT *, DATE_FORMAT(publishingTime, '%d %M %Y') as publishingTime, if(unpublishingTime = '0000-00-00 00:00:00' , '', DATE_FORMAT(unpublishingTime, '%d %M %Y')) as unpublishingTime, (select count(commentId) as totalComments from Tbl_C_FeedbackComments where feedbackId=Tbl_C_Feedback.feedbackId) as total_comments FROM Tbl_C_Feedback WHERE clientId=:clientId AND flagType=:flagType ORDER BY Tbl_C_Feedback.status DESC,Tbl_C_Feedback.createdDate DESC LIMIT $val,10";
             $stmt = $this->db_connect->prepare($query);
             $stmt->bindParam(':clientId', $clientId, PDO::PARAM_STR);
             $stmt->bindParam(':flagType', $flagType, PDO::PARAM_STR);
-            $stmt->bindParam(':status', $status, PDO::PARAM_STR);
+            //$stmt->bindParam(':status', $status, PDO::PARAM_STR);
             if ($stmt->execute()) {
                 $feedbackResult = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -96,7 +123,7 @@ class Feedback {
             if ($datacount < 1) {
             	$result = array();
                 $result['success'] = 0;
-                $result['message'] = "No more feedback available";
+                $result['message'] = "No more posts available";
                 return $result;
             } else {
                 return $result;
@@ -128,41 +155,45 @@ class Feedback {
 //                $status = "Live";
                         $flagType = 23;
 
-                        $query = "SELECT feedComments.*, DATE_FORMAT(feedComments.CommentDate, '%d %M %Y') as CommentDate, feed.feedbackQuestion, DATE_FORMAT(feed.unpublishingTime, '%d %M %Y') as unpublishingTime, (select count(autoId) from Tbl_C_FeedbackCommentLikes where commentId=feedComments.commentId and feedbackId=:feedbackId and like_unlike_status='1') as totalLikes, if((select count(autoId) from Tbl_C_FeedbackCommentLikes where commentId=feedComments.commentId and feedbackId=:feedbackId and employeeId=:empId and like_unlike_status='1')>0, (select if(employeeId=:empId, '1', '0') as likeStatus from Tbl_C_FeedbackCommentLikes where commentId=feedComments.commentId and feedbackId=:feedbackId and employeeId=:empId and like_unlike_status='1'), '0') as likeStatus, if(feedComments.anonymous='1', 'Anonymous', concat(master.firstName, ' ',master.lastName)) as user_name,if(feedComments.anonymous='1', if(personal.avatar_image='', '', concat('" . site_url . "', personal.avatar_image)) , if(personal.userImage='', '', concat('" . site_url . "', personal.userImage))) as avatar_image FROM Tbl_C_FeedbackComments as feedComments JOIN Tbl_C_Feedback as feed ON feedComments.feedbackId=feed.feedbackId JOIN Tbl_EmployeePersonalDetails as personal ON feedComments.commentBy=personal.employeeId JOIN Tbl_EmployeeDetails_Master as master ON master.employeeId=personal.employeeId WHERE feed.clientId=:clientId AND feed.flagType=:flagType AND feedComments.feedbackId=:feedbackId ORDER BY feedComments.autoId desc limit $val,10";
-//            echo $query;die;
+                        $query = "SELECT feedComments.*, DATE_FORMAT(feedComments.CommentDate, '%d %M %Y') as CommentDate, feed.feedbackQuestion, feed.feedbackTopic, if(feed.unpublishingTime = '0000-00-00 00:00:00' , '', DATE_FORMAT(feed.unpublishingTime, '%d %M %Y')) as unpublishingTime, (select count(autoId) from Tbl_C_FeedbackCommentLikes where commentId=feedComments.commentId and feedbackId=:feedbackId and like_unlike_status='1') as totalLikes, if((select count(autoId) from Tbl_C_FeedbackCommentLikes where commentId=feedComments.commentId and feedbackId=:feedbackId and employeeId=:empId and like_unlike_status='1')>0, (select if(employeeId=:empId, '1', '0') as likeStatus from Tbl_C_FeedbackCommentLikes where commentId=feedComments.commentId and feedbackId=:feedbackId and employeeId=:empId and like_unlike_status='1'), '0') as likeStatus, if(feedComments.anonymous='1', 'Anonymous', concat(master.firstName, ' ',master.lastName)) as user_name,if(feedComments.anonymous='1', if(feedComments.avatar_image='', '', concat('" . site_url . "', feedComments.avatar_image)) , if(personal.userImage='', '', concat('" . site_url . "', personal.userImage))) as avatar_image FROM Tbl_C_FeedbackComments as feedComments JOIN Tbl_C_Feedback as feed ON feedComments.feedbackId=feed.feedbackId JOIN Tbl_EmployeePersonalDetails as personal ON feedComments.commentBy=personal.employeeId JOIN Tbl_EmployeeDetails_Master as master ON master.employeeId=personal.employeeId WHERE feed.clientId=:clientId AND feed.flagType=:flagType AND feedComments.feedbackId=:feedbackId ORDER BY feedComments.autoId desc limit $val,10";
+
                         $stmt = $this->db_connect->prepare($query);
                         $stmt->bindParam(':clientId', $clientId, PDO::PARAM_STR);
                         $stmt->bindParam(':empId', $empId, PDO::PARAM_STR);
                         $stmt->bindParam(':flagType', $flagType, PDO::PARAM_STR);
-//                $stmt->bindParam(':status', $status, PDO::PARAM_STR);
+//                	$stmt->bindParam(':status', $status, PDO::PARAM_STR);
                         $stmt->bindParam(':feedbackId', $feedbackId, PDO::PARAM_STR);
                         if ($stmt->execute()) {
                             $commentResult = $stmt->fetchAll(PDO::FETCH_ASSOC);
 							
 			    if(!empty($commentResult)){
-                            $result['success'] = 1;
-                            $result['message'] = "Feedback comments available";
-                            $result['totalComments'] = $totalComments['totalComments'];
-                            $result['avatar_image'] = $avatarResult['avatar_image'];
-                            $result['feedback_question'] = $commentResult[0]['feedbackQuestion'];
-                            $result['unpublishing_time'] = $commentResult[0]['unpublishingTime'];
-                            $result['data'] = $commentResult;
-                            }else{
-								
-							/*************************************************/
+		                    $result['success'] = 1;
+		                    $result['message'] = "Feedback comments available";
+		                    $result['totalComments'] = $totalComments['totalComments'];
+		                    //$result['avatar_image'] = $avatarResult['avatar_image'];
+		                    $result['feedbackId'] 	 = $feedbackId;
+		                    $result['feedback_topic']    = $commentResult[0]['feedbackTopic'];
+		                    $result['feedback_question'] = $commentResult[0]['feedbackQuestion'];
+		                    $result['unpublishing_time'] = $commentResult[0]['unpublishingTime'];
+		                    $result['data'] = $commentResult;
+		                    //$result['data'][0]['comment_text'] = base64_decode($commentResult[5]['comment_text']);
+                            } else {				
+				/*************************************************/
 
-							$queryfeed = "SELECT *,DATE_FORMAT(unpublishingTime, '%d %M %Y') as unpublishingTime FROM Tbl_C_Feedback WHERE feedbackId=:fbId";
-							$stmtfeed = $this->db_connect->prepare($queryfeed);
-							$stmtfeed->bindParam(':fbId', $feedbackId, PDO::PARAM_STR);
-							$stmtfeed->execute();
-							$commentResultfeed = $stmtfeed->fetchAll(PDO::FETCH_ASSOC);
+				$queryfeed = "SELECT *, if(unpublishingTime = '0000-00-00 00:00:00' , '', DATE_FORMAT(unpublishingTime, '%d %M %Y')) as unpublishingTime FROM Tbl_C_Feedback WHERE feedbackId=:fbId";
+				$stmtfeed = $this->db_connect->prepare($queryfeed);
+				$stmtfeed->bindParam(':fbId', $feedbackId, PDO::PARAM_STR);
+				$stmtfeed->execute();
+				$commentResultfeed = $stmtfeed->fetchAll(PDO::FETCH_ASSOC);
 							
-							/*************************************************/
-                            $result['success'] = 0;
-                    		$result['message'] = "No more comments available";
-							$result['avatar_image'] = $avatarResult['avatar_image'];
-                            $result['feedback_question'] = $commentResultfeed[0]['feedbackQuestion'];
-							$result['unpublishing_time'] = $commentResultfeed[0]['unpublishingTime'];
+				/*************************************************/
+				$result['success'] = 0;
+				$result['message'] = "No more comments available";
+				//$result['avatar_image'] = $avatarResult['avatar_image'];
+				$result['feedbackId'] 	 = $feedbackId;
+				$result['feedback_topic'] = $commentResultfeed[0]['feedbackTopic'];
+				$result['feedback_question'] = $commentResultfeed[0]['feedbackQuestion'];
+				$result['unpublishing_time'] = $commentResultfeed[0]['unpublishingTime'];
                             }
 //                print_r($result);die;
                         }
@@ -170,7 +201,7 @@ class Feedback {
                         $result = $ex;
                     }
                 } else {
-	            $query = "SELECT *,DATE_FORMAT(unpublishingTime, '%d %M %Y') as unpublishingTime FROM Tbl_C_Feedback WHERE feedbackId=:feedbackId";
+	            $query = "SELECT *,  if(unpublishingTime = '0000-00-00 00:00:00' , '', DATE_FORMAT(unpublishingTime, '%d %M %Y')) as unpublishingTime FROM Tbl_C_Feedback WHERE feedbackId=:feedbackId";
 		    $stmt = $this->db_connect->prepare($query);
 		    $stmt->bindParam(':feedbackId', $feedbackId, PDO::PARAM_STR);
 		    $stmt->execute();
@@ -178,10 +209,12 @@ class Feedback {
                 
                     $result['success'] = 0;
                     $result['message'] = "No Comments available";
+                    $result['feedbackId'] 	 = $feedbackId;
+                    $result['feedback_topic']    = $commentResult[0]['feedbackTopic'];
                     $result['feedback_question'] = $commentResult[0]['feedbackQuestion'];
                     $result['unpublishing_time'] = $commentResult[0]['unpublishingTime'];
                     $result['totalComments'] = $totalComments['totalComments'];
-                    $result['avatar_image'] = $avatarResult['avatar_image'];
+                    //$result['avatar_image'] = $avatarResult['avatar_image'];
                 }
             }
         } catch (Exception $ex) {
@@ -237,16 +270,24 @@ class Feedback {
         return $result;
     }
 
-    public function addFeedComments($cid, $commentId, $feedbackId, $comment_text, $commentBy, $anonymous) {
+    public function addFeedComments($cid, $commentId, $feedbackId, $comment_text, $commentBy, $anonymous, $avatar_img) {
         try {
             date_default_timezone_set('Asia/Kolkata');
             $commentDate = date('Y-m-d H:i:s');
-
-            $query = "INSERT INTO Tbl_C_FeedbackComments (commentId, feedbackId, clientId, comment_text, commentBy, CommentDate, anonymous) VALUES (:commentId, :feedbackId, :cid, :comment_text, :commentBy, :cdate, :anonymous)";
+	
+	    if(!empty($avatar_img)){
+		$avatar_img = explode('images/avatar_images/', $avatar_img);
+		$avatar_img = "images/avatar_images/" . $avatar_img[1];
+	    }else{
+	    	$avatar_img = '';
+	    }
+	    
+            $query = "INSERT INTO Tbl_C_FeedbackComments (commentId, feedbackId, clientId, comment_text, commentBy, CommentDate, anonymous, avatar_image) VALUES (:commentId, :feedbackId, :cid, :comment_text, :commentBy, :cdate, :anonymous, :avatar_img)";
             $stmt = $this->db_connect->prepare($query);
             $stmt->bindParam(':commentId', $commentId, PDO::PARAM_STR);
             $stmt->bindParam(':feedbackId', $feedbackId, PDO::PARAM_STR);
             $stmt->bindParam(':anonymous', $anonymous, PDO::PARAM_STR);
+            $stmt->bindParam(':avatar_img', $avatar_img, PDO::PARAM_STR);
             $stmt->bindParam(':cid', $cid, PDO::PARAM_STR);
             $stmt->bindParam(':comment_text', $comment_text, PDO::PARAM_STR);
             $stmt->bindParam(':commentBy', $commentBy, PDO::PARAM_STR);
@@ -267,13 +308,17 @@ class Feedback {
 
     public function likeFeedComments($cId, $feedbackId, $empId, $commentId, $status) {
         try {   
-            $query = "INSERT INTO Tbl_C_FeedbackCommentLikes (commentId, feedbackId, employeeId, like_unlike_status) VALUES (:commentId, :feedbackId, :empId, :status) ON DUPLICATE KEY UPDATE like_unlike_status=:status";
+            date_default_timezone_set('Asia/Kolkata');
+            $likeDate = date('Y-m-d H:i:s');
+            $query = "INSERT INTO Tbl_C_FeedbackCommentLikes (commentId, feedbackId, employeeId, like_unlike_status,createdDate,updatedDate) VALUES (:commentId, :feedbackId, :empId, :status,:cd,:ud) ON DUPLICATE KEY UPDATE like_unlike_status=:status,updatedDate=:ud";
             $stmt = $this->db_connect->prepare($query);
             $stmt->bindParam(':cid', $cid, PDO::PARAM_STR);
             $stmt->bindParam(':commentId', $commentId, PDO::PARAM_STR);
             $stmt->bindParam(':feedbackId', $feedbackId, PDO::PARAM_STR);
             $stmt->bindParam(':empId', $empId, PDO::PARAM_STR);
             $stmt->bindParam(':status', $status, PDO::PARAM_STR);
+            $stmt->bindParam(':cd', $likeDate, PDO::PARAM_STR);
+            $stmt->bindParam(':ud', $likeDate, PDO::PARAM_STR);
 
             if ($stmt->execute()) {
                 $totalLikesQuery = "select count(autoId) as totalLikes from Tbl_C_FeedbackCommentLikes where commentId=:commentId and feedbackId=:feedbackId and like_unlike_status='1'"; 
@@ -295,6 +340,51 @@ class Feedback {
             $result = $ex;
         }
         return $result;
+    }
+    
+    /********************************* status feedback wall ***************************/
+
+    function status_FeedbackWall($fid, $fstatus) {
+ 	$flag = 23;
+        if ($fstatus == 'Live') {
+            $status = 1;
+        } else {
+            $status = 0;
+        }
+        
+        try {
+            $query = "update Tbl_C_Feedback set status = :sta where feedbackId = :fid And flagType = :flag";
+            $stmt = $this->db_connect->prepare($query);
+            $stmt->bindParam(':fid', $fid, PDO::PARAM_STR);
+            $stmt->bindParam(':sta', $fstatus, PDO::PARAM_STR);
+			$stmt->bindParam(':flag', $flag, PDO::PARAM_STR);
+            $stmt->execute();
+
+            $gquery = "update Tbl_Analytic_PostSentToGroup set status = :sta2 where postId = :fid2 And flagType = :flag2 ";
+            $stmtg = $this->db_connect->prepare($gquery);
+            $stmtg->bindParam(':fid2', $fid, PDO::PARAM_STR);
+            $stmtg->bindParam(':sta2', $status, PDO::PARAM_STR);
+	    $stmtg->bindParam(':flag2', $flag, PDO::PARAM_STR);
+	    $stmtg->execute();
+			
+	    $wquery = "update Tbl_C_WelcomeDetails set status = :sta3 where id = :fid3 And flagType = :flag3 ";
+            $stmtw = $this->db_connect->prepare($wquery);
+            $stmtw->bindParam(':fid3', $fid, PDO::PARAM_STR);
+            $stmtw->bindParam(':sta3', $status, PDO::PARAM_STR);
+	    $stmtw->bindParam(':flag3', $flag, PDO::PARAM_STR);
+            
+            if ($stmtw->execute()) {
+                $response["success"] = 1;
+                $response["message"] = "Feedback Wall status has changed";
+            } else {
+                $response["success"] = 0;
+                $response["message"] = "Feedback Wall Not change";
+            }
+        } catch (PDOException $e) {
+            $response["success"] = 0;
+                $response["message"] = "Feedback Wall status Not change".$e;
+        }
+	
     }
 
 }

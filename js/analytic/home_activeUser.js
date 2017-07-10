@@ -102,7 +102,7 @@ function homeActiveUserGraph(resdata) {
 
 function showHappinessIndexGraph(startdate, enddate, department , SITE)
 {
-
+alert("hello");
     var postData =
             {
                 "startdate":startdate ,
@@ -111,20 +111,26 @@ function showHappinessIndexGraph(startdate, enddate, department , SITE)
             }
     var dataString = JSON.stringify(postData);
     //alert(dataString);
-
+ var url = SITE +"Link_Library/link_getHappinessgraph.php";
+        alert(url);
     $.ajax({
         type: "POST",
         //dataType: "json",
         //contentType: "application/json; charset=utf-8",
+       
         url: SITE +"Link_Library/link_getHappinessgraph.php",
         data: {"mydata": dataString},
         success: function (response) {
             var resdata = response;
-            //alert(resdata);
-           // console.log(resdata);   
+            alert(resdata);
+            console.log(resdata);   
 
             var jsonData = JSON.parse(resdata);
-                                            
+            var happdata = JSON.parse(jsonData.arrdata); 
+			
+			$('#totalhappcomm').empty();
+			$('#totalhappcomm').append(jsonData.totalcomment);
+			
             /* var jsonData = JSON.parse(resdata)["data"];
              
              alert(jsonData);
@@ -136,7 +142,7 @@ function showHappinessIndexGraph(startdate, enddate, department , SITE)
              {
              alert("No Record Found");
              }*/
-            homeHappinessindexGraph(jsonData);
+            homeHappinessindexGraph(happdata);
         },
         error: function (e) {
             alert(e);

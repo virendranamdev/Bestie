@@ -32,7 +32,7 @@ class ClientLogin {
             $query = "select C.*,CA.*,U.*,UP.* from Tbl_ClientAdminDetails as CA 
      join Tbl_ClientDetails_Master as C on C.client_id = CA.clientId 
      join Tbl_EmployeeDetails_Master as U on CA.userUniqueId = U.employeeId 
-     join Tbl_EmployeePersonalDetails as UP on UP.employeeId = U.employeeId where U.emailId = :mail";
+     join Tbl_EmployeePersonalDetails as UP on UP.employeeId = U.employeeId where U.emailId = :mail and CA.status = 1";
             $stmt = $this->DB->prepare($query);
 
             $stmt->execute(array(':mail' => $this->emailid));
@@ -139,6 +139,7 @@ class ClientLogin {
 
 					//$to1 = "monikagupta05051994@gmail.com";
                     $to1 = $email;
+				   $fromEmail = 'support@mybestie.in';
                     $subject1 = "Bestie Password Assistance";
 
                     $message = '<html><body>';
@@ -151,12 +152,12 @@ class ClientLogin {
                     $message .= "<p>Team Bestie</p>";
                     $message .= '</body></html>';
 
-                    $headers1 = "From: Bestie <bestie@benepik.com> \r\n";
+					$headers1 = "From: Benepik <".$fromEmail.">"."\r\n"."Return-Path: ".$fromEmail."\r\n";
                     $headers1 .= "MIME-Version: 1.0\r\n";
                     $headers1 .= "Content-Type: text/html; charset=ISO-8859-1\r\n";
-
-                    if (mail($to1, $subject1, $message, $headers1)) {
-                        $msg = "Password has been sent to your email id";
+		            
+					if (mail($to1, $subject1, $message, $headers1, '-f '.$fromEmail)) {
+					   $msg = "Password has been sent to your email id";
                         $resp['msg'] = $msg;
                         $resp['success'] = 1;
                         return json_encode($resp);

@@ -4,6 +4,7 @@
 
 if (!class_exists('HealthWellness') && include("../../Class_Library/class_Health_Wellness.php")) {
 
+    require_once('../../Class_Library/Api_Class/class_AppAnalytic.php');
     if (isset($_SERVER['HTTP_ORIGIN'])) {
         header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
         header('Access-Control-Allow-Credentials: true');
@@ -38,8 +39,13 @@ if (!class_exists('HealthWellness') && include("../../Class_Library/class_Health
     if ($jsonArr['clientId'] && $jsonArr['empId']) {
         $obj = new HealthWellness();
         extract($jsonArr);
+          $analytic_obj = new AppAnalytic();
 
+	//$device = 'device';
         $result = $obj->getExercises($clientId, $device);
+         /************* analytic purpose seve data *****************/
+            $flagtype = 24;
+         $analytic_obj->listAppview($clientId, $empId, $device, $deviceId, $flagtype);
         $response['success'] = 1;
         $response['data'] = $result;
     } else {

@@ -38,7 +38,7 @@ $(document).ready(function() {
                     <ul class="nav navbar-right panel_toolbox">
                       <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                       </li>
-                      <li class="dropdown">
+                      <!--<li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-wrench"></i></a>
                         <ul class="dropdown-menu" role="menu">
                           <li><a href="#">Settings 1</a>
@@ -46,9 +46,9 @@ $(document).ready(function() {
                           <li><a href="#">Settings 2</a>
                           </li>
                         </ul>
-                      </li>
-                      <li><a class="close-link"><i class="fa fa-close"></i></a>
-                      </li>
+                      </li>-->
+                      <!--<li><a class="close-link"><i class="fa fa-close"></i></a>
+                      </li>-->
                     </ul>
                     <div class="clearfix"></div>
                   </div>
@@ -67,8 +67,9 @@ $(document).ready(function() {
                         <tr>
                           <th>Date</th>
                           <th>Posted Data</th>
-                          <th>Total View</th>
-                          <!--<th></th>-->
+                          <!--<th>Total View</th>-->
+                          <th>Notification Type</th>
+						  <th>Group</th>
                         </tr>
                       </thead>
 
@@ -77,7 +78,19 @@ $(document).ready(function() {
 					  <?php
 					  for($i=0; $i<count($notilistarr['data']); $i++)
 					  {
-						  
+						 $flag = $notilistarr['data'][$i]['flagType']; 
+						 if($flag == 2)
+						 {
+							$notitype = 'Message'; 
+						 }
+						 if($flag == 25)
+						 {
+							 $notitype = 'Reminder'; 
+						 }
+						 if($flag == 24)
+						 {
+							 $notitype = 'Health & Wellness'; 
+						 }
 						?>
                         <tr>
                           <td><?php echo $notilistarr['data'][$i]['createdDate'];?></td>
@@ -104,7 +117,9 @@ $(document).ready(function() {
 						  ?>
 						  
 						  </a></td>
-                        <td>20</td>
+                        <!--<td>20</td>-->
+						<td><?php echo $notitype; ?></td>
+						<td><?php echo $notilistarr['data'][$i]['group']; ?></td>
                             <!--<td><ul class="wallUL">
 <li><i class="fa fa-edit fa-lg"></i></li>
 </ul> </td>-->

@@ -38,7 +38,11 @@ if (!empty($_POST["mydata"])) {
       $HappinessDetails = $objHappiness->happinessIndexCustomGraphDetails($clientid, $enddate, $startday,$department, $location, $HappinessVal, $imgurl);
 	  $extraHappinessDetailsArr = json_decode($HappinessDetails, true);
 	  
-	  // print_r($extraHappinessDetailsArr);
+	//  print_r($extraHappinessDetailsArr);
+	 
+	 /******************** for show count *************************/
+	 	 
+	 /******************* / for show count ************************/
 	 
 	 if ($extraHappinessDetailsArr['success'] == 1) 
 	 {
@@ -75,7 +79,14 @@ while ($i < sizeof($words)) {
     array_push($extraHappyGlobeGraph, $textGraph);
 }
 $res = json_encode($extraHappyGlobeGraph);
-echo $res; 
+
+$arraycomplete = array();
+$arraycomplete['happtotalcomment'] = $extraHappinessDetailsArr['happtotalcomment'];
+$arraycomplete['totalcomment'] = $extraHappinessDetailsArr['totalComments'];
+$arraycomplete['graphdata'] = $res;
+$completeshowdata = json_encode($arraycomplete);
+echo $completeshowdata;
+//echo $res; 
     }
 }
 ?>

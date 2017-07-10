@@ -21,9 +21,9 @@ include_once('Class_Library/class_Feedback.php');
 $obj = new Feedback();
 $feedbackdetails = $obj->getSingleFeedbackDetail($clientId,$Feedback_Id);
 $fdetails = json_decode($feedbackdetails , true);
-/*echo "<pre>";
-print_r($fdetails);
-echo "</pre>";*/
+//echo "<pre>";print_r($fdetails);die;
+
+$feedbackTopic = $fdetails['feedbackTopic'];
 $feedbackquestion = $fdetails['feedbackQuestion'];
 $fromdate = $fdetails['publishingTime'];
 $todate = $fdetails['unpublishingTime'];
@@ -49,8 +49,17 @@ $todate = "";
 
 ?>
 <script>
+    $( document ).ready(function() {
+    	$("#endDate").hide();
+    	
+    	$('#endCheck').click(function() {
+	    $("#endDate").toggle(this.checked);
+	});
+    });
+
+
     function check() {
-        if (confirm('Are You Sure, You want to publish this?')) {
+        if (confirm('A Feedback is already active, want to activate a new one?')) {
             return true;
         } else {
             return false;
@@ -61,10 +70,24 @@ $todate = "";
 function ValidateUpdateFeedback()
 {
     var feedbackQuestion = document.form1.feedbackQuestion;
+	var publishingDate = document.form1.publishingDate;
+	var unpublishingDate = document.form1.unpublishingDate;
     if (feedbackQuestion.value == "")
     {
         window.alert("Please Enter Question.");
         feedbackQuestion.focus();
+        return false;
+    }
+	if (publishingDate.value == "")
+    {
+        window.alert("Please Select Date.");
+        publishingDate.focus();
+        return false;
+    }
+	if (unpublishingDate.value == "")
+    {
+        window.alert("Please Select Date.");
+        unpublishingDate.focus();
         return false;
     }
     return true;
@@ -81,7 +104,8 @@ function ValidateUpdateFeedback()
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <div class="x_panel">
                     <div class="x_title">
-                        <h2>Create New Feedback Wall</h2>
+                        <h2><?php if(!isset($_GET['feedId']))
+	{ ?>Create New Feedback Wall<?php } if(isset($_GET['feedId'])) {?>Update Feedback Wall <?php }?></h2>
 												
                         <ul class="nav navbar-right panel_toolbox">
                             <li class="right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
@@ -91,20 +115,28 @@ function ValidateUpdateFeedback()
                         <div class="clearfix"></div>
                     </div>
                     <div class="x_content">
-                        <a href="wallPredefineTemplate.php"><button class="btn btn-primary pull-right btn-round"> Use Predefined Template</button></a>
-
+                        <?php if(!isset($_GET['feedId']))
+						{ ?>
+						<a href="wallPredefineTemplate.php"><button class="btn btn-primary pull-right btn-round"> Use Predefined Template</button></a>
+						<?php } ?>
                         <br ><br ><br >
-                        <form name="form1" action="Link_Library/link_add_feedback.php" method="post" class="myform form-horizontal form-label-left" onsubmit="return check();">
+                        <form name="form1" action="Link_Library/link_add_feedback.php" method="post" class="myform form-horizontal form-label-left" <?php if(empty($_GET['feedId'])) { ?> onsubmit="return check();" <?php } ?> >
 
                             <div class="form-group">
+                            	<label class=" control-label col-md-3 col-sm-3 col-xs-12">Topic</label>
+                            	<div class="col-md-9 col-sm-9 col-xs-12 form-group has-feedback">
+            				<input type="text" name="feedbackTopic" class="form-control has-feedback-left" id="inputSuccess2" placeholder="Enter Topic" value="<?php echo $feedbackTopic ;?>">
+            				<span class="fa fa-question form-control-feedback left" aria-hidden="true"></span>
+                            	</div>
+                            
                                 <label class=" control-label col-md-3 col-sm-3 col-xs-12">Question</label>
                                 <div class="col-md-9 col-sm-9 col-xs-12 form-group has-feedback">
                                     <input type='hidden' name="useruniqueid" id="userid" value="<?php echo $_SESSION['user_unique_id']; ?>">
                                     <input type='hidden' name="clientid" id="clientid" value="<?php echo $_SESSION['client_id']; ?>">
-									<input type="hidden" name = "flag" value="23">		
-									<input type="hidden" name = "flagvalue" value="Feedback : ">	
+				    <input type="hidden" name = "flag" value="23">		
+				    <input type="hidden" name = "flagvalue" value="Feedback : ">	
 									
-									<input type="text" name="feedbackQuestion" class="form-control has-feedback-left" id="inputSuccess2" placeholder="Enter Question" value="<?php echo $feedbackquestion ;?>">
+				    <input type="text" name="feedbackQuestion" class="form-control has-feedback-left" id="inputSuccess2" placeholder="Enter Question" value="<?php echo $feedbackquestion ;?>">
                                     <span class="fa fa-question form-control-feedback left" aria-hidden="true"></span>
                                 </div>
                             </div>
@@ -116,7 +148,17 @@ function ValidateUpdateFeedback()
                                     <span id="inputSuccess2Status4" class="sr-only">(success)</span>
                                 </div>
                             </div>
-                            <div class="form-group">
+                            
+				<div class="form-group">
+				<label class="control-label col-md-3 col-sm-3 col-xs-12"></label>
+				<div class="col-md-9 col-sm-9 col-xs-12">
+				<div class="checkbox">
+					<label> <input type="checkbox" name="endDateCheck" id="endCheck"> Set end date? </label>
+				</div>
+				</div>
+				</div>
+                            
+                            <div class="form-group" id="endDate">
                                 <label class="control-label col-md-3 col-sm-3 col-xs-12">To Date</label>
                                 <div class="col-md-9 col-sm-9 col-xs-12">
                                     <input type="text" name="unpublishingDate" class="form-control has-feedback-left" id="single_cal3" placeholder="Unpublish Date" aria-describedby="inputSuccess2Status3" value="<?php echo $todate; ?>">
@@ -127,18 +169,20 @@ function ValidateUpdateFeedback()
                             </div>
 <?php if(!isset($_GET['feedId']))
 	{ ?>
-							<!------------------------------------------------------------->
-							<?php if(!isset($_GET['PreTempId']))
-							{?>
-							<div class="form-group">
-							<label class="control-label col-md-3 col-sm-3 col-xs-12"></label>
-							<div class="col-md-9 col-sm-9 col-xs-12">
-                                <div class="checkbox"> <label><input type="checkbox" name="pretempcheck"> Save as a predefined template?</label>  </div>
-							</div>
-							</div>
-							<?php 
-							}
-							?>
+				<!------------------------------------------------------------->
+				<?php if(!isset($_GET['PreTempId']))
+				{?>
+				<div class="form-group">
+				<label class="control-label col-md-3 col-sm-3 col-xs-12"></label>
+				<div class="col-md-9 col-sm-9 col-xs-12">
+				<div class="checkbox">
+					<label> <input type="checkbox" name="pretempcheck"> Save as a predefined template? </label>
+				</div>
+				</div>
+				</div>
+				<?php 
+				}
+				?>
 							
                             <div class="form-group">
                                 <label class="control-label col-md-3 col-sm-3 col-xs-12">Group</label>
@@ -218,7 +262,7 @@ function ValidateUpdateFeedback()
                                 <div class="col-md-12"><center>
 										
                                         <button type="submit" name="addFeedback" class="btn btn-round btn-primary" onclick="return ValidateFeedbackWall();">Submit</button>
-                                        <button type="button" class="btn btn-round btn-warning">Cancel</button>
+                                        <button type="reset" class="btn btn-round btn-warning">Cancel</button>
                                     </center></div>
                             </div>
 							

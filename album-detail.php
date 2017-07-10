@@ -1,7 +1,11 @@
-<?php include 'header.php';?>
-<?php include 'sidemenu.php';?>
-<?php include 'topNavigation.php';?>
- <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<?php
+ include_once 'header.php';
+ include_once 'sidemenu.php';
+ include_once 'topNavigation.php';
+?>
+ 
+ <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+ 
  <?php 
 require_once('Class_Library/class_upload_album.php');
 $objalbum = new Album();
@@ -45,15 +49,29 @@ function carousel() {
 }
 </script> 
 
+<script>
+$(document).on("click", ".open-Addimageslider", function () {
+     var selectedimgpath = $(this).data('id');
+	 //alert(myBookId);
+	$(".modal-content #imgpath").attr('src', selectedimgpath);
+	
+	$(".modal-content #img").val(selectedimgpath);
+	
+	
+	
+});
+</script>
+
 <?php
 /********************* image detail **********************/
 $device = "panel";
 $imageList = $objalbum->getAlbumImage($albumid,$device);
 $imageListArr = json_decode($imageList, true);
-/*echo "<pre>";
-print_r($imageListArr);
-echo "</pre>";*/
 $albumimages = $imageListArr['posts'];
+
+$bundle = json_decode($objalbum->getPendingBundle($clientId, $albumid), true);
+$bundleList = $bundle['posts'];
+// echo'<pre>';print_r($bundleList);die;
 /*********************** / image detail *************************/
 ?>
         <!-- page content -->
@@ -61,11 +79,64 @@ $albumimages = $imageListArr['posts'];
           <div class="">
             <div class="clearfix"></div>
 
+			
+		<div class="row">
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                <div class="x_panel">
+                    <div class="x_title">
+                        <h2>Album History</h2>
+                        <ul class="nav navbar-right panel_toolbox">
+						<li><a href="Add_Album_Image.php?albumid=<?php echo $albumid; ?>"><button class="btn btn-primary btn-round">Add Image</button></a>
+                      </li>
+                            <li class="right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                            </li>
+
+                        </ul>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_content">
+                        <br />
+                    <table id="" class="MyTable table table-striped display"  cellspacing="0" width="100%">
+                      <thead>
+                        <tr>
+                          <th>Posted By</th>
+                          <th>Date</th>
+                          <th>Total Image</th>
+                          <th>Approve Images</th>
+                          <th>Pending Images</th>
+                          <th>Action</th>
+                        </tr>
+                      </thead>
+
+
+                      <tbody>
+                      <?php foreach($bundleList as $list) { ?>
+			<tr>
+                          <th><?php echo $list['createdbyname']; ?></th>
+                          <th><?php echo $list['createdDate']; ?></th>
+                          <th><?php echo $list['totalimage']; ?></th>
+                          <th><?php echo $list['approveImage']; ?></th>
+                          <th><?php echo $list['pendingImage']; ?></th>
+                          <th><a href="pendingDataApprove.php?Bundle=<?php echo $list['bundleId']; ?>" >View</a></th>
+                        </tr>
+                        <?php } ?>		  
+		     </tbody>
+		   </table>
+
+					  
+                    </div>
+                </div>
+            </div>
+        </div>
+			
+			
+			
+			
             <div class="row">
               <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <div class="x_panel">
                   <div class="x_title">
-                    <h2>Album Detail</h2>
+                    <h2>Approve Images</h2>
 					<?php 
 					/*echo "<pre>";
 print_r($imageListArr);
@@ -73,14 +144,26 @@ echo "</pre>";*/
 					?>
 					
                     <ul class="nav navbar-right panel_toolbox">
+					<li><a href="Add_Album_Image.php?albumid=<?php echo $albumid; ?>"><button class="btn btn-primary btn-round">Add Image</button></a>
+                      </li>
                       <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                       </li>
+					  
+					   
                       
                     </ul>
                     <div class="clearfix"></div>
                   </div>
                   <div class="x_content">
+				  
+				  <br/>
+				  
+				  
+				  
+				  
      <!--<a href="wallPredefineTemplate.php"><button class="btn btn-primary pull-right btn-round"> Use Predefined Temple</button></a>-->
+	 
+	 <!--
 <div class="row">
 <div class="col-lg-2 col-md-3 col-sm-3 col-xs-12">
 <div class="border">
@@ -95,7 +178,6 @@ echo "</pre>";*/
 	</div>
 	 <p class="desc" ><center><b><?php echo count($imageListArr['posts']); ?></b></center></p>
  </div>
-<!-- <p class="desc" ><center>Posted Date:18 Apr 2017</center></p>-->
 </div>
 
 
@@ -104,11 +186,20 @@ echo "</pre>";*/
 <p><?php echo $imageListArr['album'][0]['description'];?></p>
 
 </div>
-</div>
+</div>-->
 
 
-<div class="row">
-<?php 
+				   <table id="" class="MyTable table table-striped display"  cellspacing="0" width="100%">
+                      <thead>
+                        <tr>
+                          <th>image</th><th>Total Like</th><th>Total Comment</th><th>Uploaded By</th><th>Uploaded Date</th>
+                          <th>Approve Date</th><th>Action</th>
+                        </tr>
+                      </thead>
+
+
+                      <tbody>
+					  <?php 
 for($i=0; $i<count($albumimages); $i++)
 {
 	$albumid = $albumimages[$i]['albumId'];
@@ -129,20 +220,46 @@ for($i=0; $i<count($albumimages); $i++)
 	*/
 	/**************** / image like *******************************/
 	$imagestatus = $albumimages[$i]['status'];
-	if($imagestatus == 2)
+	if($imagestatus == 1)
 	{
-		$imgstatus = "Pending";
+		$imgstatus = "Approved";
 	}
 ?>
+					  <tr>
+                          <th><img src="<?php echo $albumimages[$i]['imgName'];?>"title="<?php echo $albumimages[$i]['imageCaption'];?>"alt="image missing"class="img img-responsive tableApproveImage"></th>
+						  <th><?php echo $imagelikearray['total_like'];?></th>
+						  <th><?php echo $totalcomment; ?></th> <th>Nadeem</th><th>2 May 2017</th>
+                          <th>3 May 2017</th>
+						  <th><button type="button" name="viewbutton" class="btn btn-success btn-xs active"><a class="smallbtn" href="album-image-details.php?albumid=<?php echo $albumid;?>&&imageId=<?php echo $albumimages[$i]['autoId'];?>">view</a></button></th>
+                      </tr>
+					 <?php
+
+} ?>
+
+					  
+					  </tbody>
+					  </table>
+					  <style>
+					  .smallbtn{color:#fff;}
+					  .tableApproveImage{width:100px;}
+					  </style>
+					  <script>$(document).ready(function() {
+    $('table.display').DataTable();
+} );
+</script>
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+					  
+<div class="row">
+<!--
 <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
 
 <div class="border">
 <?php if(($imagestatus == 2)){?>
 <div class="check"><?php echo $imgstatus;?></div>
 <?php } ?>
-<span data-toggle="modal" data-target="#myModal">
+<span data-toggle="modal" data-target="#myModal" data-id="<?php echo $albumimages[$i]['imgName']; ?>" class="open-Addimageslider">
 <img src="<?php echo $albumimages[$i]['imgName'];?>" class="img img-responsive imgpadding" data-toggle="tooltip" title="<?php echo $albumimages[$i]['imageCaption'];?>"></span>
-<!--<p class="padding"><?php echo $albumimages[$i]['imageCaption'];?></p>-->
 
 <span class="fontpadding"><i class="fa fa-thumbs-o-up" aria-hidden="true"></i>&nbsp;<button type="button" class="btn btn-xs"><?php echo $imagelikearray['total_like'];?></button></span> 
 
@@ -188,10 +305,7 @@ for($i=0; $i<count($albumimages); $i++)
 	
 	
 
-</div>
-<?php
-
-} ?>
+</div>-->
 
 </div>
 
@@ -211,27 +325,35 @@ for($i=0; $i<count($albumimages); $i++)
   <center>
   <div id="myCarousel" class="carousel slide" data-ride="carousel">
     <!-- Indicators -->
-    <ol class="carousel-indicators">
+    <ol style="display:none" class="carousel-indicators">
       <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
+	  
       <li data-target="#myCarousel" data-slide-to="1"></li>
-      <li data-target="#myCarousel" data-slide-to="2"></li>
-      <li data-target="#myCarousel" data-slide-to="3"></li>
     </ol>
 
     <!-- Wrapper for slides -->
     <div class="carousel-inner" role="listbox">
 	<div class="item active">
-	  <h4 style="float:left;padding:3px;"><?php echo $albumimages[0]['imageCaption']; ?></h4>
-        <center><img src="<?php echo $albumimages[0]['imgName'];?>" alt="Chania" style="max-height:500px;max-width:100%;padding:0px 3px 3px 3px;" class="img img-responsive"></center>
+	  
+        <center>
+		
+		<img id="imgpath" alt="Chania" style="max-height:500px;max-width:100%;padding:50px 3px 40px 3px;" class="img img-responsive">
+		<!--<h4 style="float:left;padding:3px;"><?php echo $albumimages[0]['imageCaption']; ?></h4>-->
+		
+		</center>
       </div>
 	<?php 
-	for($k=0; $k<count($albumimages)-1; $k++)
+	for($k=0; $k<count($albumimages); $k++)
 	{
+		
+		
 		
 	?>
       <div class="item">
-	  <h4 style="float:left;padding:3px;"><?php echo $albumimages[$k]['imageCaption']; ?></h4>
-        <center><img src="<?php echo $albumimages[$k+1]['imgName'];?>" alt="Chania" style="max-height:500px;max-width:100%;padding:0px 3px 3px 3px;"></center>
+	 
+        <center><img src="<?php echo $albumimages[$k]['imgName'];?>" alt="Chania" style="max-height:500px;max-width:100%;padding:50px 3px 40px 3px;">
+		 <!--h4 style="float:left;padding:3px;"><?php echo $albumimages[$k]['imageCaption']; ?></h4>-->
+		</center>
       </div>
 	<?php } ?>
     </div>

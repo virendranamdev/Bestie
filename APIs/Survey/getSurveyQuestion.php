@@ -3,7 +3,7 @@ error_reporting(E_ALL); ini_set('display_errors', 1);
 if (file_exists("../../Class_Library/Api_Class/class_survey.php") 
         && include_once("../../Class_Library/Api_Class/class_survey.php")) 
     {
-
+require_once('../../Class_Library/Api_Class/class_AppAnalytic.php');
     if (isset($_SERVER['HTTP_ORIGIN'])) {
         header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
         header('Access-Control-Allow-Credentials: true');
@@ -32,8 +32,14 @@ if (file_exists("../../Class_Library/Api_Class/class_survey.php")
     if (!empty($jsonArr['clientid'])) {
 		
         extract($jsonArr);
+         $analytic_obj = new AppAnalytic();
         $obj = new Survey();  // create object of class cl_module.php
         $response = $obj->getSurveyQuestion($clientid, $employeeid, $sdate);
+         /************* analytic purpose seve data *****************/
+        $deviceId = (isset($deviceId) && $deviceId != '')?$deviceId:"";
+         $device = (isset($device) && $device != '')?$device:"";
+            $flagtype = 26;
+         $analytic_obj->listAppview($clientid, $employeeid, $device, $deviceId, $flagtype);
      
     } 
     else {

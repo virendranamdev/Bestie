@@ -112,12 +112,14 @@ $image_name = "category-" . $cimg;
 ?>	
 <?php 
 
-if(isset($_GET['editcategory']))
+if(isset($_POST['editcategory']))
 {
-	//echo "<script>alert('".$_GET['oldcategoryid']."')</script>";
+	//echo "<script>alert('hi')</script>";
+	//echo "<script>alert('".$_POST['oldcategoryid']."')</script>";
 	//echo "<script>alert('".$_GET['newcategoryname']."')</script>";
-	$oldcategoryid = $_GET['oldcategoryid'];
-	$newcategoryname = $_GET['newcategoryname'];
+	
+	$oldcategoryid = $_POST['oldcategoryid'];
+	$newcategoryname = $_POST['newcategoryname'];
 	
 	$categoryeditres = $objAlbum->editAlbumCategory($clientId, $empId , $oldcategoryid , $newcategoryname );
 	$categoryeditArr = json_decode($categoryeditres, true);
@@ -134,20 +136,25 @@ if(isset($_GET['editcategory']))
 }
 
 
-if(isset($_GET['deletecategory']))
+if(isset($_POST['deletecategory']))
 {
-	//echo "<script>alert('".$_GET['deletecategoryid']."')</script>";
-	$categoryid = $_GET['deletecategoryid'];
+	//echo "<script>alert('".$_POST['deletecategoryid']."')</script>";
+	
+	$categoryid = $_POST['deletecategoryid'];
 	$allcategory = array();
 	foreach($categoryid as $category)
 	{
 			array_push($allcategory, $category);
 	}
 	//print_R($allcategory);
+	
+	
 	$allcategoryid = $allcategory;
 	
 	$categorydeleteres = $objAlbum->deleteAlbumCategory($clientId, $empId , $allcategoryid);
 	$catres = json_decode($categorydeleteres , true);
+	//print_r($catres);
+	
 	if($catres)
 	{
 		echo "<script>alert('category deleted successfully')</script>";
@@ -173,6 +180,7 @@ if(isset($_GET['deletecategory']))
                 <div class="x_panel">
                   <div class="x_title">
                     <h2>Create Album</h2>
+					
                     <ul class="nav navbar-right panel_toolbox">
                       <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                       </li>
@@ -416,7 +424,7 @@ if(isset($_GET['deletecategory']))
 </div>
           </div>
         </div>
-<br><br><br>
+
 
 <?php include 'footer.php';?>
        

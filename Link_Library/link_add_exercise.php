@@ -1,7 +1,7 @@
 <?php
 
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+error_reporting(0);
+//ini_set('display_errors', 1);
 
 @session_start();
 require_once('../Class_Library/class_Health_Wellness.php');
@@ -29,6 +29,7 @@ if (isset($_REQUEST['updateHealth'])) {
     $exercise_type = $_REQUEST['exercise_type'];
     $exercise_name = $_REQUEST['exercise_name'];
     $exercise_instructions = $_REQUEST['exercise_instructions'];
+    $disclaimer = $_REQUEST['disclaimer'];
     $flag = $_REQUEST['flag'];
 
     if ($_FILES['exerciseImage']['name'] != "") {
@@ -46,7 +47,7 @@ if (isset($_REQUEST['updateHealth'])) {
         $exercise_image = $_REQUEST['exerciseImage'];
     }
 
-    $uresult = $obj->updateHealthExercise($healthId, $exercise_type, $exercise_name, $exercise_image, $exercise_instructions, $Post_Date, $flag);
+    $uresult = $obj->updateHealthExercise($healthId, $exercise_type, $exercise_name, $exercise_image, $exercise_instructions, $disclaimer, $Post_Date, $flag);
     
     if ($uresult) {
         echo "<script>alert('Health & Wellness Updated Successfully');</script>";
@@ -59,7 +60,8 @@ if (isset($_REQUEST['updateHealth'])) {
     $exercise_type = $_REQUEST['exercise_type'];
     $exercise_name = $_REQUEST['exercise_name'];
     $exercise_instructions = $_REQUEST['exercise_instructions'];
-    $User_Type = $_REQUEST['optradio'];
+    $disclaimer = $_REQUEST['disclaimer'];
+    //$User_Type = $_REQUEST['optradio'];
     $Uuid = $_REQUEST['useruniqueid'];
     $Client_Id = $_REQUEST['clientid'];
     $status = '1';
@@ -140,7 +142,7 @@ if (isset($_REQUEST['updateHealth'])) {
 
 
         /*         * ************************ add feedback **************************** */
-        $healthWellnessResult = $obj->createHealthExercise($Client_Id, $exercise_type, $exercise_name, $dbimage, $exercise_instructions, $status, $Post_Date, $Flag);
+        $healthWellnessResult = $obj->createHealthExercise($Client_Id, $exercise_type, $exercise_name, $dbimage, $exercise_instructions, $disclaimer, $status, $Post_Date, $Flag);
         $health_Id = $healthWellnessResult;
 
         /*         * ************************ / add feedback ************************** */

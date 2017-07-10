@@ -10,34 +10,42 @@
     var sid = '<?php echo $_GET['sid']; ?>';
     var otype = '<?php echo $_GET['otype']; ?>';
     var department = "All";
-    var location1 = "All";
-//      alert(qid);
-//     alert(sid);
-//     alert(otype);
-//    alert(location1);
+    var location1 = "All";   
+   // alert(qid);
+   //  alert(sid);
+   //  alert(otype);
+   // alert(location1);
     if (otype == 1)
     {
         showRadioGraph(qid, sid,department, location1,'<?php echo SITE; ?>');
     }
+    else if(otype == 4)
+    {
+        showRatingGraph(qid, sid, department, location1);
+    }
     else
     {
-     
         showEmojiGraph(qid, sid,department, location1);
     }
     
    function getSurveyRadioResponse()
     {
-     //   alert("hello");
+       
         var qid1 = document.getElementById("qid").value;;
         var sid1 = document.getElementById("sid").value;;
          var otype = document.getElementById("otype").value;;
-   
+ 
    var  department1= document.getElementById("alldepartments").value;
    var  location2 = document.getElementById("locationname").value;
    
    if(otype == 1)
    {
     showRadioGraph(qid1, sid1,department1, location2,'<?php echo SITE; ?>');
+    }
+     else if(otype == 4)
+    {
+      
+        showRatingGraph(qid1, sid1, department1, location2);
     }
     else
     {
@@ -148,7 +156,10 @@ $locationarray = json_decode($locationjson, true);
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <div class="x_panel">
                     <div class="x_title">
-                       <h2> <span id ="respondent" style ="color: black;"> </span></h2>
+                        <h2> <span id ="respondent" style ="color: black;"> </span></h2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                       
+                         <span id ="average" style ="color: black;font-size: 18px;font-weight: 500px;     margin-left: 180px;"> </span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                           <span id ="mode" style ="color: black;font-size: 18px;font-weight: 500px;     margin-left: 180px;"> </span>
                         <ul class="nav navbar-right panel_toolbox">
                             <li class="pull-right">
                                 <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
@@ -164,7 +175,14 @@ $locationarray = json_decode($locationjson, true);
                             ?>
                             <div id="MiniSurveyQuestion" style="min-width: 310px; height: 400px; max-width: 600px; margin: 0 auto"></div>
                             <?php
-                        } else {
+                        } 
+                        else if($otype == 4)
+                        {
+                            ?>
+                            <div id="MiniSurveyRating" style="min-width: 310px; height: 400px; max-width: 600px; margin: 0 auto">hello i am here</div>
+                            <?php
+                        }
+                        else {
                             ?>
                             <div id="MiniSurveyEmoji" style="min-width: 310px; height: 400px; max-width: 600px; margin: 0 auto"></div>   
                             <?php
@@ -174,7 +192,7 @@ $locationarray = json_decode($locationjson, true);
 
                         <hr>
                         <div id="comment"></div>
-                        <div class="tab-content">
+<!--                        <div class="tab-content">
 
                             <table id="datatable" class="MyTable table table-striped">
                                 <thead>
@@ -192,7 +210,7 @@ $locationarray = json_decode($locationjson, true);
                                 </tbody>
                             </table>  
 
-                        </div>
+                        </div>-->
                     </div>
                 </div>
             </div>

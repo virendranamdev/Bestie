@@ -44,10 +44,13 @@ $alldepartmentarray = json_decode($getalldepartment , true);
         var startday = document.getElementById("lastweek").value;
 		var department = 'All';
                 var location = 'All';
-        //alert(enddate);
-        //alert(startday);
+		var happinessenddate = document.getElementById("happstartdate").value;
+		var happinessstartdate = document.getElementById("happenddate").value;
+        //alert("end "+happinessenddate);
+        //alert("start "+happinessstartdate);
         showActiveUserGraph(startday, enddate, department,location, '<?php echo SITE; ?>');
-        showHappinessIndexGraph(startday, enddate, department, '<?php echo SITE; ?>');
+        showHappinessIndexGraph(happinessstartdate, happinessenddate, department, '<?php echo SITE; ?>');
+		//alert(showHappinessIndexGraph);
         /**********************************/
        /* $("#dsds").hide();
         $("#homeActiveUser").click(function () {
@@ -100,29 +103,38 @@ $alldepartmentarray = json_decode($getalldepartment , true);
     }
 	
 	/**************************** happiness index ************************/
-	
 	function lasthappinessindex()
     {
-		var enddate = document.getElementById("startdate").value;
-        var startday = document.getElementById("lastweek").value;
-		var department= document.getElementById("departmenthapp").value;
-		
-		//alert(enddate);
-		//alert(startday);
+		alert('hi');
+		//var enddate = document.getElementById("happstartdate").value;
+        //var startday = document.getElementById("happenddate").value;
+		var department= document.getElementById("departmenthapp").value;		
+		var happinessenddate = document.getElementById("htodate").value;
+		var happinessstartdate = document.getElementById("hfromdate").value;
+        alert("end "+happinessenddate);
+        alert("start "+happinessstartdate);
 		//alert(department);
-		
+		if (happinessstartdate == "")
+		{
+			window.alert("Please select From Date.");
+			document.getElementById("hfromdate").focus();
+			return false;
+		}
+		if (happinessenddate == "")
+		{
+			window.alert("Please select To Date.");
+			document.getElementById("htodate").focus();
+			return false;
+		}
 		if (department == "")
 		{
 			window.alert("Please select department.");
 			document.getElementById("departmenthapp").focus();
 			return false;
 		}
-		
-		showHappinessIndexGraph(startday, enddate, department, '<?php echo SITE; ?>');
+		showHappinessIndexGraph(happinessstartdate, happinessenddate, department, '<?php echo SITE; ?>');
 	}
-	
 	/**************************** / happiness index **********************/
-	
 </script> 
 
 <div class="right_col" role="main">
@@ -149,7 +161,26 @@ $alldepartmentarray = json_decode($getalldepartment , true);
 
 						<!---------------------- department ----------------->
 						<form>
+						<div class="row">
+							<div class="col-xs-6">
+								<div class="form-group">
+								<label for="pwd">From:&nbsp;&nbsp;</label>
+								<input type="date" id="hfromdate" name="hfromdate" size="20" class="form-control" placeholder="mm/dd/yyyy"/>
+								</div>
+							</div>
+							<div class="col-xs-6">
+								<div class="form-group">
+								<label for="pwd">To:&nbsp;&nbsp;</label>
+								<input type="date" id="htodate" name="htodate" size="20" class="form-control" placeholder="mm/dd/yyyy"/>
+								</div>
+							</div>
+						</div>
 						<div class="form-group">
+						
+									<input type="hidden" name="happstartdate" id="happstartdate" value="<?php echo date('Y-m-d', strtotime("-1 days")); ?>">
+                       
+									<input type="hidden" id="happenddate" name="happenddate" value="<?php echo date('Y-m-d', strtotime("-1 days")); ?>">
+						
                                     <label for="pwd">Department:&nbsp;&nbsp;</label>
 									<select name="departmenthapp" id="departmenthapp" class="form-control">
 									<option value="All">All</option>
@@ -175,6 +206,7 @@ $alldepartmentarray = json_decode($getalldepartment , true);
 						<!----------------------- / department -------------->
 					
                         <div id="container2" style="min-width: 310px; height: 405px; max-width: 600px; margin: 0 auto"></div>
+						<p><b>Total Respondent :</b> <span id="totalhappcomm"></span></p>
 						
 						
                     </div>
@@ -510,6 +542,82 @@ $alldepartmentarray = json_decode($getalldepartment , true);
             </div>
 
         </div>
+		
+				<div class="row">
+            <div class="col-md-6">
+                <div class="x_panel">
+                    <div class="x_title">
+                        <h2>Top Album</h2>
+			<?php $topAlbums = $welcome->getTopAlbums($client_id);
+				//echo'<pre>';print_r($topAlbums);die;
+			
+			?>	
+                        <ul class="nav navbar-right panel_toolbox">
+                            <li  class="pull-right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                            </li>
+	<li><p class="blink1"><?php echo "You have ".$topAlbums['pendingImages']." pending notifications"; ?></p></li>					
+<style>
+						
+p.blink1 {width: 100%; cursor: pointer;  -webkit-animation: flash 1s infinite;  animation: flash 10s infinite;}
+
+@-webkit-keyframes flash { 0% { color: aqua; }  10% { color: coral; }  20% { color: gold; }  30% { color: lime; }
+  40% { color: aqua; }  50% { color: coral; }  60% { color: gold; }  70% { color: lime; }  80% { color: aqua; }
+  90% { color: coral; }
+}
+
+@keyframes flash {  0 { color: aqua; }  10% { color: coral; }  20% { color: gold; }  30% { color: lime; }  40% { color: aqua; }
+  50% { color: coral; }  60% { color: gold; }  70% { color: lime; }  80% { color: aqua; }  90% { color: coral; }
+}
+</style>
+                        </ul>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_content">
+                    <?php 
+                    unset($topAlbums['pendingImages']);
+                    foreach($topAlbums as $Data) { ?>
+			<article class="media event">
+                            <a class="pull-left date">
+                           	
+                                <p class="month"><?php echo date('F', strtotime($Data['createdDate'])); ?></p>
+                                <p class="day"><?php echo date('d',strtotime($Data['createdDate'])); ?></p>
+                            </a>
+                            <div class="media-body"><br>
+                                <a class="title" href="javascript:void(0);"> <?php echo $Data['title']; ?> </a>
+                               <p class="pull-right"> <?php echo $Data['totallike']; ?> <span class="glyphicon glyphicon-thumbs-up"></span>, <?php echo $Data['totalcomment']; ?> <span class="glyphicon glyphicon-comment"></span>,  <?php echo $Data['totalview']; ?> <span class="glyphicon glyphicon-eye-open"></span></p>			
+                            </div>
+                        </article>
+                        <?php } ?>
+			
+					<!--
+						<div class="row">
+							<div class="col-xs-3 col-sm-2 col-md-1 col-lg-1"><span class="glyphicon glyphicon-picture"></div>
+							<div class="col-xs-9 col-sm-10 col-md-10 col-lg-10">
+								<p>This is album title</p>
+								<p> 33<span class="glyphicon glyphicon-thumbs-up"></span>, 44<span class="glyphicon glyphicon-eye-open"></span></p>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-xs-3 col-sm-2 col-md-1 col-lg-1"><span class="glyphicon glyphicon-picture"></div>
+							<div class="col-xs-9 col-sm-10 col-md-10 col-lg-10">
+								<p>This is album title2</p>
+								<p> 22<span class="glyphicon glyphicon-thumbs-up"></span>, 4<span class="glyphicon glyphicon-eye-open"></span></p>
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-xs-3 col-sm-2 col-md-1 col-lg-1"><span class="glyphicon glyphicon-picture"></div>
+							<div class="col-xs-9 col-sm-10 col-md-10 col-lg-10">
+								<p>This is album title3</p>
+								<p> 11<span class="glyphicon glyphicon-thumbs-up"></span>, 4<span class="glyphicon glyphicon-eye-open"></span></p>
+							</div>
+						</div>-->
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		
+		
     </div>
 </div>
 
@@ -542,6 +650,20 @@ $alldepartmentarray = json_decode($getalldepartment , true);
     if (datefield.type != "date") { //if browser doesn't support input type="date", initialize date picker widget:
         jQuery(function ($) { //on document.ready
             $('#date').datepicker();
+        })
+    }
+</script>
+<script>
+    if (datefield.type != "date") { //if browser doesn't support input type="date", initialize date picker widget:
+        jQuery(function ($) { //on document.ready
+            $('#htodate').datepicker();
+        })
+    }
+</script>
+<script>
+    if (datefield.type != "date") { //if browser doesn't support input type="date", initialize date picker widget:
+        jQuery(function ($) { //on document.ready
+            $('#hfromdate').datepicker();
         })
     }
 </script>

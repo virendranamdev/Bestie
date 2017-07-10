@@ -1,7 +1,7 @@
 <?php
 
-error_reporting(0);
-//ini_set('display_errors', 1);
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
 @session_start();
 require_once('../Class_Library/class_MiniSurvey.php');
@@ -37,8 +37,8 @@ if (!empty($_POST)) {
 //    echo "question no-".$questionno . "<br>";
 //    echo "valid from-".$surveystart . "<br>";
 
-    $createddate = $post_date;
-$PUSH_NOTIFICATION = "PUSH_YES";
+    	$createddate = $post_date;
+	$PUSH_NOTIFICATION = "PUSH_YES";
 
     /**     * ***************** find group **************************** */
 //// $User_Type == 'Selected'
@@ -67,7 +67,7 @@ $PUSH_NOTIFICATION = "PUSH_YES";
 
     /*********************** end find group ********************** */
 //echo "survey statrt-".$surveystart;
-$countsurvey = $survey_obj->checkSurveyAvailablity($clientid,$surveystart);
+	$countsurvey = $survey_obj->checkSurveyAvailablity($clientid,$surveystart);
     
     $value1 = json_decode($countsurvey,true);
   
@@ -89,51 +89,61 @@ $countsurvey = $survey_obj->checkSurveyAvailablity($clientid,$surveystart);
     {
         $questionname = "surveyquestion" . $t;
         $surveyquestion = $_POST[$questionname];
-       //echo "question-".$surveyquestion."<br/>";
+      // echo "question-".$surveyquestion."<br/>";
        
        $optioncount = $_POST['optioncount'];
       // echo "this is option count-".$optioncount."<br/>";
+       
+      // echo "------------------------------------"."<br/>";
+       
        for($k=0;$k<$optioncount;$k++)
        {
            $val = "optiontypeid".$t.$k;
-          // $optionid = $_POST[$val];
-         
+        //   echo "this is optiontype-".$val."<br/>";
+           $optionid = $_POST[$val];
+        // echo "thid is option id-".$optionid."<br/>";
            $radioname = "radio".$t.$k;
-          //  $radio = ;
-            if(isset($_POST[$radioname]))
-            {
-                $radiovalue = $_POST[$radioname];
+         //  echo "thi sis radio name-".$radioname."<br/>";
+        //  echo $_POST[$radioname]."<br/>";
+          $optionnumber = 0;
+           if(isset($_POST[$radioname]))
+           {
+            //   echo "-------- inside iset option ---="."<br/>";
+               $radiovalue = $_POST[$radioname];
+            //    echo "this is radio value-".$radiovalue."<br/>";
                  $optionid = $_POST[$val];
-                 
-                
-                 $optionnumber = ($optionid == 1)?$_POST['numberoption']:0;
-                 
-                  /*******************************/
+           //      echo "this is radio option-".$optionid."<br/>";
+                $noofoption = "numberoption".$t;
+           //     echo "this is option nuber parameter-".$noofoption."<br/>";
+                 $optionnumber = ($optionid == 1)?$_POST[$noofoption]:0;
+           //      echo "thi sis option number-".$optionnumber."<br/>";
+//                  /*******************************/
                  $response = $survey_obj->createSurveyQuestion($surveyid, $surveyquestion,  $optionid, $optionnumber, $createddate, $createdby, $status);
        // print_r($response);
         
         $questionid = $response['questionid'];
-                 
-               /**************************/    
-                 
-                 if($optionnumber > 0)
-                 {
+//                 
+//               /**************************/    
+//                 
+               if($optionnumber > 0)
+               {
+              // echo "hello i am inside radio option"."<br/>";
                      for($h=1;$h<=$optionnumber;$h++)
                      {
                          $optionradio = "radiooption".$t.$h;
                          $optionvalue = $_POST[$optionradio];
-                        // echo "this is option value-".$optionvalue;
+                 //       echo "this is option value-".$optionvalue."<br/>";
                          
-                         $response1 = $survey_obj->createSurveyQuestionoption($questionid,$surveyid, $optionid, $optionvalue, $status, $createddate, $createdby);
-       // print_r($response1);
+                        $response1 = $survey_obj->createSurveyQuestionoption($questionid,$surveyid, $optionid, $optionvalue, $status, $createddate, $createdby);
+      //  print_r($response1);
                          
                      }
-                 }
- else {
-    // $optionnumber = 0;
- }
-               
-            }
+               }
+else {
+   // $optionnumber = 0;
+    }
+}
+
   
        }
     
@@ -159,7 +169,7 @@ $countsurvey = $survey_obj->checkSurveyAvailablity($clientid,$surveystart);
     $general_group = array();
     $custom_group = array();
     for ($k = 0; $k < $groupcount; $k++) {
-        //echo "group id-".$wholegroup[$k];
+    //    echo "group id-".$wholegroup[$k];
         $result1 = $read->postSentToGroup($clientid, $surveyid, $wholegroup[$k], $FLAG);
         /*         * *********************  custom group ******************** */
         $groupdetails1 = $obj_group->getGroupDetails($clientid, $wholegroup[$k]);  //get all groupdetails
@@ -187,7 +197,7 @@ $countsurvey = $survey_obj->checkSurveyAvailablity($clientid,$surveystart);
         $generaluserid = array();
     }
     if (count($custom_group) > 0) {
-        $gcm_value1 = $customGroup->getCustomGroupUser($clientid, $custom_group);
+        $gcm_value1 = $obj_group->getCustomGroupUser($clientid, $custom_group);
         $customuserid = json_decode($gcm_value1, true);
     } else {
         $customuserid = array();
@@ -227,11 +237,12 @@ $countsurvey = $survey_obj->checkSurveyAvailablity($clientid,$surveystart);
 
     for ($i = 0; $i < $total; $i++) {
         $uuid = $allempid1[$i];
-        //echo "post sent to empid:--".$uuid."<br/>";
+      //  echo "post sent to empid:--".$uuid."<br/>";
         if (!empty($uuid)) {
             $read->postSentTo($clientid, $surveyid, $uuid, $FLAG);
         }
     }
+   
     /**     * ****** insert into post sent to table for analytic sstart************ */
     /*     * *** get all registration token  for sending push **************** */
     $reg_token = $push_obj->getGCMDetails($allempid1, $clientid);

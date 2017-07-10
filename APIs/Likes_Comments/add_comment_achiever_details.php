@@ -30,9 +30,10 @@ $jsonArr = json_decode(file_get_contents("php://input"), true);
   "employeeid":"bllQIibhNzypMGlEtwU8Bn5JpbdHdp",
   "message":"hello nice comment",
   "flag":"1"
-  "device":"IOS"
+  "device":"IOS",
+  "deviceId":"12345"
   } */
-if (!empty($jsonArr['clientid'])) {
+if (!empty($jsonArr['clientid']) && !empty($jsonArr['device']) && !empty($jsonArr['deviceId'])) {
     $comment = new Comment();
     $push = new PushNotification();
     $obj = new Post();                                        // object of class post page
@@ -50,7 +51,7 @@ if (!empty($jsonArr['clientid'])) {
         /**         * ****************************************** Get GoogleAPIKey and IOSPEM file ********************************* */
         $googleapiIOSPem = $push->getKeysPem($clientid);
 
-        $createComment = $comment->create_Comment($clientid, $post_id, $employeeid, $message, $flag, $device);
+        $createComment = $comment->create_Comment($clientid, $post_id, $employeeid, $message, $flag, $device,$deviceId);
         $myArray = $comment->getGroups($clientid, $post_id, $flag);
         //print_r($myArray);
         $POST_ID = $post_id;

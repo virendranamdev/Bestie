@@ -133,7 +133,7 @@ class ThoughtOfDay {
             if (count($value['groups']) > 0) {
                 $in = implode("', '", array_unique($value['groups']));
                 try {
-                    /*                     * ***************** count thought **************************** */
+                    /******************* count thought **************************** */
                     $query1 = "select count(distinct(thoughtId)) as totals from Tbl_Analytic_ThoughtSentToGroup where clientId=:cli and status = 1 and groupId IN('" . $in . "')";
 
                     $stmt1 = $this->DB->prepare($query1);
@@ -141,7 +141,7 @@ class ThoughtOfDay {
                     $stmt1->execute();
                     $rows1 = $stmt1->fetchAll(PDO::FETCH_ASSOC);
                     //print_r($rows1);
-                    /*                     * ********************** end count thought ************************** */
+                    /** ********************** end count thought ************************** */
 
 
                     $response["success"] = 1;
@@ -150,7 +150,7 @@ class ThoughtOfDay {
                     $response["posts"] = array();
                     $post = array();
 
-                    /*                     * ********************* find thought id ********************** */
+                    /** ********************* find thought id ********************** */
 
                     $query3 = "select distinct(thoughtId) from Tbl_Analytic_ThoughtSentToGroup where clientId=:cli and status = 1 and groupId IN('" . $in . "') order by autoId desc";
 
@@ -158,23 +158,88 @@ class ThoughtOfDay {
                     $stmt3->bindParam(':cli', $this->idclient, PDO::PARAM_STR);
                     $stmt3->execute();
                     $rows3 = $stmt3->fetchAll(PDO::FETCH_ASSOC);
-                    //print_r($rows3);
+                  //  print_r($rows3);
 
-                    /*                     * ******************** end thought id ************************ */
+                    /** ******************** end thought id ************************ */
                     if (count($rows3) > 0) {
                         foreach ($rows3 as $row) {
                             $path = dirname(SITE_URL) . "/";
                             $postid = $row["thoughtId"];
+                           
                             $query = "select thoughtId,message,if(thoughtImage = '' or thoughtImage IS NULL ,'',CONCAT('" . $path . "',thoughtImage))as thoughtImage,createdBy,DATE_FORMAT(createdDate,'%d %b %Y %h:%i %p')as createdDate from Tbl_C_Thought where clientId=:cli and status = 1 and thoughtId = :thoughtid and flagType = 5 order by autoId desc";
 
                             $stmt = $this->DB->prepare($query);
                             $stmt->bindParam(':cli', $this->idclient, PDO::PARAM_STR);
                             $stmt->bindParam(':thoughtid', $postid, PDO::PARAM_STR);
-                            //$stmt->bindValue(':lim', (int)$this->value, PDO::PARAM_INT);
+                  
                             $stmt->execute();
                             $rows = $stmt->fetch(PDO::FETCH_ASSOC);
-                            //print_r($rows);
+                          //  print_r($rows);
+                         
+                            /********************* user like or not ****************/
+					
+					$querylike = "select count(likeBy) as likeStatus from Tbl_Analytic_PostLike where postId =:tid  and likeBy = :user and flagtype = 5 and status = 1";
+					
+                    $stmtlik = $this->DB->prepare($querylike);
 
+                    $stmtlik->bindParam(':tid', $postid, PDO::PARAM_STR);
+                    $stmtlik->bindParam(':user', $uuids, PDO::PARAM_INT);
+                  
+                    $stmtlik->execute();
+                    $rowstmtlik = $stmtlik->fetch(PDO::FETCH_ASSOC);
+                  
+		     $rows["likeStatus"] = $rowstmtlik['likeStatus'];
+					
+					
+		/******************* / user like or not ****************/
+                                     
+                     
+                     /************************total like comment ***********************/
+                     $flagType = 5;
+                     
+                    $query = "select count(likeBy) as total_likes from Tbl_Analytic_PostLike where postId =:pid and status = 1 and flagType = 5";
+                    $stmt = $this->DB->prepare($query);
+
+                    $stmt->bindParam(':pid', $postid, PDO::PARAM_STR);
+                   
+                    $stmt->execute();
+                    $trow = $stmt->fetch(PDO::FETCH_ASSOC);
+                     $rows["total_likes"] = $trow["total_likes"];
+                   // print_r($trow);
+                    if($trow['total_likes']>0)
+                    {
+                          include_once('Api_Class/class_postLike.php');
+                            $objLike = new Like;
+
+                  $likes_content = $objLike->getTotalLikeANDcomment($clientid, $postid, $flagType,$path);
+                //  print_r($likes_content);
+$rows["likes"] = ($likes_content['Success'] == 1) ? $likes_content['Posts'] : "";
+                    }
+
+                    /***************************/
+                    
+                  $query = "select count(commentBy) as total_comment from Tbl_Analytic_PostComment where postId =:pid and status = 'Show' and flagType = 5";
+                    $cstmt = $this->DB->prepare($query);
+
+                    $cstmt->bindParam(':pid', $postid, PDO::PARAM_STR);
+                   
+                    $cstmt->execute();
+                    $crow = $cstmt->fetch(PDO::FETCH_ASSOC);
+                    $rows["total_comments"] = $crow["total_comment"];
+                  //  print_r($crow);
+                    if($crow["total_comment"]>0)
+                    {
+                          include_once('Api_Class/class_comment.php');
+                            $objcomment = new Comment;
+
+                  $comment_content = $objcomment->Comment_display($clientid, $postid, $flagType,$path);
+                //  print_r($comment_content);
+  $rows["comments"] = ($comment_content['Success'] == 1) ? $comment_content['Posts'] : "";
+                    }   
+                  
+             
+                     /*********************************end like comment *******************/
+                  
                             $post["message"] = strip_tags(trim($rows["message"]));
                             array_push($response["posts"], $rows);
                         }
@@ -199,7 +264,7 @@ class ThoughtOfDay {
         }
     }
 
-    /*     * ******************FOR GETTING THOUGHT DETAILS FROM DATABASE BASED ON CLIENTID STARTS**************************** */
+    /********************FOR GETTING THOUGHT DETAILS FROM DATABASE BASED ON CLIENTID STARTS*****************************/
 
     function thoughtDetails($clientid, $user_uniqueid, $user_type) {
         $this->idclient = $clientid;

@@ -28,10 +28,52 @@ $data = $obj->getSurveyquestionresponse($sid, $qid,$department,$location);
 //echo "</pre>";
 $quesycount = count($data);
 //echo $quesycount;
+
+
+/* * ************** for export data ************* */
+$expd = array();
+for ($i = 0; $i < $quesycount; $i++) {
+    $expdata['sn'] = $data[$i]['sn'] = $i + 1;
+    $expdata['comment'] = $data[$i]['answer'];
+  
+//expdata['accessibility'] = $val[$i]['accessibility'];
+    array_push($expd, $expdata);
+}
+$exprecord = json_encode($expd);
+
+/* * ************** / for export data *********** */
+
 ?>
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.0.js"></script>
 
-<script src="js/analytic/downloadanalyticimage.js"></script>
+<!--<script src="js/analytic/downloadanalyticimage.js"></script>-->
+
+<script src="js/analytic/0.5.0-beta3html2canvas.min.js"></script>
+<script src="js/exportdata.js"></script>
+<script>
+    function tableexport() {
+        var exdata = document.getElementById('exportdata').value;
+         var title = document.getElementById('title').value;
+        var jsonData = JSON.parse(exdata);
+//alert(exdata);
+        if (jsonData.length > 0)
+        {
+            if (confirm('Are You Sure, You want to Export directory?')) {
+                JSONToCSVConvertor1(jsonData, title, true);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            alert("No data available");
+        }
+
+    }
+</script>
 
 <!-- page content -->
 <div class="right_col" role="main">
@@ -90,6 +132,8 @@ $quesycount = count($data);
                         <ul class="nav navbar-right panel_toolbox">
                             <li class="right"><a class="collapse-link right"><i class="fa fa-chevron-up"></i></a>
                             </li>
+							
+							<li class="right"><input type="button" class="btn btn-primary"value="Download" id="capture" /></li>
 
                         </ul>
 						
@@ -100,6 +144,7 @@ $quesycount = count($data);
                     <div class="x_content wordData">
                         <br />
                         <form class="form-horizontal form-label-left input_mask">
+						<div id="canvas">
                             <?php
                             $i = 0;
                             $globeGraph = array();
@@ -124,11 +169,12 @@ $quesycount = count($data);
                             }
                             
                             ?>
+							</div>
                         </form>
                     </div>
                 </div>
             </div>
-            <textarea style="display:none;" id="textGlobe" ><?php echo json_encode($globeGraph); ?></textarea>
+           <textarea style="display:none;" id="textGlobe" ><?php echo json_encode($globeGraph); ?></textarea>
             <div class="col-md-6 col-xs-12">
                 <div class="x_panel">
                     <div class="x_title">
@@ -136,6 +182,8 @@ $quesycount = count($data);
                         <ul class="nav navbar-right panel_toolbox">
                             <li class="right"><a class="collapse-link "><i class="fa fa-chevron-up"></i></a>
                             </li>
+							
+							<li class="right"><input type="button" class="btn btn-primary"value="Download" id="capture1" /></li>
 
                         </ul>
                         <div class="clearfix"></div>
@@ -164,13 +212,15 @@ $quesycount = count($data);
                         <ul class="nav navbar-right panel_toolbox">
                             <li class="right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                             </li>
-
+<li class="right"><button type="button" class="btn btn-primary " onclick="return tableexport();" style="float:right;">Export</button></li>
                         </ul>
                         <div class="clearfix"></div>
                     </div>
                     <div class="x_content">
                         <br />
                        <div class="tab-content">
+ <textarea name="exportdata" id="exportdata" style="display:none;"><?php echo $exprecord; ?></textarea>
+ <textarea name="exportdata" id="title" style="display:none;"><?php echo $data[0]['question']; ?></textarea>
 
                             <table id="datatable" class="MyTable table table-striped">
                                 <thead>
@@ -196,7 +246,8 @@ $quesycount = count($data);
 
                                         <tr>
                                             <td><?php echo $date; ?></td>
-                                            <td class="questionTD"><?php echo $fname . " " . $lname; ?></td>
+                                            <td class="questionTD">Anonymous</td>
+<!--                                     <td class="questionTD"><?php echo $fname . " " . $lname; ?></td>-->
                                             <td><?php echo $answer; ?></td>
                                         </tr>
 
@@ -217,5 +268,57 @@ $quesycount = count($data);
                                                 </div>
                                                 </div>
                                                 <!-- /page content -->
+<style>#canvas{
+		background-color : white;
+		}		
+</style>
+<script type="text/javascript">
+            			
+	$("#capture").click(function(){
+	html2canvas([document.getElementById('canvas')], {
+    onrendered: function (canvas) 
+	{
+    var data = canvas.toDataURL('image/jpeg');
+	//alert(data);		
+	save_img(data,'popularwords.jpeg');
+    }
+    });
+  });
+  
+  
+  $("#capture1").click(function(){
+		
+    html2canvas($("#canvas1"), {
+        onrendered: function(canvas) {
+			//alert(canvas);
+            // canvas is the final rendered <canvas> element
+            var data = canvas.toDataURL("image/jpeg");
+			
+			//alert(data);
+           
+			save_img(data,'wordcloud.jpeg');
+           // window.open(myImage);
+        }
+    });
+  });
 
+			function save_img(data, imgname) {
+                //alert(data);
+                var img = document.createElement('img');
+                img.src = data;
+				img.style.cssFloat  = "left";
+				img.style.border  = "1px solid black";
+                var a = document.createElement('a');
+				a.setAttribute("download", imgname);
+                a.setAttribute("href", data);
+                a.appendChild(img);
+                var w = open();
+                w.document.title = 'Download Image';
+                w.document.body.innerHTML = '<b style="color:red;">Click On Image for Download</b><br><br><br>';
+                w.document.body.appendChild(a);
+            }
+
+            /******************************** / download image *********************/
+        </script>
+												
                                                 <?php include 'footer.php'; ?>

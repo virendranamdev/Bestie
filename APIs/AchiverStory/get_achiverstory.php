@@ -2,6 +2,8 @@
 error_reporting(E_ALL); ini_set('display_errors', 1);
 if (file_exists("../../Class_Library/Api_Class/class_getAchiverStory.php") && include("../../Class_Library/Api_Class/class_getAchiverStory.php")) {
 
+      require_once('../../Class_Library/Api_Class/class_AppAnalytic.php');
+    
     if (isset($_SERVER['HTTP_ORIGIN'])) {
         header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
         header('Access-Control-Allow-Credentials: true');
@@ -25,15 +27,22 @@ if (file_exists("../../Class_Library/Api_Class/class_getAchiverStory.php") && in
 	/*{
 		"clientid":"CO-28",
 		"uid":"HGLF3M0DfwFdqWP3AbWPUWA0cD03O61",
-		"value":0
+		"value":0,
+		"device":"2",
+		"deviceId":"12345"
 	}*/
 	//print_r($jsonArr);
-    if (!empty($jsonArr['clientid'])) 
+    if (!empty($jsonArr['clientid']) && !empty($jsonArr['device']) && !empty($jsonArr['deviceId'])) 
 	{
         $obj = new AchiverStory();
+         $analytic_obj = new AppAnalytic();
         extract($jsonArr);
 
+        $flagtype = 16;
         $response = $obj->AchiverStoryDisplay($clientid,$uid,$value);
+        
+        /************* analytic purpose seve data *****************/
+         $analytic_obj->listAppview($clientid, $uid, $device, $deviceId, $flagtype);
     } else {
         $response['success'] = 0;
         $response['result'] = "Invalid json";

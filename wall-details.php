@@ -20,20 +20,19 @@ $feedData = $feedDetailsArr['data'];
 ?>
 <input type="hidden" name="feedid" id="feedid" value="<?php echo $feedbackId; ?>">
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.0.js"></script>
-<!--<script src="js/analytic/downloadanalyticimage.js"></script>
--->
+<!--<script src="js/analytic/downloadanalyticimage.js"></script>-->
+
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.5.0-beta4/html2canvas.min.js"></script>-->
+
+<script src="js/analytic/0.5.0-beta3html2canvas.min.js"></script>
+<!--------------------------------------->
+
+
+
+
+<!--
 <script src="js/analytic/html2canvas.min.js"></script>
-
-<script>
-  // tell the embed parent frame the height of the content
-  if (window.parent && window.parent.parent){
-    window.parent.parent.postMessage(["resultsFrame", {
-      height: document.body.getBoundingClientRect().height,
-      slug: "None"
-    }], "*")
-  }
-</script>
-
+-->
 <script>
     $(document).ready(function () {
 			
@@ -107,6 +106,9 @@ $feedData = $feedDetailsArr['data'];
             $comments .= ' /// ' . $wordData['comment_text'];
         }
         $words = json_decode($objFeed->extractCommonWords($comments), true);
+		//echo "<pre>";
+//print_r($words);
+//echo "</pre>";
 
         $fieldnames_actual = array();
         $values = array();
@@ -117,18 +119,25 @@ $feedData = $feedDetailsArr['data'];
                 $values[] = $v;
             }
         }
-//        echo'<pre>';        print_r($fieldnames_actual);        print_r($values);
+		
+       // echo'<pre>';        print_r($fieldnames_actual);        print_r($values);echo '</pre>';
         ?>
         <div class="row">
             <div class="col-md-6 col-xs-12">
                 <div class="x_panel">
                     <div class="x_title">
-                        <h2>Popular Words</h2>
+                        <h2>Popular Words</h2> 
+						
+						<!--------------- image capture ------->
+							
+								
+							
+							<!--------------- image capture ------->
 						
                         <ul class="nav navbar-right panel_toolbox">
                             <li class="right"><a class="collapse-link right"><i class="fa fa-chevron-up"></i></a>
                             </li>
-
+                        <li class="right"><input type="button" class="btn btn-primary"value="Download" id="capture" /></li>
                         </ul>
 						
                         <div class="clearfix"></div>
@@ -143,12 +152,14 @@ $feedData = $feedDetailsArr['data'];
                             $i = 0;
                             $globeGraph = array();
                             $textGraph = array();
+							$valuesum = array_sum($values);
                             while ($i < sizeof($words)) {
+								 $progrsswidth =  $values[$i] * 100/$valuesum;
                                 ?>
                                 <div  class="form-group">
 								
                                     <div class="progress">
-                                        <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width:<?php echo $values[$i] * 20; ?>%">
+					<div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100" style="width:<?php echo $progrsswidth; ?>%">
                                             <?php
                                             echo '<b>' . $fieldnames_actual[$i] . ' : ' . $values[$i] . '<b>';
                                             ?>
@@ -164,15 +175,7 @@ $feedData = $feedDetailsArr['data'];
                             }
                             ?>
 							</div>
-							<!--------------- image capture ------->
-							<div class="form-group">
-							<div id="design">
-							<div id="controls">
-							<input type="button" value="Download" id="capture" /><br /><br />	
-							</div>
-							</div>
-							</div>
-							<!--------------- image capture ------->
+							
                         </form>
 						
                     </div>
@@ -183,9 +186,13 @@ $feedData = $feedDetailsArr['data'];
                 <div class="x_panel">
                     <div class="x_title">
                         <h2>Word Cloud</h2>
+						
+						
                         <ul class="nav navbar-right panel_toolbox">
                             <li class="right"><a class="collapse-link "><i class="fa fa-chevron-up"></i></a>
                             </li>
+							
+							<li class="right"><input type="button" class="btn btn-primary"value="Download" id="capture1" /></li>
 
                         </ul>
                         <div class="clearfix"></div>
@@ -227,11 +234,10 @@ $feedData = $feedDetailsArr['data'];
                         <br />
                         <form id="demo-form3" data-parsley-validate class="form-horizontal form-label-left">
                             <?php 
-							if($feedDetailsArr['success']==1)
-							{
-							foreach ($feedData as $feed) { ?>
-
-									<?php echo "<div class='row' id='commentDiv" . $feed['commentId'] . "'>"; ?>
+				if($feedDetailsArr['success']==1){
+					foreach ($feedData as $feed) { 
+						echo "<div class='row' id='commentDiv" . $feed['commentId'] . "'>"; 
+			    ?>
 									
 								<div class="col-sm-1">
 								<img src="<?php echo $feed['userimage'];?>" onerror="this.src='images/user.png' "class="img img-responsive img-circle "style="border:1px solid"/>
@@ -272,91 +278,57 @@ $feedData = $feedDetailsArr['data'];
 		}		
 </style>		
 
-<script type='text/javascript'>//<![CDATA[
 
-function renderContent() {
-    html2canvas(document.getElementById("canvas"), {
-        allowTaint: true
-    }).then(function(canvas) {
-	//alert(canvas);
-        //document.getElementById("result").appendChild(canvas);
-		data = canvas.toDataURL('image/jpeg');
-		//alert(data);
-		save_img(data,'popularword.jpeg');
+<script type="text/javascript">
+            			
+	$("#capture").click(function(){
+	html2canvas([document.getElementById('canvas')], {
+    onrendered: function (canvas) 
+	{
+    var data = canvas.toDataURL('image/jpeg');
+	//alert(data);		
+	save_img(data,'popularwords.jpeg');
+    }
     });
-	
-	
-}
-
-document.getElementById("capture").onclick = renderContent;
-
-function save_img(data,imgname){
-	//alert('hi');
-var img = document.createElement('img');
-img.src = data;
-var a = document.createElement('a');
-//a.setAttribute("download", "wordcloud.jpeg");
-a.setAttribute("download", imgname);
-a.setAttribute("href", data);
-a.appendChild(img);
-var w = open();
-w.document.title = 'Download Image';
-w.document.body.innerHTML = 'Click On Image for Download';
-w.document.body.appendChild(a);
-}
-
-
-
-
-
-</script>
-<script type="text/javascript">	
-/*************************** download image *************************/
-		/*$(function(){
+  });
+  
+  
+  $("#capture1").click(function(){
+		
+    html2canvas($("#canvas1"), {
+        onrendered: function(canvas) {
+			//alert(canvas);
+            // canvas is the final rendered <canvas> element
+            var data = canvas.toDataURL("image/jpeg");
 			
-		$('#capture').click(function(){
-				//get the div content
-				div_content = document.querySelector("#canvas");
-				alert(div_content);
-				//make it as html5 canvas
-				html2canvas(div_content).then(function(canvas) {
-					alert('ho');
-					die;
-					//change the canvas to jpeg image
-					data = canvas.toDataURL('image/jpeg');
-					
-					//then call a super hero php to save the image
-					save_img(data,'wordcloud.jpeg');
-				});
-			});			
-		});
-		
-		
-function save_img(data,imgname){
-var img = document.createElement('img');
-img.src = data;
-var a = document.createElement('a');
-//a.setAttribute("download", "wordcloud.jpeg");
-a.setAttribute("download", imgname);
-a.setAttribute("href", data);
-a.appendChild(img);
-var w = open();
-w.document.title = 'Download Image';
-w.document.body.innerHTML = 'Click On Image for Download';
-w.document.body.appendChild(a);
-}
-*/
+			//alert(data);
+           
+			save_img(data,'wordcloud.jpeg');
+           // window.open(myImage);
+        }
+    });
+  });
 
-/******************************** / download image *********************/		
-</script>
-<script>
-  // tell the embed parent frame the height of the content
-  if (window.parent && window.parent.parent){
-    window.parent.parent.postMessage(["resultsFrame", {
-      height: document.body.getBoundingClientRect().height,
-      slug: "None"
-    }], "*")
-  }
-</script>
+			function save_img(data, imgname) {
+                //alert(data);
+                var img = document.createElement('img');
+                img.src = data;
+				img.style.cssFloat  = "left";
+				img.style.border  = "1px solid black";
+                var a = document.createElement('a');
+				a.setAttribute("download", imgname);
+                a.setAttribute("href", data);
+                a.appendChild(img);
+                var w = open();
+                w.document.title = 'Download Image';
+                w.document.body.innerHTML = '<b style="color:red;">Click On Image for Download</b><br><br><br>';
+                w.document.body.appendChild(a);
+            }
+
+            /******************************** / download image *********************/
+        </script>
+
+
+
 
                                                 <?php include 'footer.php'; ?>

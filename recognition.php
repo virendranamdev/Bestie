@@ -31,7 +31,7 @@ $(document).ready(function() {
               <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <div class="x_panel">
                   <div class="x_title">
-                    <h2>Recognition</h2>
+                    <h2>Badge me</h2>
 					  <ul class="nav navbar-right panel_toolbox">
                       <li class="right"><a class="collapse-link"><i class="fa fa-chevron-up "></i></a>
                       </li>
@@ -42,7 +42,11 @@ $(document).ready(function() {
                   <div class="x_content"> 
 				   <div class="row">
                             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                                <ul class="inlineUL right"><li><a href="topRecognizeUser.php"><button class="btn btn-primary btn-round">Top Recognize User</button></a></li></ul>
+                                <ul class="inlineUL right">
+								<li><a href="recognitionAnalytics.php"><button class="btn btn-info btn-round">Recognition Analytics</button></a></li>
+								<li><a href="topRecognizeUser.php"><button class="btn btn-primary btn-round">Top Recognize User</button></a></li>
+								<li><a href="referbadge.php"><button class="btn btn-success btn-round">Badges referrel</button></a></li>
+								</ul>
                             </div>
 
                         </div>

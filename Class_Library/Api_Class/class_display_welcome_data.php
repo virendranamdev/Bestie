@@ -14,7 +14,7 @@ class PostDisplayWelcome {
         $this->DB = $db->getConnection_Communication();
     }
 
-    function PostDisplay($clientid, $uid, $start) {
+    function PostDisplay($clientid, $uid, $start, $device = '') {
 
         $this->idclient = $clientid;
 //        $this->value = $val;
@@ -380,40 +380,50 @@ class PostDisplayWelcome {
 
 //                          Display Happiness                            
                                 case "Happiness" :
-                                    $eventquery1 = "select happiness.*,Concat('Happiness','') as type,Concat('20','') as flagCheck, DATE_FORMAT(happiness.createdDate,'%d %b %Y') as createdDate, DATE_FORMAT(happiness.startDate,'%d %b %Y') as publishingTime, if(master.lastName IS NULL or master.lastName='', master.firstName, CONCAT(master.firstName, ' ', master.lastName)) as createdBy, if(personal.userImage IS NULL or personal.userImage='', '', CONCAT('$site_url', personal.userImage)) as userImage from Tbl_C_HappinessQuestion as happiness join Tbl_EmployeeDetails_Master as master on happiness.createdBy=master.employeeId join Tbl_EmployeePersonalDetails as personal on happiness.createdBy=personal.employeeId where happiness.surveyId =:id and happiness.clientId =:cid and happiness.startDate = CURDATE()";
-                                    $nstmt = $this->DB->prepare($eventquery1);
-                                    $nstmt->bindParam(':cid', $this->idclient, PDO::PARAM_STR);
-                                    $nstmt->bindParam(':id', $welid, PDO::PARAM_STR);
-                                    $nstmt->execute();
-                                    $data = $nstmt->fetch(PDO::FETCH_ASSOC);
-                             	    if ($data) {
-		                            $data['module'] = "Happiness";                                    
-		                            array_push($welcomearray, $data);
+		                    $eventquery1 = "select happiness.*,Concat('Happiness','') as type,Concat('20','') as flagCheck, DATE_FORMAT(happiness.createdDate,'%d %b %Y') as createdDate, DATE_FORMAT(happiness.startDate,'%d %b %Y') as publishingTime, if(master.lastName IS NULL or master.lastName='', master.firstName, CONCAT(master.firstName, ' ', master.lastName)) as createdBy, if(personal.userImage IS NULL or personal.userImage='', '', CONCAT('$site_url', personal.userImage)) as userImage from Tbl_C_HappinessQuestion as happiness join Tbl_EmployeeDetails_Master as master on happiness.createdBy=master.employeeId join Tbl_EmployeePersonalDetails as personal on happiness.createdBy=personal.employeeId where happiness.surveyId =:id and happiness.clientId =:cid and happiness.startDate = CURDATE()";
+	                            $nstmt = $this->DB->prepare($eventquery1);
+	                            $nstmt->bindParam(':cid', $this->idclient, PDO::PARAM_STR);
+	                            $nstmt->bindParam(':id', $welid, PDO::PARAM_STR);
+	                            $nstmt->execute();
+	                            $data = $nstmt->fetch(PDO::FETCH_ASSOC);
+
+				    if($data) {
+				            $query = "SELECT count(auto_id) count FROM Tbl_Analytic_EmployeeHappiness WHERE surveyId=:questionId AND userUniqueId=:empId";
+					    $stmt = $this->DB->prepare($query);
+					    $stmt->bindParam(':questionId', $data['surveyId'], PDO::PARAM_INT);
+					    $stmt->bindParam(':empId', $uid, PDO::PARAM_STR);
+					    $stmt->execute();
+					    $commentsCount = $stmt->fetch(PDO::FETCH_ASSOC);
+					    
+					    $commentsCount['count'] = (int)$commentsCount['count'];
+				    
+					    if (($commentsCount['count'] == 0)) {
+					    	$data['module'] = "Happiness Indicator";
+						array_push($welcomearray, $data);
+			                    }
                                     }
                                     break;
 
 //                          Display Album                            
                                 case "Album":
-                                $eventquery = "select * from Tbl_Analytic_AlbumSentToGroup where groupId IN('" . $in . "') and albumId =:id and clientId =:cid";
+                                $eventquery = "select * from Tbl_Analytic_AlbumSentToGroup where groupId IN('" . $in . "') and bundleId =:id and clientId =:cid";
                                 $nstmt = $this->DB->prepare($eventquery);
                                 $nstmt->bindParam(':cid', $this->idclient, PDO::PARAM_STR);
                                 $nstmt->bindParam(':id', $welid, PDO::PARAM_STR);
                                 $nstmt->execute();
                                 $eventrows = $nstmt->fetchAll(PDO::FETCH_ASSOC);
                                 if (count($eventrows) > 0) {
-                                    $eventquery1 = "select album.*,Concat('Album','') as type, Concat('11','') as flagCheck, DATE_FORMAT(album.createdDate,'%d %b %Y') as createdDate, Concat('$site_url',album_image.imgName) as imageName from Tbl_C_AlbumDetails as album join Tbl_C_AlbumImage as album_image on album_image.albumId=album.albumId where album.albumId =:id and album.clientId =:cid And album.status=1 And album_image.status = 1 ";                                   
+                                    $eventquery1 = "select album.*,Concat('Album','') as type, Concat('11','') as flagCheck, DATE_FORMAT(album.createdDate,'%d %b %Y') as createdDate, Concat('$site_url',album_image.imgName) as imageName, album_image.bundleId, album_image.createdby as createdby from Tbl_C_AlbumDetails as album join Tbl_C_AlbumImage as album_image on album_image.albumId=album.albumId where album_image.bundleId =:id and album.clientId =:cid And album.status=1 And album_image.status = 1 ";                                   
                                     $nstmt = $this->DB->prepare($eventquery1);
                                     $nstmt->bindParam(':cid', $this->idclient, PDO::PARAM_STR);
                                     $nstmt->bindParam(':id', $welid, PDO::PARAM_STR);
                                     $nstmt->execute();
                                     $eventdata = $nstmt->fetch(PDO::FETCH_ASSOC);
 
-				   
-				   
 				    $albumImages = array();
-				    $albumImagesQuery = "select IF(imgName IS NULL or imgName='', '', CONCAT('$site_url',imgName)) AS imgName from Tbl_C_AlbumImage where albumId=:albumId and status=1 limit 0,3";
+				    $albumImagesQuery = "select IF(imgName IS NULL or imgName='', '', CONCAT('$site_url',imgName)) AS imgName from Tbl_C_AlbumImage where bundleId=:albumId and status=1 limit 0,3";
 				    $nstmt = $this->DB->prepare($albumImagesQuery);
-				    $nstmt->bindParam(':albumId', $eventdata['albumId'], PDO::PARAM_STR);
+				    $nstmt->bindParam(':albumId', $welid, PDO::PARAM_STR);
 				    $nstmt->execute();
 				    $albumImages = $nstmt->fetchAll(PDO::FETCH_ASSOC);
                                     	
@@ -424,7 +434,7 @@ class PostDisplayWelcome {
                             	    $eventdata['imageName3'] = (!empty($albumImages[2]['imgName']))?$albumImages[2]['imgName']:"";
                                    
                                     $userid = $eventdata['createdby'];
-
+			
                                     $query = "select emp_master.firstName,emp_master.lastName,if(emp_personal.userImage IS NULL or emp_personal.userImage='', '', if(emp_personal.linkedIn = '1', emp_personal.userImage, Concat('$site_url',emp_personal.userImage))) as userImage from Tbl_EmployeeDetails_Master as emp_master left join Tbl_EmployeePersonalDetails as emp_personal on emp_personal.employeeId=emp_master.employeeId where emp_master.employeeId =:eid";
                                     $stmt12 = $this->DB->prepare($query);
                                     $stmt12->bindparam(':eid', $userid, PDO::PARAM_STR);
@@ -433,14 +443,16 @@ class PostDisplayWelcome {
 
                                     $username = $eventdata1['firstName'] . " " . $eventdata1['lastName'];
                                     $eventdata['posted'] = $username;
+                                    $eventdata['title'] = $eventdata1['firstName']." shared memories in ".$eventdata['title'];
                                     $eventdata['postedBy'] = $eventdata1['userImage'];
-                                    $eventdata['module'] = 'Gallery';
+                                    $eventdata['module'] = "Let's Click";
 
                                     array_push($welcomearray, $eventdata);
                                 }
                                 break;
 
 //                          Display Recognition
+                                /*
                                 case "Recognition" :
                                     $sts = "Approve";
 				    $recognitionQuery = "select recognition.*, Concat('Recognition','') as type,Concat('10','') as flagCheck, DATE_FORMAT(recognition.dateOfEntry,'%d %b %Y') as createdDate, badges.recognizeTitle, if(badges.image IS NULL or badges.image='', '',concat('$site_url', badges.image)) as badgesImage, if(Bymaster.lastName IS NULL or Bymaster.lastName='', Bymaster.firstName,CONCAT(Bymaster.firstName, ' ', Bymaster.lastName)) as ByUsername, if(Bypersonal.userImage IS NULL or Bypersonal.userImage='', '', CONCAT('$site_url',Bypersonal.userImage)) as ByuserImage, if(Tomaster.lastName IS NULL or Tomaster.lastName='', Tomaster.firstName,CONCAT(Tomaster.firstName, ' ', Tomaster.lastName)) as ToUsername, if(Topersonal.userImage IS NULL or Topersonal.userImage='', '', CONCAT('$site_url',Topersonal.userImage)) as TouserImage, (select count(autoId) as totalLikes from Tbl_Analytic_RecognitionLikes where recognitionId=:id and like_unlike_status='1') as totalLikes, if((select if(employeeId=:uid, '1', '0') as likeStatus from Tbl_Analytic_RecognitionLikes where recognitionId=:id and like_unlike_status='1' and employeeId=:uid), 1, 0) as likeStatus from Tbl_RecognizedEmployeeDetails as recognition join Tbl_RecognizeTopicDetails as badges ON recognition.topic=badges.topicId join Tbl_EmployeeDetails_Master as Bymaster on Bymaster.employeeId=recognition.recognitionBy join Tbl_EmployeeDetails_Master as Tomaster on Tomaster.employeeId=recognition.recognitionTo join Tbl_EmployeePersonalDetails as Bypersonal ON Bypersonal.employeeId=recognition.recognitionBy join Tbl_EmployeePersonalDetails as Topersonal ON Topersonal.employeeId=recognition.recognitionTo where recognition.status =:sts and recognition.clientId=:cli and recognition.recognitionId=:id"; 
@@ -459,9 +471,13 @@ class PostDisplayWelcome {
 				    $data['module'] = "Recognition";                                    
                                     array_push($welcomearray, $data);
                                     break;
-
+				*/
+				
 //                          Display Thought
+				
+								
                                 case "Thought":
+                                   if($device == '2'){
                                     $eventquery1 = "select thought.*,Concat('Thought','') as type,Concat('5','') as flagCheck, DATE_FORMAT(thought.createdDate,'%d %b %Y') as createdDate, DATE_FORMAT(thought.publishingTime,'%d %b %Y') as publishingTime, if(thought.thoughtImage IS NULL OR thought.thoughtImage ='','',Concat('$site_url',thought.thoughtImage)) as thoughtImage, if(master.lastName IS NULL or master.lastName='', master.firstName, CONCAT(master.firstName, ' ', master.lastName)) as createdBy, if(personal.userImage IS NULL or personal.userImage='', '', CONCAT('$site_url', personal.userImage)) as userImage from Tbl_C_Thought as thought join Tbl_EmployeeDetails_Master as master on thought.createdBy=master.employeeId join Tbl_EmployeePersonalDetails as personal on thought.createdBy=personal.employeeId where thought.thoughtId =:id and thought.clientId =:cid";
                                     $nstmt = $this->DB->prepare($eventquery1);
                                     $nstmt->bindParam(':cid', $this->idclient, PDO::PARAM_STR);
@@ -470,8 +486,9 @@ class PostDisplayWelcome {
                                     $data = $nstmt->fetch(PDO::FETCH_ASSOC);
                                     $data['module'] = "Thought";                                    
                                     array_push($welcomearray, $data);
-
+				    }
                                     break;
+				
 
 //                          Display Colleague Story or Achiever Story
                                 case "AStory":
@@ -481,9 +498,9 @@ class PostDisplayWelcome {
                                 $nstmt->bindParam(':id', $welid, PDO::PARAM_STR);
                                 $nstmt->execute();
                                 $val = $nstmt->fetch(PDO::FETCH_ASSOC);
-                                $userid = $val['createdBy'];
+                                $userid = $val['achiverEmailId'];
 
-                                $query = "select emp_master.firstName,emp_master.lastName,if(emp_personal.userImage IS NULL or emp_personal.userImage='', '', if(emp_personal.linkedIn = '1', emp_personal.userImage, Concat('$site_url',emp_personal.userImage))) as userImage from Tbl_EmployeeDetails_Master as emp_master left join Tbl_EmployeePersonalDetails as emp_personal on emp_personal.employeeId=emp_master.employeeId where emp_master.employeeId =:eid";
+                                $query = "select emp_master.firstName,emp_master.lastName,if(emp_personal.userImage IS NULL or emp_personal.userImage='', '', if(emp_personal.linkedIn = '1', emp_personal.userImage, Concat('$site_url',emp_personal.userImage))) as userImage from Tbl_EmployeeDetails_Master as emp_master left join Tbl_EmployeePersonalDetails as emp_personal on emp_personal.employeeId=emp_master.employeeId where emp_master.emailId =:eid";
                                 $stmt12 = $this->DB->prepare($query);
                                 $stmt12->bindparam(':eid', $userid, PDO::PARAM_STR);
                                 $stmt12->execute();
@@ -492,7 +509,7 @@ class PostDisplayWelcome {
                                 $username = $eventdata1['firstName'] . " " . $eventdata1['lastName'];
                                 $val['posted'] = $username;
                                 $val['postedBy'] = $eventdata1['userImage'];
-                                $val['module'] = 'Colleague Story';
+                                $val['module'] = 'My story';
 
                                 array_push($welcomearray, $val);
                                 break;
@@ -541,7 +558,7 @@ class PostDisplayWelcome {
 //                          Display Notification Reminder
                                 case "Reminder" :
                                 
-				$reminderQuery = "select reminder.*,Concat('Reminder','') as type,Concat('25','') as flagCheck, DATE_FORMAT(reminder.createdDate,'%d %b %Y') as createdDate, DATE_FORMAT(reminder.createdDate,'%d %b %Y') as publishingTime, if(reminder.image IS NULL OR reminder.image ='','',Concat('$site_url', reminder.image)) as image, if(personal.userImage IS NULL or personal.userImage='', '', CONCAT('$site_url', personal.userImage)) as userImage, if(master.lastName IS NULL or master.lastName='', master.firstName, CONCAT(master.firstName, ' ', master.lastName)) as createdBy from Tbl_C_ReminderDetails as reminder join Tbl_EmployeePersonalDetails as personal on reminder.createdBy=personal.employeeId join Tbl_EmployeeDetails_Master as master on reminder.createdBy=master.employeeId where reminder.reminderId =:id and reminder.clientId =:cid and reminder.status=1";
+				$reminderQuery = "select reminder.*,Concat('Reminder','') as type,Concat('25','') as flagCheck, DATE_FORMAT(reminder.createdDate,'%d %b %Y') as createdDate, DATE_FORMAT(reminder.createdDate,'%d %b %Y') as publishingTime, if(reminder.image IS NULL OR reminder.image ='','',Concat('$site_url', reminder.image)) as image, master.employeeId, if(personal.userImage IS NULL or personal.userImage='', '', CONCAT('$site_url', personal.userImage)) as userImage, if(master.lastName IS NULL or master.lastName='', master.firstName, CONCAT(master.firstName, ' ', master.lastName)) as createdBy from Tbl_C_ReminderDetails as reminder join Tbl_EmployeePersonalDetails as personal on reminder.createdBy=personal.employeeId join Tbl_EmployeeDetails_Master as master on reminder.createdBy=master.employeeId where reminder.reminderId =:id and reminder.clientId =:cid and reminder.status=1";
                                     $nstmt = $this->DB->prepare($reminderQuery);
                                     $nstmt->bindParam(':cid', $this->idclient, PDO::PARAM_STR);
                                     $nstmt->bindParam(':id', $welid, PDO::PARAM_STR);

@@ -94,62 +94,46 @@
             <div id="cloud"></div>
         </div>
         <!--------------- image capture ------->
-        <div class="form-group">
+        <!--<div class="form-group">
             <div id="design1">
                 <div id="controls1">
                     <input type="button" value="Download" id="capture1" /><br /><br />	
                 </div>
             </div>
-        </div>
+        </div>-->
         <!--------------- image capture ------->
 
         <script type="text/javascript">
             /*************************** download image *************************/
             
-          
-            
-            $(function () {
+           /* $(function () {
 
                 $('#capture1').click(function () {
-                    //get the div content
-                    div_content = document.querySelector("#canvas1");
-                    //alert('hi');
-                    //make it as html5 canvas
-                  console.log(div_content);
-                    
-                  
+					div_content = document.querySelector("#canvas1");
+                    console.log(div_content);
                     html2canvas(div_content).then(function (canvas) {
-                        background :'#FFFFFF',
-                        //alert('ho');
-                        //change the canvas to jpeg image
                         data = canvas.toDataURL('image/jpeg');
-//window.open(data);
-                        //then call a super hero php to save the image
-                        save_img(data, 'wordcloud.jpeg');
+						//alert(data);
+						save_img(data, 'wordcloud.jpeg');
                     });
                 });
             });
 
-
-
-
-
-            function save_img(data, imgname) {
-               //    alert(data);
+			function save_img(data, imgname) {
+                //alert(data);
                 var img = document.createElement('img');
-              
                 img.src = data;
-                 document.body.style.backgroundColor = "#f3f3f3";
+				img.style.cssFloat  = "left";
+				img.style.border  = "1px solid black";
                 var a = document.createElement('a');
-//a.setAttribute("download", "wordcloud.jpeg");
-                a.setAttribute("download", imgname);
+				a.setAttribute("download", imgname);
                 a.setAttribute("href", data);
                 a.appendChild(img);
                 var w = open();
                 w.document.title = 'Download Image';
-                w.document.body.innerHTML = 'Click On Image for Download';
+                w.document.body.innerHTML = '<b style="color:red;">Click On Image for Download</b><br><br><br>';
                 w.document.body.appendChild(a);
-            }
+            }*/
 
             /******************************** / download image *********************/
         </script>

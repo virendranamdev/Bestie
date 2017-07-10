@@ -18,7 +18,7 @@ class LoginAnalytic {
     function graphGetActiveUser($client, $fromdt, $enddte , $department,$location) {
         try {
 
-			$query = "SELECT count(track.userUniqueId) as totalview,count(distinct(track.userUniqueId)) as uniqueview,DATE_FORMAT(track.date_of_entry,'%d/%m/%Y') as date_of_entry FROM Tbl_Analytic_TrackUser as track JOIN Tbl_EmployeeDetails_Master as edm ON track.userUniqueId = edm.employeeId where (DATE(track.date_of_entry) BETWEEN :fromdte AND :enddte) AND track.clientId = :client and track.description = 'Open Spalsh'";
+			$query = "SELECT count(track.userUniqueId) as totalview,count(distinct(track.userUniqueId)) as uniqueview,DATE_FORMAT(track.date_of_entry,'%d/%m/%Y') as date_of_entry FROM Tbl_Analytic_TrackUser as track JOIN Tbl_EmployeeDetails_Master as edm ON track.userUniqueId = edm.employeeId where (DATE(track.date_of_entry) BETWEEN :fromdte AND :enddte) AND track.clientId = :client";
 		 
                     if ($department == 'All' && $location == 'All'){
                 $query .= "";}
@@ -67,7 +67,7 @@ class LoginAnalytic {
     function gettoppostforwelcome($clientid, $uid) {
      
         try {
-            $query = "select count(userUniqueId) as totalview,post_id,date_of_entry,flagType from Tbl_Analytic_PostView where clientId = :client group by post_id order by count(userUniqueId) desc limit 5";
+            $query = "select count(userUniqueId) as totalview,post_id,date_of_entry,flagType from Tbl_Analytic_PostView where clientId = :client AND flagType IN(16,11,23,24) group by post_id,flagType order by count(userUniqueId) desc limit 5";
             $stmt = $this->db_connect->prepare($query);
             $stmt->bindParam(':client', $clientid, PDO::PARAM_STR);
             $stmt->execute();
@@ -197,17 +197,16 @@ class LoginAnalytic {
     
     /*************************************************************/
     
-     function graphGetHappinessIndex($client, $fromdt, $enddate, $department) 
+     /*function graphGetHappinessIndex($client, $fromdt, $enddate, $department) 
                 {
-         
-         $query = "select * from Tbl_C_HappinessQuestion where expiryDate < :enddte order by surveyId desc limit 1";
+       
+         $query = "select * from Tbl_C_HappinessQuestion where expiryDate <= :enddte order by surveyId desc limit 1";
           $stmt = $this->db_connect->prepare($query);
            
           $stmt->bindParam(':enddte', $enddate, PDO::PARAM_STR);
             $stmt->execute();
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
-            //echo "<pre>";
-            //print_r($result);
+            			
             $questionid = $result['surveyId'];
 			$surveyid = $result['surveyId'];
 			$clientId = $result['clientId'];
@@ -235,7 +234,69 @@ class LoginAnalytic {
             echo $ex;
         }
           return json_encode($response, JSON_NUMERIC_CHECK);
+    }*/
+	
+/********************************** happiness graph ********************************************/
+
+function graphGetHappinessIndex($client, $fromdt, $enddate, $department) 
+                {
+     
+            try {
+			
+			if($department == "All")
+			{
+            $query = "SELECT value as name,count(userUniqueId) as y FROM Tbl_Analytic_EmployeeHappiness where (DATE(createdDate) BETWEEN :fromdt AND :enddate) AND clientId = :client and status = 1 group by value";
+			}
+			else
+			{
+			 $query = "SELECT analytichapp.value as name,count(analytichapp.userUniqueId) as y FROM Tbl_Analytic_EmployeeHappiness as analytichapp JOIN Tbl_EmployeeDetails_Master as edm ON analytichapp.userUniqueId = edm.employeeId where (DATE(analytichapp.createdDate) BETWEEN :fromdt AND :enddate) AND analytichapp.clientId = :client and analytichapp.status = 1 AND edm.department = :department group by analytichapp.value";	
+			}
+            $stmt = $this->db_connect->prepare($query);
+            $stmt->bindParam(':client', $client, PDO::PARAM_STR);
+            $stmt->bindParam(':fromdt', $fromdt, PDO::PARAM_STR);
+            $stmt->bindParam(':enddate', $enddate, PDO::PARAM_STR);
+			if($department != "All"){$stmt->bindParam(':department', $department, PDO::PARAM_STR);}
+            $stmt->execute();
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+          //  print_r($result);
+          
+            $response["data"] = $result;
+          
+        } catch (PDOException $ex) {
+            echo $ex;
+        }
+          return json_encode($response, JSON_NUMERIC_CHECK);
     }
+	
+	
+/********************************* / happiness index graph ********************************/
+
+/***************************** get toal count *******************************/
+
+function graphGetHappinessIndexcount($client, $fromdt, $enddate, $department) 
+{
+	try {
+	$query2 = "SELECT count(happiness.userUniqueId) as totalhappresponse FROM Tbl_Analytic_EmployeeHappiness as happiness JOIN Tbl_EmployeeDetails_Master as edm ON happiness.userUniqueId = edm.employeeId where (DATE(happiness.createdDate) BETWEEN :fromdt2 AND :enddate2) AND happiness.clientId = :client2 and happiness.status = 1";
+	
+			if($department != 'All')
+			{
+				$query2 .= " AND edm.department = :department";
+			}
+				
+			$stmt2 = $this->db_connect->prepare($query2);
+            $stmt2->bindParam(':client2', $client, PDO::PARAM_STR);
+            $stmt2->bindParam(':fromdt2', $fromdt, PDO::PARAM_STR);
+            $stmt2->bindParam(':enddate2', $enddate, PDO::PARAM_STR);
+			if($department != "All"){$stmt2->bindParam(':department', $department, PDO::PARAM_STR);}
+			$stmt2->execute();
+            $result2 = $stmt2->fetch(PDO::FETCH_ASSOC);
+	} catch (PDOException $ex) {
+            echo $ex;
+        }
+          return json_encode($result2);
+}
+
+/***************************** / get totao count ****************************/
 
 }
 

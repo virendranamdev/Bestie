@@ -122,7 +122,7 @@ class AlbumAPI {
                     /*                     * ************************* fetch album id *************************** */
                     //$query3 = "select distinct(albumId) from Tbl_Analytic_AlbumSentToGroup where clientId=:cli and status = 1 and flagType = 11 and groupId IN('" . $in . "') order by autoId desc";
 
-                    $query3 = "select distinct(albumgroup.albumId) from Tbl_Analytic_AlbumSentToGroup as albumgroup JOIN Tbl_C_AlbumDetails as albumdetails ON albumgroup.albumId = albumdetails.albumId where albumgroup.clientId=:cli and albumgroup.status = 1 and albumgroup.flagType = 11 and albumdetails.categoryId = :categoryid AND albumgroup.groupId IN('" . $in . "') order by albumgroup.autoId desc";
+                    $query3 = "select distinct(albumgroup.albumId) from Tbl_Analytic_AlbumSentToGroup as albumgroup JOIN Tbl_C_AlbumDetails as albumdetails ON albumgroup.albumId = albumdetails.albumId where albumgroup.clientId=:cli and albumgroup.status = 1 and albumgroup.flagType = 11 and albumdetails.categoryId = :categoryid AND albumgroup.groupId IN('" . $in . "') group by albumgroup.albumId order by albumgroup.autoId desc";
 
                     $stmt3 = $this->DB->prepare($query3);
                     $stmt3->bindParam(':cli', $cid, PDO::PARAM_STR);
@@ -212,9 +212,10 @@ class AlbumAPI {
 
     /*     * ********************** get image details ************************************** */
 
-    function getAllAlbumImageDetails($albumid, $clientid = '', $device = '') {
+    function getAllAlbumImageDetails($albumid, $clientid = '', $uid , $deviceId='', $device = '') {
         $this->albumid = $albumid;
         $status = 1;
+		
         try {
             $server_name = site_url;
 
@@ -245,6 +246,27 @@ class AlbumAPI {
                     $imgautoid = $rows[$i]["autoId"];
                     $albid = $rows[$i]["albumId"];
 
+					/********************* user like or not ****************/
+					
+					//$querylike = "select count(likeId) as likeStatus from Tbl_Analytic_AlbumLike where albumId =:albumid AND imageId = :imgid and status = :status AND userId = :likeuid ";
+					
+					$querylike = "select count(likeId) as likeStatus from Tbl_Analytic_AlbumLike where albumId =:likealbumid AND imageId = :likeimgid and status = :likestatus AND userId = :likeuid ";
+					
+                    $stmtlik = $this->DB->prepare($querylike);
+
+                    $stmtlik->bindParam(':likealbumid', $albid, PDO::PARAM_STR);
+                    $stmtlik->bindParam(':likeimgid', $imgautoid, PDO::PARAM_INT);
+                    $stmtlik->bindParam(':likestatus', $status, PDO::PARAM_INT);
+					$stmtlik->bindParam(':likeuid', $uid, PDO::PARAM_INT);
+
+                    $stmtlik->execute();
+                    $rowstmtlik = $stmtlik->fetch(PDO::FETCH_ASSOC);
+					
+					
+					$post["likeStatus"] = $rowstmtlik['likeStatus'];
+					
+					
+					/******************* / user like or not ****************/
 
                     $query = "select count(imageId) as total_likes from Tbl_Analytic_AlbumLike where albumId =:albumid AND imageId = :imgid and status = :status";
                     $stmt = $this->DB->prepare($query);

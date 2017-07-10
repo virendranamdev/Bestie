@@ -2,6 +2,7 @@
 
 error_reporting(E_ALL ^ E_NOTICE);
 if (file_exists("../../Class_Library/Api_Class/class_getAchiverStory.php") && include("../../Class_Library/Api_Class/class_getAchiverStory.php")) {
+   
     if (isset($_SERVER['HTTP_ORIGIN'])) {
         header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
         header('Access-Control-Allow-Credentials: true');
@@ -23,11 +24,13 @@ if (file_exists("../../Class_Library/Api_Class/class_getAchiverStory.php") && in
 
     $jsonArr = json_decode(file_get_contents("php://input"), true);
 
-    if (!empty($jsonArr['clientid'])) {
+    if (!empty($jsonArr['clientid']) && !empty($jsonArr['device']) && !empty($jsonArr['deviceId'])) {
         $achiever = new AchiverStory();
+        
         extract($jsonArr);
 
-        $response = $achiever->achiever_details($clientid, $postid, $flag);
+        $response = $achiever->achiever_details($clientid, $postid, $flag, $uid);
+         
     } else {
         $response['success'] = 0;
         $response['message'] = "Invalid json";

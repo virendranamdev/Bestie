@@ -69,7 +69,9 @@ while ($i < sizeof($words)) {
 //print_r($happinessGlobeGraph);
 ?>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
-<script src="js/analytic/downloadanalyticimage.js"></script>
+
+<!--<script src="js/analytic/downloadanalyticimage.js"></script>-->
+<script src="js/analytic/0.5.0-beta3html2canvas.min.js"></script>
 <textarea style="display:none;" id="textGlobe" ><?php echo json_encode($happinessGlobeGraph); ?></textarea>
 
 <?php
@@ -211,6 +213,9 @@ echo "<script> document.getElementById('doughnutGraphData').value = '" . json_en
                         <ul class="nav navbar-right panel_toolbox">
                             <li class="right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                             </li>
+							
+							
+							
 
                         </ul>
                         <div class="clearfix"></div>
@@ -390,6 +395,8 @@ echo "<script> document.getElementById('doughnutGraphData').value = '" . json_en
                         <ul class="nav navbar-right panel_toolbox">
                             <li class="right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                             </li>
+							
+							<li class="right"><input type="button" class="btn btn-primary"value="Download" id="capture" /></li>
 
                         </ul>
                         <div class="clearfix"></div>
@@ -432,9 +439,9 @@ echo "<script> document.getElementById('doughnutGraphData').value = '" . json_en
                                 <div class="row">
                                     <div class="col-xs-1 col-sm-1 col-md-1 col-lg-1"> 
                                         <center>
-                                            <img src="<?php echo $feed['userImage']; ?>" class="img-circle" onerror="this.src=&quot;images/dummyUser.png&quot;">
+                                            <img src="<?php echo $feed['userImage1']; ?>" class="img-circle" onerror="this.src=&quot;images/dummyUser.png&quot;">
                                             <br>
-    <?php echo $feed['name']; ?>
+    <?php echo $feed['name1']; ?>
                                         </center>
                                     </div>
                                     <div class="col-xs-11 col-sm-11 col-md-11 col-lg-11">
@@ -629,4 +636,45 @@ echo "<script> document.getElementById('doughnutGraphData').value = '" . json_en
     }*/
     /************************************** end draw chart function **************************************/
 </script>
+
+<script type="text/javascript">	
+/*************************** download image *************************/
+		$(function(){
+			
+		$('#capture').click(function(){
+				//get the div content
+				div_content = document.querySelector("#canvas");
+				
+				//make it as html5 canvas
+				html2canvas(div_content).then(function(canvas) {
+					//alert('ho');
+					//change the canvas to jpeg image
+					data = canvas.toDataURL('image/jpeg');
+					
+					//then call a super hero php to save the image
+					save_img(data,'wordcloud.jpeg');
+				});
+			});			
+		});
+		
+		
+function save_img(data,imgname){
+var img = document.createElement('img');
+img.src = data;
+img.style.cssFloat  = "left";
+img.style.border  = "1px solid black";
+var a = document.createElement('a');
+//a.setAttribute("download", "wordcloud.jpeg");
+a.setAttribute("download", imgname);
+a.setAttribute("href", data);
+a.appendChild(img);
+var w = open();
+w.document.title = 'Download Image';
+w.document.body.innerHTML = '<b style="color:red;">Click On Image for Download</b><br><br><br>';
+w.document.body.appendChild(a);
+}
+
+/******************************** / download image *********************/		
+</script>
+
 <?php include 'footer.php'; ?>

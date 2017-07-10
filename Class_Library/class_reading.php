@@ -332,10 +332,10 @@ class Reading {
         $this->client = $clientId;
         $this->eventid = $recogId;
         $this->groupid = $GroupId;
-        date_default_timezone_set('Asia/Calcutta');
+        date_default_timezone_set('Asia/Kolkata');
         $today = date("Y-m-d H:i:s");
         try {
-            $query = "insert into RecognizeSentToGroup(clientId,recognizeId,groupId,createdDate)values(:cid,:rid,:gid,:today)";
+            $query = "insert into Tbl_Analytic_RecognizeSentToGroup(clientId,recognizeId,groupId,createdDate)values(:cid,:rid,:gid,:today)";
             $stmt = $this->DB->prepare($query);
             $stmt->bindParam(':cid', $this->client, PDO::PARAM_STR);
             $stmt->bindParam(':rid', $this->eventid, PDO::PARAM_STR);
@@ -453,6 +453,59 @@ class Reading {
 
 /***************************** end thought sent to group *****************/
 
+/**************************** post view analytic ************************************/
+function viewednews($clientid, $pid, $eid, $flagtype, $device) {
+        
+		date_default_timezone_set('Asia/Calcutta');
+        $cd = date("Y-m-d H:i:s");
+
+        try {
+            $query = "insert into Tbl_Analytic_PostView(userUniqueId,post_id,clientId,date_of_entry,flagType,device)
+            values(:eid,:pid,:clid,:dc,:flag,:device)";
+            $stmt = $this->DB->prepare($query);
+            $stmt->bindParam(':eid', $eid, PDO::PARAM_STR);
+            $stmt->bindParam(':pid', $pid, PDO::PARAM_STR);
+            $stmt->bindParam(':clid', $clientid, PDO::PARAM_STR);
+            $stmt->bindParam(':dc', $cd, PDO::PARAM_STR);
+            $stmt->bindParam(':flag', $flagtype, PDO::PARAM_STR);
+            $stmt->bindParam(':device', $device, PDO::PARAM_STR);
+
+            $response = array();
+
+            if ($stmt->execute()) {
+                $response["success"] = 1;
+                $response["message"] = "successfully inserted data";
+                return $response;
+            } else {
+                $response["success"] = 0;
+                $response["message"] = "no inserted data";
+                return $response;
+            }
+        } catch (PDOException $e) {
+				$response["success"] = 0;
+                $response["message"] = "no inserted data".$e;
+				return $response;
+        }
+    }
+/***************************** / post view analytics ********************************/
+ /****************************************************************************************/
+    
+     function getGroupDetails($clientId, $GroupId) {
+        date_default_timezone_set('Asia/Calcutta');
+        $today = date("Y-m-d H:i:s");
+        try {
+            $query = "select * from Tbl_ClientGroupDetails where clientId = :cid and groupId = :gid";
+            $stmt = $this->DB->prepare($query);
+            $stmt->bindParam(':cid', $clientId, PDO::PARAM_STR);
+            $stmt->bindParam(':gid', $GroupId, PDO::PARAM_STR);
+            $stmt->execute();
+           $VAL =  $stmt->fetch(PDO::FETCH_ASSOC);
+            return $VAL; 
+               
+        } catch (PDOException $e) {
+            echo $e;
+        }
+    }
 }
 
 ?>

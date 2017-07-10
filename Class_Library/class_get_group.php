@@ -1,5 +1,9 @@
 <?php
-include_once('class_connect_db_Communication.php');
+
+if (!class_exists('Connection_Communication')) {
+    include_once('class_connect_db_Communication.php');
+}
+
 class Group
 {
   public $DB;
@@ -33,7 +37,7 @@ class Group
        }
        catch(PDOException $ex)
        {
-       echo $ex;
+	return $ex;
        }
 }
 
@@ -142,100 +146,22 @@ array_push($result['posts'],$post);
        }
 }
 
-function GrgetGroupDetails($clientid,$groupid)
-  {
-     $this->clientid = $clientid;
-     $this->groupid = $groupid;
-     
-     try{
-     $query = "select * from Tbl_ClientGroupDetails where clientId=:cli and groupId=:gid";
-            $stmt = $this->DB->prepare($query);
-            $stmt->bindParam(':cli', $this->clientid, PDO::PARAM_STR);
-            $stmt->bindParam(':gid', $this->groupid, PDO::PARAM_STR);
-            $stmt->execute();
-            $rows = $stmt->fetchAll();
-           if($rows)
-           {
 
-           $result=array();
-           $result['success'] = 1;
-           $result['message'] = "successfully fetch data";
-           $result['posts']=array();
-
-$idclient = $rows[0]["clientId"];
-$idgroup = $rows[0]["groupId"];
-
-
-     $query = "select adminEmail from Tbl_ClientGroupAdmin where clientId=:cli and groupId=:gid";
-            $stmt = $this->DB->prepare($query);
-            $stmt->bindParam(':cli', $idclient, PDO::PARAM_STR);
-            $stmt->bindParam(':gid', $idgroup, PDO::PARAM_STR);
-            $stmt->execute();
-            $row1 = $stmt->fetchAll(PDO::FETCH_COLUMN, 0);
-
-$post["groupName"]=$rows[0]["groupName"];
-$post["groupDescription"]=$rows[0]["groupDescription"];
-$post["adminEmails"] =$row1; 
-$post["demographics"] = array();
-
-     $query1 = "select distinct(columnName) from Tbl_ClientGroupDemoParam where clientId=:cli and groupId=:gid";
-            $stmt1 = $this->DB->prepare($query1);
-            $stmt1->bindParam(':cli', $idclient, PDO::PARAM_STR);
-            $stmt1->bindParam(':gid', $idgroup, PDO::PARAM_STR);
-            $stmt1->execute();
-            $row2 = $stmt1->fetchAll();
-          
-if($row2)
-{
-/*$count = count($row2["columnName"]);
-echo "Total no. records executed:- ".$count."<br>";
-*/
-
-foreach($row2 as $row)
-{
-$baseon = $row["columnName"];
-     $query2 = "select columnValue from Tbl_ClientGroupDemoParam where clientId=:cli and groupId=:gid and columnName=:col";
-            $stmt2 = $this->DB->prepare($query2);
-            $stmt2->bindParam(':cli', $idclient, PDO::PARAM_STR);
-            $stmt2->bindParam(':gid', $idgroup, PDO::PARAM_STR);
-            $stmt2->bindParam(':col', $baseon, PDO::PARAM_STR);
-            $stmt2->execute();
-            $row3 = $stmt2->fetchAll(PDO::FETCH_COLUMN, 0);
-
-         if($row3)
-            {
-                 $postr["columnName"]=$baseon;
-                 $postr["columnValue"]=$row3;
-                 array_push($post["demographics"],$postr);
-            }
-   }
-
-}
-$result["posts"] = $post;
-
-           return json_encode($result);
-	    }
-     }
-       catch(PDOException $ex)
-       {
-       echo $ex;
-       }
-   }
-   
      /*************************** get custom group user ********************************/
    
  function getCustomGroupUser($clientid,$groupids)
  {
+    
      $count1 = count($groupids);
-   //  print_r($count1);
+ 
             $allrows1 = array();
        for ($t = 0; $t < $count1; $t++)     {
 
                 $groupid = $groupids[$t];
-              //  echo $groupid;
+           ///     echo $groupid;
             
    try{
-       $query = "select master.employeeId from Tbl_CustomGroupDetails as custom join Tbl_EmployeeDetails_Master as master on master.employeeCode = custom.employeeId where custom.clientId = :cid and custom.groupId = :gid";
+       $query = "select master.employeeId from Tbl_CustomGroupDetails as custom join Tbl_EmployeeDetails_Master as master on master.emailId = custom.employeeId where custom.clientId = :cid and custom.groupId = :gid";
        $stmt2 = $this->DB->prepare($query);
             $stmt2->bindParam(':cid',$clientid, PDO::PARAM_STR);
             $stmt2->bindParam(':gid',$groupid, PDO::PARAM_STR);

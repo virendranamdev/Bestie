@@ -1,5 +1,4 @@
 <?php
-
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -62,7 +61,7 @@ if (isset($_REQUEST['updateThought'])) {
 
     $FLAG = $_POST['flag'];
     $dev = $_POST['device'];
-    $flag_name = "Thought : ";
+    $flag_name = "Thought for the day : ";
 
     if ($_FILES['thoughtimage']['name'] != "") {
         $timg = str_replace(" ", "", $_FILES['thoughtimage']['name']);
@@ -163,47 +162,69 @@ if (isset($_REQUEST['updateThought'])) {
     $result1 = $welcome_obj->createWelcomeData($clientid, $thought_maxid, $type, $thoughttext, $dbimage, $post_date, $USEREMAIL, $FLAG);
 
     $groupcount = count($myArray);
+    $general_group = array();
+    $custom_group = array();
     for ($k = 0; $k < $groupcount; $k++) {
 //echo "group id".$myArray[$k];
         $result1 = $read->thoughtSentToGroup($clientid, $thought_maxid, $myArray[$k], $FLAG);
-//echo $result1;
+/***********************  custom group *********************/
+         $groupdetails = $read->getGroupDetails($clientid, $myArray[$k]);  //get all groupdetails
+
+        if ($groupdetails['groupType'] == 2) {
+            array_push($custom_group, $myArray[$k]);
+        } else {
+            array_push($general_group, $myArray[$k]);
+        }
     }
-    /*     * ****************  fetch all user employee id from user detail start **************************** */
-    $gcm_value = $push_obj->get_Employee_details($User_Type, $myArray, $clientid);
-    $token = json_decode($gcm_value, true);
-    /* echo "hello user  id";
-      echo "<pre>";
-      print_r($token);
-      echo "</pre>"; */
+   /******************  fetch all user employee id from user detail start **************************** */
+if (count($general_group) > 0) {
+       
+        $gcm_value = $push_obj->get_Employee_details($User_Type, $general_group, $clientid);
+    
+        $generaluserid = json_decode($gcm_value, true);
 
+    }
+    else{   
+               $generaluserid = array();
+    }
+    if (count($custom_group) > 0) {
+        $gcm_value1 = $obj_group->getCustomGroupUser($clientid, $custom_group);
+        $customuserid = json_decode($gcm_value1, true);
 
+    }
+     else{
+              $customuserid = array();
+    }
+    /*************get group admin uuid  form group admin table if user type not= all ************** */
     /*     * *************************get group admin uuid  form group admin table if user type not= all *************************** */
 
+/**************************** group admin id *******************************/		
+		if ($User_Type != 'All') {
+        //    $groupadminuuid = $push->getGroupAdminUUId($myArray, $Client_Id);
+          //  $adminuuid = json_decode($groupadminuuid, true);
+              /*echo "hello groupm admin id";
+              echo "<pre>";
+              print_r($adminuuid)."<br/>";
+              echo "</pre>";
+              echo "--------------all employee id---------";*/
 
-    if ($User_Type != 'All') {
-//$groupadminuuid = $push_obj->getGroupAdminUUId($myArray,$clientid);
-//$adminuuid = json_decode($groupadminuuid, true);
-        /* echo "hello groupm admin id";
-          echo "<pre>";
-          print_r($adminuuid)."<br/>";
-          echo "</pre>"; */
-        /*         * ****** "--------------all employee id---------"** */
+            $allempid = array_merge($generaluserid, $customuserid);
+             /*echo "<pre>";
+              print_r($allempid);
+              echo "<pre>";
 
-//$allempid = array_merge($token,$adminuuid);
-        $allempid = array_merge($token);
-        /* echo "<pre>";
-          print_r($allempid);
-          echo "<pre>"; */
+              echo "--------------all unique employee id---------";*/ 
 
-        /*         * ** "--------------all unique employee id---------"********** */
-
-        $allempid1 = array_unique($allempid);
-        /* echo "<pre>";
-          print_r($allempid1);
-          echo "<pre>"; */
-    } else {
-        $allempid1 = $token;
-    }
+            $allempid1 = array_values(array_unique($allempid));
+              /*echo "user unique id";
+              echo "<pre>";
+              print_r($allempid1);
+              echo "<pre>";*/ 
+        } else {
+//echo "within all user type".$User_Type."<br/>";
+            $allempid1 = $generaluserid;
+        }
+/**************************** / group admin id *******************************/	
 
     /*     * ******* insert into post sent to table for analytic sstart************ */
 
@@ -256,30 +277,28 @@ if (isset($_REQUEST['updateThought'])) {
         $idsIOS = array();
 
         foreach ($token1 as $row) {
+		$content = $thoughttext;
+ 
+            	$data = array('Id' => $thought_maxid, 'Title' => $content, 'Content' => $content, 'SendBy' => $USEREMAIL, 'Picture' => $fullpath, 'image' => $fullpath, 'Date' => $post_date, 'Publishing_time' => $ptime, 'Unpublishing_time' => $utime, 'flag' => $FLAG, 'flagValue' => $flag_name, 'success' => $sf);
+	    
+		$badgecount = $push_obj->getBadgecount($row['deviceId']);
+		$badgecount = $badgecount['badgeCount']+1;
+		$addBadgecount = $push_obj->updateBadgecount($row['deviceId'], $badgecount);
+	    
+                if ($row['deviceName'] == "3") {
+                    $data['device_token'] = $row['registrationToken'];
+            	    $IOSrevert = $push_obj->sendAPNSPushCron($data, $googleapiIOSPem['iosPemfile'], '', $badgecount);        
+                } else {
+                    $data['device_token'] = $row['registrationToken'];
+                    $data['badge'] = $badgecount;
+                    $revert = $push_obj->sendGoogleCloudMessageCron($data, $googleapiIOSPem['googleApiKey']);
+		}
+	}
 
-            if ($row['deviceName'] == 3) {
-                array_push($idsIOS, $row["registrationToken"]);
-            } else {
-                array_push($ids, $row["registrationToken"]);
-            }
-        }
-
-        $data = array('Id' => $thought_maxid, 'Title' => $thoughttext, 'Content' => $thoughttext, 'SendBy' => $USEREMAIL, 'Picture' => $hrimg, 'image' => $fullpath, 'Date' => $post_date,
-            'Publishing_time' => $ptime, 'Unpublishing_time' => $utime, 'flag' => $FLAG, 'flagValue' => $flag_name, 'success' => $sf);
-
-//        $IOSrevert = $push_obj->sendAPNSPush($data, $idsIOS, $googleapiIOSPem['iosPemfile']);
-//        $iosrt = json_decode($IOSrevert, true);
-
-        $revert = $push_obj->sendGoogleCloudMessage($data, $ids, $googleapiIOSPem['googleApiKey']);
-        $rt = json_decode($revert, true);
-
-        if ($rt['success'] == 1) {
+        if ($revert['success'] == 1) {
             echo "<script>alert('Thought Posted Successfully');</script>";
             echo "<script>window.location='../view-previous-thought.php'</script>";
-        } else {
-            echo "<script>alert('Thought Posted Successfully');</script>";
-            echo "<script>window.location='../view-previous-thought.php'</script>";
-        }
+        } 
     } else {
         echo "<script>alert('Thought Post Successfully');</script>";
         echo "<script>window.location='../view-previous-thought.php'</script>";

@@ -9,7 +9,7 @@ function showAnalyticTopPost(startdate,enddate,dept,loc, SITE)
                 "location":loc
             }
     var dataString = JSON.stringify(postData);
-    //    alert(dataString);
+    //  alert(dataString);
 
     $.ajax({
         type: "post",
@@ -19,8 +19,8 @@ function showAnalyticTopPost(startdate,enddate,dept,loc, SITE)
         data: {"mydata": dataString},
         success: function (response) {
             var resdata = response;
-         // alert(resdata);
-          //  console.log(resdata);   
+      //   alert(resdata);
+            console.log(resdata);   
 
 
           document.getElementById("toppostcontainer").innerHTML = resdata;
@@ -48,3 +48,62 @@ function showAnalyticTopPost(startdate,enddate,dept,loc, SITE)
         }
     });
 }
+
+
+
+
+/**************************** analytic list view *******************************/
+
+function showListViewAnalytic(startdate,enddate,dept,loc, SITE)
+{
+    var postData =
+            {
+                "startdate":startdate,
+                "enddate": enddate,
+                "department": dept,
+                "location":loc
+            }
+    var dataString = JSON.stringify(postData);
+     //alert(dataString);
+	 
+    $.ajax({
+        type: "post",
+        url: SITE +"Link_Library/link_getTopPostlistAnalytic.php",
+        data: {"mydata": dataString},
+        success: function (response) {
+        var resdata = response;
+//		alert(resdata);
+//                console.log(resdata);
+		var jsonData = JSON.parse(resdata);
+		//alert(jsonData.length);
+		if (jsonData.length !== 0)
+                {
+					//alert('hi');
+                     $('#mytable tbody').remove();
+					 for (var i = 0; i < jsonData.length; i++) 
+					 {
+						var newRow = '<tbody><tr><td>' + jsonData[i].moduleName + '</td><td>' + jsonData[i].totalview + '</td><td>' + jsonData[i].uniqueview + '</td></tr><tbody>';
+					$('#mytable').append(newRow);
+
+					 }
+					 
+					}
+		else
+		{
+			 $('#mytable tbody').remove();
+			 var newRow = '<tbody><tr><td></td><td> No Record Found </td><td></td></tr><tbody>';
+					$('#mytable').append(newRow);
+			 
+			
+		}
+        
+		
+        },
+        error: function (e) {
+            alert(e);
+            console.log(e.message);
+        }
+    });
+}
+
+/**************************** / analytic list view *****************************/

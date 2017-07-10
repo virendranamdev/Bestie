@@ -1,0 +1,215 @@
+<?php include 'header.php'; ?>
+<?php include 'sidemenu.php'; ?>
+<?php include 'topNavigation.php'; ?>
+
+<?php
+$clientId = $_SESSION['client_id'];
+$empId = $_SESSION['user_unique_id'];
+$user_type = $_SESSION['user_type'];
+
+require_once('Class_Library/class_getDepartment.php');
+$recogobj = new Department();
+$department1 = $recogobj->getDepartment($clientId);
+$department = json_decode($department1, true);
+
+$locationjson = $recogobj->getLocation($clientId);
+$locationarray = json_decode($locationjson, true);
+?>
+<script src="js/analytic/analyticTopPostGraph.js"></script>
+<script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        var rfromdte = $("#enddate").val();
+        var rtodte = $("#startdate").val();
+        var rdept = 'All';
+        var location = 'All';
+		
+		//alert(rfromdte);
+		//alert(rtodte);
+		
+       showListViewAnalytic(rfromdte, rtodte, rdept,location, '<?php echo SITE; ?>');
+       
+    });
+
+    function getViewListAnalytic()
+    {
+	//alert("hello iam here");
+		
+        var  startday= document.getElementById("fromDate").value;
+		var  enddate= document.getElementById("toDate").value;
+		var  department= document.getElementById("dept").value;
+		var  location = document.getElementById("rlocation").value;
+		//alert("startday"+startday);
+		//alert("enddate"+enddate);
+		//alert("department"+department);
+		//alert("location"+location);
+        if (startday == "")
+		{
+        window.alert("Please select From date.");
+        document.getElementById("fromDate").focus();
+        return false;
+		}
+		if (enddate == "")
+		{
+			window.alert("Please select To date.");
+			document.getElementById("toDate").focus();
+			return false;
+		}
+		if (department == "")
+		{
+			window.alert("Please select department.");
+			document.getElementById("dept").focus();
+			return false;
+		}
+		if (location == "")
+		{
+			window.alert("Please select location.");
+			document.getElementById("rlocation").focus();
+			return false;
+		}
+		
+        showListViewAnalytic(startday, enddate, department, location,'<?php echo SITE; ?>');
+    
+    }
+	
+
+</script>
+<div class="right_col" role="main">
+    <div class="">
+        <br>
+        <div class="clearfix"></div>
+
+
+        <div class="row">
+            
+            
+             <div class="col-md-12 col-sm-12 col-xs-12 col-lg-12">
+                <div class="x_panel">
+                    <div class="x_title">
+                        <h2>Module View</h2>
+                        <ul class="nav navbar-right panel_toolbox">
+                            <li class="right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                            </li>
+
+                        </ul>
+                        <div class="clearfix"></div>
+                    </div>
+
+                    <div class="x_content">
+                        <br /><center>
+                            <input type="hidden" name="startdate" id="startdate" value="<?php echo date("Y-m-d"); ?>">
+                            <input type="hidden" name="enddate" id="enddate" value="<?php echo date('Y-m-d', strtotime("-7 days")); ?>">
+                            <!--<form id="demo-form2" data-parsley-validate class="form-inline">-->
+                            <div class="row">
+                                <div class="form-group col-md-3">
+                                    <label for="usr">From:</label>
+                                    <input type="date" class="form-control" id="fromDate" size="20" placeholder="mm/dd/yyyy" name="fromDate"/>
+                                </div>&nbsp;&nbsp;&nbsp;&nbsp;
+                                <div class="form-group col-md-3">
+                                    <label for="pwd">To:&nbsp;&nbsp;</label>
+                                    <input type="date"class="form-control" id="toDate" size="20" placeholder="mm/dd/yyyy" name="toDate"/>
+                                </div>&nbsp;&nbsp;&nbsp;&nbsp;
+
+                                <div class="form-group col-md-2">
+                                    <label for="sel1">Select Department:</label>
+                                    <select class="form-control" id="dept">
+                                        <option value = "All" selected="">All</option>
+                                        <?php
+                                        $count = count($department);
+                                        for ($i = 0; $i < $count; $i++) {
+                                            echo '<option value="' . $department[$i]['department'] . '">' . $department[$i]['department'] . '</option>';
+                                        }
+                                        ?>
+                                    </select>
+                                </div>&nbsp;&nbsp;&nbsp;&nbsp;
+                                 <div class="form-group col-md-2">
+                                    <label for="sel1">Select Location:</label>
+                                    <select class="form-control" id="rlocation">
+                                        <option value = "All" selected="">All</option>
+                                        <?php
+                                        $countloc = count($locationarray);
+                                        for ($i = 0; $i < $countloc; $i++) {
+                                            echo '<option value="' . $locationarray[$i]['location'] . '">' . $locationarray[$i]['location'] . '</option>';
+                                        }
+                                        ?>
+                                    </select>
+                                </div>
+                                
+                                <div class="col-md-2">
+                                    <input type="submit" id="postviewlist" onclick="getViewListAnalytic();" class="btn btn-primary" style="margin-top:5px" value="Submit" />
+                                </div>
+                            </div>                
+</center>
+                            <br>
+                            <br>
+                            <br>
+                             <div class="smallDivRecognition">
+                           <div id="toppostcontainer"></div>
+                           </div>
+						   
+<!--------------------------------------- post list view --------------------------------------->
+   <table id="mytable" class="MyTable table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Module Name</th>
+                                        <th>Total View</th> 
+                                        <th>Unique View</th>
+                                   
+                                    </tr>
+                                </thead>
+                            </table>
+<!-------------------------------------- / post list view -------------------------------------->
+
+                    </div>
+                </div>
+            </div>
+            
+            
+            <!-------------------------Active user analytic---------------------------------------->
+         
+        </div>
+
+
+    </div>
+</div>
+
+
+<!--------------------- these script for custom date picker -------------------------------------------->
+<script type="text/javascript">
+    var datefield = document.createElement("input")
+    datefield.setAttribute("type", "date")
+    if (datefield.type != "date") { //if browser doesn't support input type="date", load files for jQuery UI Date Picker
+        document.write('<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css" />\n')
+        document.write('<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"><\/script>\n')
+        document.write('<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"><\/script>\n')
+    }
+</script>
+
+<script>
+    if (datefield.type != "date") { //if browser doesn't support input type="date", initialize date picker widget:
+        jQuery(function ($) { //on document.ready
+            $('#fromDate').datepicker();
+            $('#fromDate1').datepicker();
+           
+        })
+
+    }
+</script>
+<script>
+    if (datefield.type != "date") { //if browser doesn't support input type="date", initialize date picker widget:
+        jQuery(function ($) { //on document.ready
+            $('#toDate').datepicker();
+            $('#toDate1').datepicker();
+            
+        })
+    }
+</script>
+<script>
+    if (datefield.type != "date") { //if browser doesn't support input type="date", initialize date picker widget:
+        jQuery(function ($) { //on document.ready
+            $('#date').datepicker();
+        })
+    }
+</script>
+<?php include 'footer.php'; ?>

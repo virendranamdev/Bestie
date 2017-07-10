@@ -1,9 +1,12 @@
 <?php
+
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 @session_start();
-if (!class_exists('Connection_Communication')) 
-    {
+if (!class_exists('Connection_Communication')) {
     include_once('class_connect_db_Communication.php');
-    }
+}
 
 class User {
 
@@ -13,37 +16,40 @@ class User {
         $db = new Connection_Communication();
         $this->DB = $db->getConnection_Communication();
     }
-	
-	/******************************** get max userid ***************************/
-				function maxuserid()
-				{
-				try {
-                    $max = "select max(autoId) from Tbl_EmployeeDetails_Master";
-                    $query = $this->DB->prepare($max);
-                    if ($query->execute()) {
-                        $tr = $query->fetch();
-                        $m_id = $tr[0];
-                        $m_id1 = $m_id + 1;
-                        $usid = "User-" . $m_id1;
-						return $usid;
-                    }
-                } catch (PDOException $e) {
-                    echo $e;
-                    trigger_error('Error occured fetching max autoid : ' . $e->getMessage(), E_USER_ERROR);
-                }
-				}
-/************************************ / get max user id **************************/
+
+    /*     * ****************************** get max userid ************************** */
+
+    public function maxuserid() {
+        try {
+            $max = "select max(autoId) from Tbl_EmployeeDetails_Master";
+            $query = $this->DB->prepare($max);
+            if ($query->execute()) {
+                $tr = $query->fetch();
+                $m_id = $tr[0];
+                $m_id1 = $m_id + 1;
+                $usid = "User-" . $m_id1;
+                return $usid;
+            }
+        } catch (PDOException $e) {
+            echo $e;
+            trigger_error('Error occured fetching max autoid : ' . $e->getMessage(), E_USER_ERROR);
+        }
+    }
+
+    /*     * ********************************** / get max user id ************************* */
+
     public $filename;
     public $filetempname;
     public $fullcsvpath;
     public $client_id;
     public $createdby;
-
-    function uploadUserCsv($clientid1, $user, $file_name, $file_temp_name, $fullpath,$adminname,$adminemail) {
-		$imgpath = SITE_URL;
+    
+    
+    function testMailUserCsv($clientid1, $user, $file_name, $file_temp_name, $fullpath, $adminname, $adminemail) {
+        $imgpath = SITE_URL;
         $this->fullcsvpath = $fullpath;
 
-        date_default_timezone_set('Asia/Calcutta');
+        date_default_timezone_set('Asia/Kolkata');
         $c_date = date('Y-m-d H:i:s');
         $status = "Active";
         $access = "User";
@@ -60,40 +66,216 @@ class User {
         if ($imageFileType != "csv") {
             echo "Sorry, only .csv files are allowed.";
             $uploadOk = 0;
-        } else 
-		{
+        } else {
             $handle = fopen($this->filetempname, "r");
             while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
                 $userdata[] = $data;
             }
 
             /*             * ************start insert into database ************************************************* */
-			/*echo "<pre>";
-            print_r($userdata);
-			echo "</pre>";*/
+            /* echo "<pre>"; print_r($userdata); */
+            $countrows = count($userdata);
+            if ($countrows > 200) {
+                echo "<script>alert(Sorry! You can't upoad data more than 200 employee at a time) </script>";
+            }
+            
+            $program_name = "Bestie";
+            $dedicateemail = "support@mybestie.in";
+            $subdomain_link = "bestie.benepik.com";
+
+            /*             * ************************ fetching data from B_Client_Data******************************** */
+
+		
+            for ($row = 1; $row < $countrows; $row++) {
+
+                $adminaccess = 'Admin';
+                $useremail = $userdata[$row][5];
+                //$companyname = $userdata[$row][14];				
+                        /* * ********************* mail  send **************************** */
+
+
+                        /* * ************************** */
+                $to = $useremail;
+                echo $to.'<br>';
+                /*                 * ************************************************************************************************************************************************************* */
+                $subject = 'Test Email from Bestie';
+
+                $bound_text = "----*%$!$%*";
+                $bound = "--" . $bound_text . "\r\n";
+                $bound_last = "--" . $bound_text . "--\r\n";
+
+
+
+                $headers = "From: " . $program_name . " <" . $dedicateemail . "> \r\n" . "Return-Path: " . $dedicateemail . "\r\n";
+                $headers .= "MIME-Version: 1.0\r\n" .
+                        "Content-Type: multipart/mixed; boundary=\"$bound_text\"" . "\r\n";
+
+                $message =
+                        'Content-Type: text/html; charset=UTF-8' . "\r\n" .
+                        'Content-Transfer-Encoding: 7bit' . "\r\n\r\n" .
+                        
+			'<html>
+
+			   <body>
+			   <div style="width: 700;height: 500;background: white;">
+			   <div style="width: 700;height: 100;background: white" >
+			   </div >
+			   
+			   <div style="background: window;height: 420;  ">
+			   <div style="width: 600; ">
+			   <p>Dear '.ucfirst($userdata[$row][0]).',</p>
+			   <p >This is a Test Email to check if you are receiving emails from Bestie.</p> 
+			   <p>For any queries, please contact preethi.priscillakumarai@barclays.com </p>
+			 
+			   <br>
+
+			   <p>Yours Bestie</p>
+			 
+			   
+			   </div>
+			   </div>
+			   
+			   
+			   </div>
+			   </body>
+			</html>';
+			   // ' . "\n\n" .   $bound_last;
+                /*                 * ************************************************************************************************************************************************************* */
+		if (!mail($to, $subject, $message, $headers, '-f ' . $dedicateemail)) {
+                    echo "Mail Failed";
+                }
+
+            }
+            
+            $result = 1;
+            if ($result == 1) {
+                $number = $countrows - 1;
+
+                $path = $this->fullcsvpath;
+
+                $to1 = "gagandeep@benepik.com";
+                /*                 * ************************************************************************************************************************************************************* */
+                $subject = 'Administrator has uploaded a CSV File';
+
+                $bound_text = "----*%$!$%*";
+                $bound = "--" . $bound_text . "\r\n";
+                $bound_last = "--" . $bound_text . "--\r\n";
+
+
+
+                $headers = "From: " . $program_name . " <" . $dedicateemail . "> \r\n" . "Return-Path: " . $dedicateemail . "\r\n";
+                $headers .= "MIME-Version: 1.0\r\n" .
+                        "Content-Type: multipart/mixed; boundary=\"$bound_text\"" . "\r\n";
+
+                $message = " Now You Can Login With This Emailid & Password \r\n" . $bound;
+
+                $message .=
+
+                        'Content-Type: text/html; charset=UTF-8' . "\r\n" .
+                        'Content-Transfer-Encoding: 7bit' . "\r\n\r\n" .
+                        '
+
+			<html>
+
+			   <body>
+			   <div style="width: 700;height: 500;background: white;">
+			   <div style="width: 700;height: 100;background: white" >
+			   </div >
+			   
+			   <div style="background: window;height: 420;  ">
+			   <div style="width: 600; ">
+			   <p>Dear Admin,</p>
+			   <p ><b>' . $program_name . ' Administrator has uploaded a CSV File</b></p> 
+			   <p><b>' . $number . '</b> Users are listed in CSV</p>
+			   <p>Users CSV can be downloaded from here <a href=' . SITE_URL . "/" . $path . '>User Csv</a></p>
+			 
+			   <p><b>Admin Name : </b>' . $adminname . '</p>
+			   <p><b>Admin EmailID : </b>' . $adminemail . '</p>
+			 
+			   <br>
+
+			   <p>Regards</p>
+			   <p>Team Bestie</p>
+			 
+			   
+			   </div>
+			   </div>
+			   
+			   
+			   </div>
+			   </body>
+			</html>
+			   ' . "\n\n" .
+                        $bound_last;
+                /*                 * ************************************************************************************************************************************************************* */
+
+                //$mailres = mail($to1, $subject, $message, $headers);
+                //$mailres;
+
+                if (mail($to1, $subject, $message, $headers, '-f ' . $dedicateemail)) {
+                    $msg = "data successfully uploaded";
+                    $resp['msg'] = $msg;
+                    $resp['success'] = 1;
+                }
+            }
+            return json_encode($resp);
+        }
+
+
+
+        /*         * ********************************file csv start  end ********************************** */
+    }
+    
+    
+
+    function uploadUserCsv($clientid1, $user, $file_name, $file_temp_name, $fullpath, $adminname, $adminemail) {
+        $imgpath = SITE_URL;
+        $this->fullcsvpath = $fullpath;
+
+        date_default_timezone_set('Asia/Kolkata');
+        $c_date = date('Y-m-d H:i:s');
+        $status = "Active";
+        $access = "User";
+        $this->client_id = $clientid1;
+        $user_session = $_SESSION['user_email'];
+        $this->createdby = $user;
+        //  echo "user unique id := ".$this->createdby;
+        $this->filename = $file_name;
+        $this->filetempname = $file_temp_name;
+        $target_file = basename($this->filename);
+
+        $imageFileType = pathinfo($target_file, PATHINFO_EXTENSION);
+
+        if ($imageFileType != "csv") {
+            echo "Sorry, only .csv files are allowed.";
+            $uploadOk = 0;
+        } else {
+            $handle = fopen($this->filetempname, "r");
+            while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+                $userdata[] = $data;
+            }
+
+            /*             * ************start insert into database ************************************************* */
+            /* echo "<pre>"; print_r($userdata); */
             $countrows = count($userdata);
             if ($countrows > 200) {
                 echo "<script>alert(Sorry! You can't upoad data more than 200 employee at a time) </script>";
             }
             // echo $countrows;
-            /** ***************************fetch existing admin details (emaild)************************************* */
-            try 
-			{
+            /**             * **************************fetch existing admin details (emaild)************************************* */
+            try {
                 $max = "select * from Tbl_EmployeeDetails_Master where clientId = '" . $this->client_id . "'";
                 $query = $this->DB->prepare($max);
                 if ($query->execute()) {
                     $tr = $query->fetch();
                     $ADMINEMAIL = $tr['employeeId'];   //fetch admin email id
                 }
-            } 
-			catch (PDOException $e) 
-			{
+            } catch (PDOException $e) {
                 echo $e;
                 trigger_error('Error occured fetching max autoid : ' . $e->getMessage(), E_USER_ERROR);
             }
 
-            try 
-			{
+            try {
                 $query_client = "select * from Tbl_ClientDetails_Master where client_id =:cid7";
                 $stmt7 = $this->DB->prepare($query_client);
                 $stmt7->bindParam(':cid7', $this->client_id, PDO::PARAM_STR);
@@ -115,15 +297,14 @@ class User {
             /*             * ************************ fetching data from B_Client_Data******************************** */
 
 
-            for ($row = 1; $row < $countrows; $row++) 
-			{
+            for ($row = 1; $row < $countrows; $row++) {
 
                 $user_name = ucfirst($userdata[$row][0]) . " " . $userdata[$row][1] . " " . ucfirst($userdata[$row][2]);
 
-                $randomAlpha = self::randomalpha(6);
-                $randomDigit = self::randomdigit(2);
-				
-                $randompassword = $randomAlpha . $randomDigit;
+                //$randomAlpha = self::randomalpha(4);
+                $randomDigit = self::randomdigit(6);
+
+                $randompassword = $randomDigit;
                 $md5password1 = md5($randompassword);
                 $md5password = "";
 
@@ -131,8 +312,10 @@ class User {
 
                 $adminaccess = 'Admin';
                 $useremail = $userdata[$row][5];
-				//$companyname = $userdata[$row][14];				
-				//$comname = self::checkCompany($clientid1,$companyname);
+                //$companyname = $userdata[$row][14];				
+                //$comname = self::checkCompany($clientid1,$companyname);
+                $companyname = "";
+                $comname = "";
 
                 try {
                     $max = "select max(autoId) from Tbl_EmployeeDetails_Master";
@@ -150,19 +333,23 @@ class User {
 
                 try {
                     $qu = "insert into Tbl_EmployeeDetails_Master
-(userId,clientId,employeeId,firstName,middleName,lastName,emailId,password,department,location, status, accessibility, createdDate, createdBy) values(:uid,:cid,:eid,:fname,:mname,:lname,:email,:pass,:dep, :loc,:sta,:acc,:cred,:creb) ON DUPLICATE KEY UPDATE firstName =:fname,middleName=:mname, lastName=:lname, department=:dep, location=:loc, status=:sta, accessibility=:acc,createdDate=:cred,createdBy=:creb , password =:pass  ";
+(userId,clientId,employeeId,firstName,middleName,lastName,emailId,password,department,location, companyName, companyUniqueId, status, accessibility, createdDate, createdBy) values(:uid,:cid,:eid,:fname,:mname,:lname,:email,:pass,:dep, :loc,:compny, :comid,:sta,:acc,:cred,:creb) ON DUPLICATE KEY UPDATE firstName =:fname,middleName=:mname, lastName=:lname, department=:dep, location=:loc, status=:sta, accessibility=:acc,createdDate=:cred,createdBy=:creb , password =:pass  ";
                     $stmt = $this->DB->prepare($qu);
 
+		    $firstName = ucfirst($userdata[$row][0]);
+		    $lastName  = ucfirst($userdata[$row][2]);
+		    $emailId   = rtrim($userdata[$row][5]);
+		    
                     $stmt->bindParam(':uid', $usid, PDO::PARAM_STR);
                     $stmt->bindParam(':cid', $clientid, PDO::PARAM_STR);
                     $stmt->bindParam(':eid', $randomempid, PDO::PARAM_STR);
 
-                    $stmt->bindParam(':fname', ucfirst($userdata[$row][0]), PDO::PARAM_STR);
+                    $stmt->bindParam(':fname', $firstName, PDO::PARAM_STR);
                     $stmt->bindParam(':mname', $userdata[$row][1], PDO::PARAM_STR);
-                    $stmt->bindParam(':lname', ucfirst($userdata[$row][2]), PDO::PARAM_STR);
+                    $stmt->bindParam(':lname', $lastName, PDO::PARAM_STR);
 
                     //$stmt->bindParam(':gen', $userdata[$row][3], PDO::PARAM_STR);
-                    $stmt->bindParam(':email', rtrim($userdata[$row][5]), PDO::PARAM_STR);
+                    $stmt->bindParam(':email', $emailId, PDO::PARAM_STR);
                     //$stmt->bindParam(':mob', $userdata[$row][13], PDO::PARAM_STR);
                     $stmt->bindParam(':pass', $md5password1, PDO::PARAM_STR);
                     //$stmt->bindParam(':ecode', $userdata[$row][6], PDO::PARAM_STR);
@@ -171,16 +358,14 @@ class User {
                     $stmt->bindParam(':loc', $userdata[$row][4], PDO::PARAM_STR);
                     //$stmt->bindParam(':bra', $userdata[$row][11], PDO::PARAM_STR);
                     //$stmt->bindParam(':gra', $userdata[$row][9], PDO::PARAM_STR);
-                    //$stmt->bindParam(':compny',$companyname, PDO::PARAM_STR);
-					//$stmt->bindParam(':comid',$comname, PDO::PARAM_STR);
+                    $stmt->bindParam(':compny', $companyname, PDO::PARAM_STR);
+                    $stmt->bindParam(':comid', $comname, PDO::PARAM_STR);
                     $stmt->bindParam('sta', $status, PDO::PARAM_STR);
                     $stmt->bindParam(':acc', $access, PDO::PARAM_STR);
                     $stmt->bindParam(':cred', $c_date, PDO::PARAM_STR);
                     $stmt->bindParam(':creb', $this->createdby, PDO::PARAM_STR);
 
-                    if ($stmt->execute()) 
-					{
-
+                    if ($stmt->execute()) {
                         $query4 = "insert into Tbl_EmployeePersonalDetails(userid, clientId, employeeId, emailId) values(:uid1, :cid1, :eid1, :emailid1) ON DUPLICATE KEY UPDATE clientId=:cid1";
                         $stmt4 = $this->DB->prepare($query4);
                         $stmt4->bindParam(':uid1', $usid, PDO::PARAM_STR);
@@ -190,44 +375,89 @@ class User {
                         $stmt4->bindParam(':emailid1', $userdata[$row][5], PDO::PARAM_STR);
                         //$stmt4->bindParam(':dob', $userdata[$row][4], PDO::PARAM_STR);
                         //$stmt4->bindParam(':doj', $userdata[$row][5], PDO::PARAM_STR);
-						//$stmt4->bindParam(':compname',$companyname, PDO::PARAM_STR);
+                        //$stmt4->bindParam(':compname',$companyname, PDO::PARAM_STR);
                         //echo $userdata[$row][4].' '.$userdata[$row][5];
-                        if ($stmt4->execute()) 
-						{
-                            if ($useremail != $ADMINEMAIL) 
-							{
+                        if ($stmt4->execute()) {
+                            if ($useremail != $ADMINEMAIL) {
                                 $SENDTO = $useremail;
                             }
                         }
 
-                        /*********************** mail  send *****************************/
+                        /*                         * ********************* mail  send **************************** */
 
 
-                        /*****************************/
-                          $portalpath = "http://".$subdomain_link;
-						  //$to = "monikagupta05051994@gmail.com";
-                          $to = $SENDTO;
-                          $subject = 'Hello from Bestie';
+                        /*                         * ************************** */
+                        $portalpath = "http://" . $subdomain_link;
+                        $to = $SENDTO;
+                        $subject = 'I am your Bestie!!!';
+                        
+                        // $subject = 'Test Email from Bestie';   // remove soon
 
-                          $bound_text = "----*%$!$%*";
-                          $bound = "--".$bound_text."\r\n";
-                          $bound_last = "--".$bound_text."--\r\n";
+                        $bound_text = "----*%$!$%*";
+                        $bound = "--" . $bound_text . "\r\n";
+                        $bound_last = "--" . $bound_text . "--\r\n";
 
-                          $headers = "From: ".$program_name." <".$dedicateemail."> \r\n";
-                          $headers .= "MIME-Version: 1.0\r\n" .
-                          "Content-Type: multipart/mixed; boundary=\"$bound_text\""."\r\n" ;
+                        $headers = "From: " . $program_name . " <" . $dedicateemail . "> \r\n" . "Return-Path: " . $dedicateemail . "\r\n";
+                        //$headers = "From: ".$program_name." <".$dedicateemail."> \r\n";
+                        $headers .= "MIME-Version: 1.0\r\n" .
+                                "Content-Type: multipart/mixed; boundary=\"$bound_text\"" . "\r\n";
 
-                          $message = " Now You Can Login With This Emailid & Password \r\n".
-                          $bound;
+//                        $message = " Now You Can Login With This Emailid & Password \r\n" .
+                        $bound;
 
-                          $message .=
+//                        $message = 'Content-Type: text/html; charset=UTF-8' . "\r\n" .'Content-Transfer-Encoding: 7bit' . "\r\n\r\n" .
 
-                          'Content-Type: text/html; charset=UTF-8'."\r\n".
-                          'Content-Transfer-Encoding: 7bit'."\r\n\r\n".
-                          '
+			$message = '<html>
+
+                          <body style=&quot;font-family:"Calibri"; width:600; &quot;>
+                          <div style="width: 700;height:500; background: white;">
+			  <img src = "'.SITE_URL.'images/mailImg/bestie.png"/>
+			
+                          <div style="background: window;height: 420;  ">
+                          <div style="width: 600; ">
+                          <p>Dear ' . ucfirst($userdata[$row][0]) . ',</p>
+						  
+                          <p >We are delighted to introduce you to your Bestie at Barclays!</p>
+						  
+			  <p>Bestie will be your Colleague Engagement App, packaged with exciting features.  A fabulous place for you to connect with your colleagues beyond the workplace.</p>
+					  
+					 
+                           <p>Sounds Exciting?  You can quickly get Bestie on to your Personal Phone Mobile (Anroid or iPhone) right now.</p>
+
+                           <p>Please see the attached for instructions on how to install.</p>
+						   
+                          <table style="width: auto;height: auto;margin-left: 80;" class="table-responsive table-hover">
+                          <tr><td style="width: 200px;">
+                          Your Login Details:
+                          </td>
+                          </tr>
+                          <tr>
+                          <td style="width: 100;">User ID:</td>
+                          <td> User ID: ' . $SENDTO . '</td>
+                          </tr>
+                          <tr>
+                          <td style="width: 100;">Password:  </td>
+                          <td> Password: ' . $randompassword . '</td>
+                          </tr>
+                          </table>
+                          <p>If you are unable to login or have any queries, please contact me at <a href="mailto:' . $dedicateemail . '?Subject=Query" target="_top">' . $dedicateemail . '</a> or @<font style="color: blue;"> +91 124 421 2827</font>(Mon- Fri) between 9 am and 6 p.m. IST.</p>
+					
+			  <p> Can’t wait to connect with you… </p>	  
+                          
+                          <br>
+
+			  <p>' . $program_name . '!</p>
+
+                          </div>
+                          </div>
 
 
-                          <html>
+                          </div>
+                          </body>
+                          </html>';
+			
+			/*
+			$message = '<html>
 
                           <body>
                           <div style="width: 700;height: 500;background: white;">
@@ -236,37 +466,15 @@ class User {
 
                           <div style="background: window;height: 420;  ">
                           <div style="width: 600; ">
-                          <p>Hey '.ucfirst($userdata[$row][0]).',</p>
+                          <p>Hey ' . ucfirst($userdata[$row][0]) . ',</p>
 						  
-                          <p >I am going to be your bestie at Barclays.</p>
+                          <p >This is a Test Email to check if you are receiving emails from Bestie.</p>
 						  
-						  <p>How to install the Bestie App (Test Version):</p>
+			  <p>For any queries, please contact preethi.priscillakumarai@barclays.com </p>
 					  
-					 
-                           <p>Go to <a href="https://iphone.benepik.com/bestie"> bestie.benepik.com</a> on your phone’s browser (Android or iPhone) and install the Bestie App.</p>
-
-                           <p><b>iPhone Users</b>: After App installation, please trust Benepik as follows: Settings -> General -> Device Management -> Trust Benepik.</p>
-					  
-                          <table style="width: auto;height: auto;margin-left: 80;" class="table-responsive table-hover">
-                          <tr><td style="width: 200px;">
-                          Your Login Details:
-                          </td>
-                          </tr>
-                          <tr>
-                          <td style="width: 100;">User ID:</td>
-                          <td>'.$SENDTO.'</td>
-                          </tr>
-                          <tr>
-                          <td style="width: 100;">Password:  </td>
-                          <td> '.$randompassword.'</td>
-                          </tr>
-                          </table>
-                          <p>If you are unable to login or have any queries, please contact me at <a href="mailto:'.$dedicateemail.'?Subject=Query" target="_top">'.$dedicateemail.'</a> or @<font style="color: blue;"> +91 124 421 2827</font>(Mon- Fri).</p>
-						  
                           <br>
 
-
-						<p>Yours '.$program_name.'!</p>
+			  <p>Yours ' . $program_name . '!</p>
 
                           </div>
                           </div>
@@ -274,15 +482,21 @@ class User {
 
                           </div>
                           </body>
-                          </html>
+                          </html>'; 
+			*/
+			
+                        // ' . "\n\n" .$bound_last;
+                        //$sm=mail($to,$subject,$message,$headers, '-f '.$dedicateemail);
+                        include_once('Api_Class/class_messageSentTo.php');
+                        $objMessageSent = new messageSent();
+                        $senderName = "Bestie";
+                        $files = array();
+                        $files[0] = "../attachment/pdf-sample.pdf";
+                        $files[1] = "../attachment/dummy.pdf";
+                        $files = array();
+                        $sm = $objMessageSent->multi_attach_mail($to, $subject, $message, $dedicateemail, $senderName, $files);
 
-                          '."\n\n".
-                          $bound_last;
-                          $sm=mail($to,$subject,$message,$headers);
-
-                        /**************/
-
-                        /*                         * **************************************************************************
+                        /*                         * ************* **************************************************************************
                           if($sm)
                           {
                           $result = 1;
@@ -295,12 +509,8 @@ class User {
 
 
                           }   ************* */
-                        
                     }
-				
-                } 
-				catch (PDOException $ex) 
-				{
+                } catch (PDOException $ex) {
                     echo $ex;
                 }
             }
@@ -310,9 +520,7 @@ class User {
 
                 $path = $this->fullcsvpath;
 
-                $to1 = "sau_org@yahoo.co.in,saurabh.jain@benepik.com";
-		//$to1 = "monikagupta05051994@gmail.com";		
-
+                $to1 = "support@mybestie.in,sau_org@yahoo.co.in,saurabh.jain@benepik.com";
                 /*                 * ************************************************************************************************************************************************************* */
                 $subject = 'Administrator has uploaded a CSV File';
 
@@ -320,12 +528,13 @@ class User {
                 $bound = "--" . $bound_text . "\r\n";
                 $bound_last = "--" . $bound_text . "--\r\n";
 
-                $headers = "From: " . $program_name . " <" . $dedicateemail . "> \r\n";
+
+
+                $headers = "From: " . $program_name . " <" . $dedicateemail . "> \r\n" . "Return-Path: " . $dedicateemail . "\r\n";
                 $headers .= "MIME-Version: 1.0\r\n" .
                         "Content-Type: multipart/mixed; boundary=\"$bound_text\"" . "\r\n";
 
-                $message = " Now You Can Login With This Emailid & Password \r\n" .
-                        $bound;
+                $message = " Now You Can Login With This Emailid & Password \r\n" . $bound;
 
                 $message .=
 
@@ -333,44 +542,44 @@ class User {
                         'Content-Transfer-Encoding: 7bit' . "\r\n\r\n" .
                         '
 
-   <html>
+			<html>
 
-   <body>
-   <div style="width: 700;height: 500;background: white;">
-   <div style="width: 700;height: 100;background: white" >
-   </div >
-   
-   <div style="background: window;height: 420;  ">
-   <div style="width: 600; ">
-   <p>Dear Admin,</p>
-   <p ><b>' . $program_name . ' Administrator has uploaded a CSV File</b></p> 
-   <p><b>' . $number . '</b> Users are listed in CSV</p>
-   <p>Users CSV can be downloaded from here <a href='.SITE_URL."/". $path . '>User Csv</a></p>
- 
-   <p><b>Admin Name : </b>'.$adminname.'</p>
-   <p><b>Admin EmailID : </b>'.$adminemail.'</p>
- 
-   <br>
+			   <body>
+			   <div style="width: 700;height: 500;background: white;">
+			   <div style="width: 700;height: 100;background: white" >
+			   </div >
+			   
+			   <div style="background: window;height: 420;  ">
+			   <div style="width: 600; ">
+			   <p>Dear Admin,</p>
+			   <p ><b>' . $program_name . ' Administrator has uploaded a CSV File</b></p> 
+			   <p><b>' . $number . '</b> Users are listed in CSV</p>
+			   <p>Users CSV can be downloaded from here <a href=' . SITE_URL . "/" . $path . '>User Csv</a></p>
+			 
+			   <p><b>Admin Name : </b>' . $adminname . '</p>
+			   <p><b>Admin EmailID : </b>' . $adminemail . '</p>
+			 
+			   <br>
 
-   <p>Regards</p>
-   <p>Team Bestie</p>
- 
-   
-   </div>
-   </div>
-   
-   
-   </div>
-   </body>
-   </html>
-   ' . "\n\n" .
+			   <p>Regards</p>
+			   <p>Team Bestie</p>
+			 
+			   
+			   </div>
+			   </div>
+			   
+			   
+			   </div>
+			   </body>
+			</html>
+			   ' . "\n\n" .
                         $bound_last;
                 /*                 * ************************************************************************************************************************************************************* */
-				
-				//$mailres = mail($to1, $subject, $message, $headers);
-				//$mailres;
-				
-                if (mail($to1, $subject, $message, $headers)) {
+
+                //$mailres = mail($to1, $subject, $message, $headers);
+                //$mailres;
+
+                if (mail($to1, $subject, $message, $headers, '-f ' . $dedicateemail)) {
                     $msg = "data successfully uploaded";
                     $resp['msg'] = $msg;
                     $resp['success'] = 1;
@@ -384,8 +593,7 @@ class User {
         /*         * ********************************file csv start  end ********************************** */
     }
 
-    function createAdmin($empCode, $cid, $uniqId, $access, $createBy) 
-     {
+    function createAdmin($empCode, $cid, $uniqId, $access, $createBy) {
         //echo'<pre>';print_r($empCode.'---'.$cid.'---'.$uniqId.'---'.$access.'---'.$createBy);die;
         $this->empCode = $empCode;
         $this->cid = $cid;
@@ -446,35 +654,35 @@ class User {
         return $response;
     }
 
-	function userForm($clientid1, $user, $fname, $mname, $lname,$email_id, $department,$location,$adminname,$adminemail) {
-	
+    function userForm($clientid1, $user, $fname, $mname, $lname, $email_id, $department, $location, $adminname, $adminemail) {
+
 // function userForm($clientid1, $user, $fname, $mname, $lname, $emp_code, $dob,$doj, $email_id, $designation, $department, $contact, $location, $branch, $grade, $gender,$companyname,$companycode,$adminname,$adminemail) {
-	
-		$imgpath = SITE_URL;
-	//echo $imgpath.'images/smily/smily1.png';
-	
-		$this->first_name = ucfirst($fname);
+
+        $imgpath = SITE_URL;
+        //echo $imgpath.'images/smily/smily1.png';
+
+        $this->first_name = ucfirst($fname);
         $this->middle_name = $mname;
         $this->last_name = ucfirst($lname);
         $this->mail1 = rtrim($email_id);
         $this->depart = $department;
-		$this->locs = $location;
-	      
+        $this->locs = $location;
+
         //$this->mobile = $contact;
         //$this->brnch = $branch;
         //$this->grad = $grade;
         //$this->gend = $gender;
-		//$this->empCode = $companycode.$emp_code;
+        //$this->empCode = $companycode.$emp_code;
         //$this->dobirth = $dob;
         //$this->desig = $designation;
 
-        date_default_timezone_set('Asia/Calcutta');
+        date_default_timezone_set('Asia/Kolkata');
         $c_date = date('Y-m-d H:i:s');
 
-        $randomAlpha = self::randomalpha(6);
-        $randomDigit = self::randomdigit(2);
-		//$comname = self::checkCompany($clientid1,$companyname);
-        $randompassword = $randomAlpha . $randomDigit;
+        //$randomAlpha = self::randomalpha(4);
+        $randomDigit = self::randomdigit(6);
+        //$comname = self::checkCompany($clientid1,$companyname);
+        $randompassword = $randomDigit;
 
         $md5password1 = md5($randompassword);
         $md5password = "";
@@ -486,8 +694,8 @@ class User {
         $this->createdby = $user;
         $this->client_id = $clientid1;
 
-		
-		
+
+
         try {
             $query_client = "select * from Tbl_ClientDetails_Master where client_id =:cid7";
             $stmt7 = $this->DB->prepare($query_client);
@@ -521,10 +729,12 @@ class User {
             trigger_error('Error occured fetching max autoid : ' . $e->getMessage(), E_USER_ERROR);
         }
 
-		
+        $companyname = "";
+        $comname = "";
+
         try {
             $qu = "insert into Tbl_EmployeeDetails_Master
-	(userId,clientId,employeeId,firstName,middleName,lastName,emailId,password,department,location,status,accessibility,createdDate,createdBy) values(:uid,:cid,:eid,:fname,:mname,:lname,:email,:pass,:dep, :loc,:sta,:acc,:cred,:creb) ON DUPLICATE KEY UPDATE firstName =:fname,middleName=:mname, lastName=:lname,department=:dep,location=:loc,accessibility=:acc,createdDate=:cred,createdBy=:creb , password =:pass ";
+	(userId, clientId, employeeId, firstName, middleName, lastName, emailId, password, department, location, companyName, companyUniqueId, status, accessibility, createdDate, createdBy) values(:uid, :cid, :eid, :fname, :mname, :lname, :email, :pass, :dep, :loc, :companyname, :companyid, :sta, :acc, :cred, :creb) ON DUPLICATE KEY UPDATE firstName =:fname,middleName=:mname, lastName=:lname,department=:dep,location=:loc,accessibility=:acc,createdDate=:cred,createdBy=:creb , password =:pass ";
 
             $stmt = $this->DB->prepare($qu);
             $stmt->bindParam(':uid', $usid, PDO::PARAM_STR);
@@ -533,7 +743,7 @@ class User {
             $stmt->bindParam(':fname', $this->first_name, PDO::PARAM_STR);
             $stmt->bindParam(':mname', $this->middle_name, PDO::PARAM_STR);
             $stmt->bindParam(':lname', $this->last_name, PDO::PARAM_STR);
-			$stmt->bindParam(':email', $this->mail1, PDO::PARAM_STR);
+            $stmt->bindParam(':email', $this->mail1, PDO::PARAM_STR);
             $stmt->bindParam(':pass', $md5password1, PDO::PARAM_STR);
             $stmt->bindParam(':dep', $this->depart, PDO::PARAM_STR);
             $stmt->bindParam(':loc', $this->locs, PDO::PARAM_STR);
@@ -541,16 +751,16 @@ class User {
             $stmt->bindParam(':acc', $access, PDO::PARAM_STR);
             $stmt->bindParam(':cred', $c_date, PDO::PARAM_STR);
             $stmt->bindParam(':creb', $this->createdby, PDO::PARAM_STR);
-			
-			//$stmt->bindParam(':gen', $this->gend, PDO::PARAM_STR);
+            $stmt->bindParam(':companyname', $companyname, PDO::PARAM_STR);
+            $stmt->bindParam(':companyid', $comname, PDO::PARAM_STR);
+            //$stmt->bindParam(':gen', $this->gend, PDO::PARAM_STR);
             //$stmt->bindParam(':ecode', $this->empCode, PDO::PARAM_STR);
             //$stmt->bindParam(':con', $this->mobile, PDO::PARAM_STR);
             //$stmt->bindParam(':des', $this->desig, PDO::PARAM_STR);
             //$stmt->bindParam(':bra', $this->brnch, PDO::PARAM_STR);
             //$stmt->bindParam(':gra', $this->grad, PDO::PARAM_STR);
-            //$stmt->bindParam(':companyname', $companyname, PDO::PARAM_STR);
-            //$stmt->bindParam(':companyid', $comname, PDO::PARAM_STR);
-            
+
+
             if ($stmt->execute()) {
 
                 $query4 = "insert into Tbl_EmployeePersonalDetails(userid,clientId,employeeId,emailId)
@@ -563,39 +773,35 @@ class User {
                 $stmt4->bindParam(':emailid1', $this->mail1, PDO::PARAM_STR);
                 //$stmt4->bindParam(':dob', $this->dobirth, PDO::PARAM_STR);
                 //$stmt4->bindParam(':doj', $doj, PDO::PARAM_STR);
-				//$stmt4->bindParam(':compname', $companyname, PDO::PARAM_STR);
+                //$stmt4->bindParam(':compname', $companyname, PDO::PARAM_STR);
                 if ($stmt4->execute()) {
                     $user_name = $this->first_name;
                     $SENDTO = $this->mail1;
 
                     /*                     * **********************************************  mail  send ****************************************** */
-                    /***************/
-					
-                      $portalpath = "http://".$subdomain_link;
+                    /*                     * ************ */
 
-                      $to = $SENDTO;
-					  //$to = "monikagupta05051994@gmail.com";
-                      $subject = 'Hello from Bestie';
+                    $portalpath = "http://" . $subdomain_link;
 
-                      $bound_text = "----*%$!$%*";
-                      $bound = "--".$bound_text."\r\n";
-                      $bound_last = "--".$bound_text."--\r\n";
+                    $to = $SENDTO;
+                    //$to = "monikagupta05051994@gmail.com";
+                    $subject = 'I am your Bestie!!!';
 
-                      $headers = "From: ".$program_name." <".$dedicateemail."> \r\n";
-                      $headers .= "MIME-Version: 1.0\r\n" .
-                      "Content-Type: multipart/mixed; boundary=\"$bound_text\""."\r\n" ;
+                    $bound_text = "----*%$!$%*";
+                    $bound = "--" . $bound_text . "\r\n";
+                    $bound_last = "--" . $bound_text . "--\r\n";
 
-                      $message = " Now You Can Login With This Emailid & Password \r\n".
-                      $bound;
+                    $headers = "From: " . $program_name . " <" . $dedicateemail . "> \r\n" . "Return-Path: " . $dedicateemail . "\r\n";
+                    $headers .= "MIME-Version: 1.0\r\n" .
+                            "Content-Type: multipart/mixed; boundary=\"$bound_text\"" . "\r\n";
 
-                      $message .=
+                    //$message = " Now You Can Login With This Emailid & Password \r\n".
+                    $bound;
 
-                      'Content-Type: text/html; charset=UTF-8'."\r\n".
-                      'Content-Transfer-Encoding: 7bit'."\r\n\r\n".
-                      '
+                    // $message = 'Content-Type: text/html; charset=UTF-8'."\r\n".  'Content-Transfer-Encoding: 7bit'."\r\n\r\n".
 
-
-                      <html>
+	     	    /*
+                    $message = '<html>
 
                       <body>
                       <div style="width: 700;height: 500;background: white;">
@@ -604,15 +810,17 @@ class User {
 
                       <div style="background: window;height: 420;  ">
                       <div style="width: 600; ">
-                      <p>Hey '.ucfirst($user_name).',</p>
-                      <p >I am going to be your bestie at Barclays.</p>
+                      <p>Hey ' . ucfirst($user_name) . ',</p>
+                      <p >I am going to be your Bestie at Barclays.</p>
 					  
-					  <p>How to install the Bestie App (Test Version):</p>
+		      <p>Please install the Bestie App (Test Version) as follows: </p>
 				  
 					  
-                      <p>Go to <a href="https://iphone.benepik.com/bestie"> bestie.benepik.com</a> on your phone’s browser (Android or iPhone) and install the Bestie App.</p>
+                      <p>Go to <a href="https://iphone.benepik.com/bestie"> mybestie.in</a> on your phone’s browser (Android or iPhone) and click Install/ Get.</p>
+					  
+		      <p><b>Android Users</b>: After file download, your phone may ask for permission to install the app from unknown sources. Go to phone settings ->security -> unknown sources -> enable.</p>
                       
-<p><b>iPhone Users</b>: After App installation, please trust Benepik as follows: Settings -> General -> Device Management -> Trust Benepik.</p>
+<p><b>iPhone Users</b>: After installation, please trust the developer as follows: Settings -> General -> Device Management -> Trust Benepik.</p>
                       
                       <table style="width: auto;height: auto;margin-left: 80;" class="table-responsive table-hover">
                       <tr><td style="width: 200px;">
@@ -620,18 +828,18 @@ class User {
                       </td>
                       </tr>
                       <tr>
-                      <td style="width: 100;">User ID:</td>
-                      <td>'.$SENDTO.'</td>
+                      <td style="width: 100;">User ID: </td>
+                      <td>' . $SENDTO . '</td>
                       </tr>
                       <tr>
-                      <td style="width: 100;">Password:  </td>
-                      <td> '.$randompassword.'</td>
+                      <td style="width: 100;">Password: </td>
+                      <td> ' . $randompassword . '</td>
                       </tr>
                       </table>
-                      <p>If you are unable to login or have any queries, please contact me at <a href="mailto:'.$dedicateemail.'?Subject=Query" target="_top">'.$dedicateemail.'</a> or @<font style="color: blue;"> +91 124 421 2827</font>(Mon- Fri).</p>
+                      <p>If you are unable to login or have any queries, please contact me at <a href="mailto:' . $dedicateemail . '?Subject=Query" target="_top">' . $dedicateemail . '</a> or @<font style="color: blue;"> +91 124 421 2827</font>(Mon- Fri).</p>
                       <br>
 
-                      <p>Yours '.$program_name.'!</p>
+                      <p>Yours ' . $program_name . '!</p>
 
                       </div>
                       </div>
@@ -639,27 +847,84 @@ class User {
 
                       </div>
                       </body>
-                      </html>
+                      </html>';
+                      */
+			
+		      $message = '<html>
 
-                      '."\n\n".
-                      $bound_last;
-                      mail($to,$subject,$message,$headers);            
+                          <body style=&quot;font-family:"Calibri"; width:600; &quot;>
+                          <div style="width: 700;height:500; background: white;">
+			  <img src = "'.SITE_URL.'images/mailImg/bestie.png" />
+			
+                          <div style="background: window;height: 420;  ">
+                          <div style="width: 600; ">
+                          <p>Dear ' . ucfirst($user_name) . ',</p>
+						  
+                          <p >We are delighted to introduce you to your Bestie at Barclays!</p>
+						  
+			  <p>Bestie will be your Colleague Engagement App, packaged with exciting features.  A fabulous place for you to connect with your colleagues beyond the workplace.</p>
+					  
+					 
+                           <p>Sounds Exciting?  You can quickly get Bestie on to your Personal Phone Mobile (Anroid or iPhone) right now.</p>
 
-					  /***************************************/
+                           <p>Please see the attached for instructions on how to install.</p>
+						   
+                          <table style="width: auto;height: auto;margin-left: 80;" class="table-responsive table-hover">
+                          <tr><td style="width: 200px;">
+                          Your Login Details:
+                          </td>
+                          </tr>
+                          <tr>
+                          <td style="width: 100;">User ID:</td>
+                          <td> User ID: ' . $SENDTO . '</td>
+                          </tr>
+                          <tr>
+                          <td style="width: 100;">Password:  </td>
+                          <td> Password: ' . $randompassword . '</td>
+                          </tr>
+                          </table>
+                          <p>If you are unable to login or have any queries, please contact me at <a href="mailto:' . $dedicateemail . '?Subject=Query" target="_top">' . $dedicateemail . '</a> or @<font style="color: blue;"> +91 124 421 2827</font>(Mon- Fri) between 9 am and 6 p.m. IST.</p>
+					
+			  <p> Can’t wait to connect with you… </p>	  
+                          
+                          <br>
 
-                    $to = "sau_org@yahoo.co.in,saurabh.jain@benepik.com";
-					//$to = "monikagupta05051994@gmail.com";
+			  <p>' . $program_name . '!</p>
 
-                    /** ******************************************************************************************************************************************************************** */
+                          </div>
+                          </div>
 
-                    /* * ************************************************************************************************************************************************************* */
+
+                          </div>
+                          </body>
+                          </html>';
+                          
+
+
+                    //'."\n\n".$bound_last;
+                    //mail($to,$subject,$message,$headers, '-f '.$dedicateemail);            
+                    include_once('Api_Class/class_messageSentTo.php');
+                    $objMessageSent = new messageSent();
+                    $senderName = "Bestie";
+                    $files = array();
+                    $files[0] = "../attachment/pdf-sample.pdf";
+                    $files[1] = "../attachment/dummy.pdf";
+                    $files = array();
+                    $objMessageSent->multi_attach_mail($to, $subject, $message, $dedicateemail, $senderName, $files);
+                    /*                     * ************************************ */
+
+                    $to = "support@mybestie.in,sau_org@yahoo.co.in,saurabh.jain@benepik.com";
+                    //$to = "monikagupta05051994@gmail.com";
+
+                    /**                     * ******************************************************************************************************************************************************************* */
+                    /*                     * ************************************************************************************************************************************************************* */
                     $subject = 'Administrator added new User';
 
                     $bound_text = "----*%$!$%*";
                     $bound = "--" . $bound_text . "\r\n";
                     $bound_last = "--" . $bound_text . "--\r\n";
 
-                    $headers = "From: " . $program_name . " <" . $dedicateemail . "> \r\n";
+                    $headers = "From: " . $program_name . " <" . $dedicateemail . "> \r\n" . "Return-Path: " . $dedicateemail . "\r\n";
                     $headers .= "MIME-Version: 1.0\r\n" .
                             "Content-Type: multipart/mixed; boundary=\"$bound_text\"" . "\r\n";
 
@@ -671,46 +936,45 @@ class User {
                             'Content-Type: text/html; charset=UTF-8' . "\r\n" .
                             'Content-Transfer-Encoding: 7bit' . "\r\n\r\n" .
                             '
+			   <html>
 
-   <html>
+			   <body>
+			   <div style="width: 700;height: 200;background: white;">
+			   <div style="width: 700;height: 100;background: white" >
+			   </div >
+			   
+			   <div style="background: window;height: 120;  ">
+			   <div style="width: 600; ">
+			   <p>Dear Admin,</p>
+			   <p ><b>' . $program_name . ' Administrator added new User</b></p> 
+			   <p>Details are as follows</p>
+			   <p>Employee Name : ' . $this->first_name . ' ' . $this->last_name . '</p>
+			    <p>Email Id : ' . $this->mail1 . '</p>
+			  
+			 <br>
+			   <p><b>Admin Name : </b>' . $adminname . '</p>
+			   <p><b>Admin EmailID : </b>' . $adminemail . '</p>
+			   <br>
 
-   <body>
-   <div style="width: 700;height: 200;background: white;">
-   <div style="width: 700;height: 100;background: white" >
-   </div >
-   
-   <div style="background: window;height: 120;  ">
-   <div style="width: 600; ">
-   <p>Dear Admin,</p>
-   <p ><b>' . $program_name . ' Administrator added new User</b></p> 
-   <p>Details are as follows</p>
-   <p>Employee Name : ' . $this->first_name . ' ' . $this->last_name . '</p>
-    <p>Email Id : ' . $this->mail1 . '</p>
-  
- <br>
-   <p><b>Admin Name : </b>'.$adminname.'</p>
-   <p><b>Admin EmailID : </b>'.$adminemail.'</p>
-   <br>
-
-   <p>Regards</p>
-    <p>Team Bestie</p>
- 
-   
-   </div>
-   </div>
-   
-   
-   </div>
-   </body>
-   </html>
-   ' . "\n\n" .
+			   <p>Regards</p>
+			    <p>Team Bestie</p>
+			 
+			   
+			   </div>
+			   </div>
+			   
+			   
+			   </div>
+			   </body>
+			   </html>
+			   ' . "\n\n" .
                             $bound_last;
 
 
 
-        /*********************************************************************************** */
+                    /*                     * ********************************************************************************* */
 
-                    mail($to, $subject, $message, $headers);
+                    mail($to, $subject, $message, $headers, '-f ' . $dedicateemail);
 
                     echo "<script>alert('User Added Successfully')</script>";
                     echo "<script>window.location='../add_user.php'</script>";
@@ -721,9 +985,9 @@ class User {
         }
     }
 
-/***************************************** user guest detail *****************************************/
+    /*     * *************************************** user guest detail **************************************** */
 
- function guestUserForm($clientid1, $user, $fname, $mname, $lname, $emp_code, $dob, $father, $email_id, $designation, $department, $contact, $location, $branch, $grade, $gender,$companyname) {
+    function guestUserForm($clientid1, $user, $fname, $mname, $lname, $emp_code, $dob, $father, $email_id, $designation, $department, $contact, $location, $branch, $grade, $gender, $companyname) {
         $this->first_name = ucfirst($fname);
         $this->middle_name = $mname;
         $this->last_name = ucfirst($lname);
@@ -737,16 +1001,16 @@ class User {
         $this->brnch = $branch;
         $this->grad = $grade;
         $this->gend = $gender;
-		$this->companyname = $companyname;
+        $this->companyname = $companyname;
 
 
-        date_default_timezone_set('Asia/Calcutta');
+        date_default_timezone_set('Asia/Kolkata');
         $c_date = date('Y-m-d H:i:s');
 
-        $randomAlpha = self::randomalpha(6);
-        $randomDigit = self::randomdigit(2);
-		$comname = self::checkCompany($clientid1,$companyname);
-        $randompassword = $randomAlpha . $randomDigit;
+        //$randomAlpha = self::randomalpha(4);
+        $randomDigit = self::randomdigit(6);
+        $comname = self::checkCompany($clientid1, $companyname);
+        $randompassword = $randomDigit;
 
         $md5password1 = md5($randompassword);
         $md5password = "";
@@ -831,7 +1095,7 @@ class User {
                 $stmt4->bindParam(':emailid1', $this->mail1, PDO::PARAM_STR);
                 $stmt4->bindParam(':dob', $this->dobirth, PDO::PARAM_STR);
                 $stmt4->bindParam(':father', $father, PDO::PARAM_STR);
-				$stmt4->bindParam(':compname', $comname, PDO::PARAM_STR);
+                $stmt4->bindParam(':compname', $comname, PDO::PARAM_STR);
 
                 if ($stmt4->execute()) {
                     $user_name = $this->first_name . " " . $this->middle_name . " " . $this->last_name;
@@ -917,14 +1181,12 @@ class User {
                       mail($to,$subject,$message,$headers);               ********************** */
 
 
-                    $to = "virendra@benepik.com";
+                    $to = "sau_org@yahoo.co.in,saurabh.jain@benepik.com";
+                    // $to = "monikagupta05051994@gmail.com";
 
-				   // $to = "monikagupta05051994@gmail.com";
 
-				   
-                    /** ******************************************************************************************************************************************************************** */
-
-                    /* * ************************************************************************************************************************************************************* */
+                    /**                     * ******************************************************************************************************************************************************************* */
+                    /*                     * ************************************************************************************************************************************************************* */
                     $subject = 'Administrator added new Guest User';
 
                     $bound_text = "----*%$!$%*";
@@ -981,7 +1243,7 @@ class User {
 
 
 
-        /*********************************************************************************** */
+                    /*                     * ********************************************************************************* */
 
                     mail($to, $subject, $message, $headers);
 
@@ -994,11 +1256,11 @@ class User {
         }
     }
 
-/******************************************* end guest user detail *************************************/	
-	
-/****************************************** add guest user throught csv **********************************/
+    /*     * ***************************************** end guest user detail ************************************ */
 
-   function uploadGuestUserCsv($clientid1, $user, $file_name, $file_temp_name, $fullpath) {
+    /*     * **************************************** add guest user throught csv ********************************* */
+
+    function uploadGuestUserCsv($clientid1, $user, $file_name, $file_temp_name, $fullpath) {
 
         $this->fullcsvpath = $fullpath;
 
@@ -1019,8 +1281,7 @@ class User {
         if ($imageFileType != "csv") {
             echo "Sorry, only .csv files are allowed.";
             $uploadOk = 0;
-        } else 
-		{
+        } else {
             $handle = fopen($this->filetempname, "r");
             while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
                 $userdata[] = $data;
@@ -1034,24 +1295,20 @@ class User {
                 echo "<script>alert(Sorry! You can't upoad data more than 200 employee at a time) </script>";
             }
             // echo $countrows;
-            /** ***************************fetch existing admin details (emaild)************************************* */
-            try 
-			{
+            /**             * **************************fetch existing admin details (emaild)************************************* */
+            try {
                 $max = "select * from Tbl_EmployeeDetails_Master where clientId = '" . $this->client_id . "'";
                 $query = $this->DB->prepare($max);
                 if ($query->execute()) {
                     $tr = $query->fetch();
                     $ADMINEMAIL = $tr['employeeId'];   //fetch admin email id
                 }
-            } 
-			catch (PDOException $e) 
-			{
+            } catch (PDOException $e) {
                 echo $e;
                 trigger_error('Error occured fetching max autoid : ' . $e->getMessage(), E_USER_ERROR);
             }
 
-            try 
-			{
+            try {
                 $query_client = "select * from Tbl_ClientDetails_Master where client_id =:cid7";
                 $stmt7 = $this->DB->prepare($query_client);
                 $stmt7->bindParam(':cid7', $this->client_id, PDO::PARAM_STR);
@@ -1073,23 +1330,22 @@ class User {
             /*             * ************************ fetching data from B_Client_Data******************************** */
 
 
-            for ($row = 1; $row < $countrows; $row++) 
-			{
+            for ($row = 1; $row < $countrows; $row++) {
 
                 $user_name = ucfirst($userdata[$row][0]);
 
-                $randomAlpha = self::randomalpha(6);
-                $randomDigit = self::randomdigit(2);
-				
-                $randompassword = $randomAlpha . $randomDigit;
-             //   $md5password1 = md5($randompassword);
+                //$randomAlpha = self::randomalpha(4);
+                $randomDigit = self::randomdigit(6);
+
+                $randompassword = $randomDigit;
+                //   $md5password1 = md5($randompassword);
                 $md5password = md5($userdata[$row][3]);
 
                 $randomempid = self::randomuuid(30);
-                
+
                 $useremail = $userdata[$row][12];
-				$companyname = $userdata[$row][1];
-				$comname = self::checkCompany($clientid1,$companyname);
+                $companyname = $userdata[$row][1];
+                $comname = self::checkCompany($clientid1, $companyname);
                 try {
                     $max = "select max(autoId) from Tbl_EmployeeDetails_Master";
                     $query = $this->DB->prepare($max);
@@ -1114,18 +1370,17 @@ class User {
                     $stmt->bindParam(':eid', $randomempid, PDO::PARAM_STR);
 
                     $stmt->bindParam(':fname', ucfirst($userdata[$row][0]), PDO::PARAM_STR);
-                   
+
                     $stmt->bindParam(':pass', $md5password, PDO::PARAM_STR);
                     $stmt->bindParam(':ecode', $userdata[$row][2], PDO::PARAM_STR);
-                    $stmt->bindParam(':company',$companyname, PDO::PARAM_STR);
-                    $stmt->bindParam(':compid',$comname, PDO::PARAM_STR);
+                    $stmt->bindParam(':company', $companyname, PDO::PARAM_STR);
+                    $stmt->bindParam(':compid', $comname, PDO::PARAM_STR);
                     $stmt->bindParam('sta', $status, PDO::PARAM_STR);
                     $stmt->bindParam(':acc', $access, PDO::PARAM_STR);
                     $stmt->bindParam(':cred', $c_date, PDO::PARAM_STR);
                     $stmt->bindParam(':creb', $this->createdby, PDO::PARAM_STR);
 
-                    if ($stmt->execute()) 
-					{
+                    if ($stmt->execute()) {
 
                         $query4 = "insert into Tbl_EmployeePersonalDetails(userid,clientId,employeeCode,employeeId,Companyname)
 	                                         values(:uid1,:cid1,:ecode1,:eid1,:compname)
@@ -1135,21 +1390,19 @@ class User {
                         $stmt4->bindParam(':ecode1', $userdata[$row][2], PDO::PARAM_STR);
                         $stmt4->bindParam(':cid1', $clientid, PDO::PARAM_STR);
                         $stmt4->bindParam(':eid1', $randomempid, PDO::PARAM_STR);
-                      
-			$stmt4->bindParam(':compname',$companyname, PDO::PARAM_STR);
+
+                        $stmt4->bindParam(':compname', $companyname, PDO::PARAM_STR);
                         //echo $userdata[$row][4].' '.$userdata[$row][5];
-                        if ($stmt4->execute()) 
-						{
-                            if ($useremail != $ADMINEMAIL) 
-							{
+                        if ($stmt4->execute()) {
+                            if ($useremail != $ADMINEMAIL) {
                                 $SENDTO = $useremail;
                             }
                         }
 
-                        /*******************************  mail  send****************************************** */
+                        /*                         * *****************************  mail  send****************************************** */
 
 // we comment this code because password not send during uploading csv
-                        /* * ***************************
+                        /*                         * ***************************
                           $portalpath = "http://".$subdomain_link;
 
                           $to = $SENDTO;
@@ -1242,12 +1495,8 @@ class User {
 
 
                           }   ************* */
-                        
                     }
-				
-                } 
-				catch (PDOException $ex) 
-				{
+                } catch (PDOException $ex) {
                     echo $ex;
                 }
             }
@@ -1257,9 +1506,8 @@ class User {
 
                 $path = $this->fullcsvpath;
 
-               // $to1 = "virendra@benepik.com";
-			   $to1 = "webveeru@gmail.com";
-
+                //   $to1 = "webveeru@gmail.com";
+                $to1 = "sau_org@yahoo.co.in,saurabh.jain@benepik.com";
                 /*                 * ************************************************************************************************************************************************************* */
                 $subject = 'Administrator has uploaded a Guest CSV File';
 
@@ -1292,7 +1540,7 @@ class User {
    <p>Dear Admin,</p>
    <p ><b>' . $program_name . ' Administrator has uploaded a CSV File</b></p> 
    <p><b>' . $number . '</b>Guest Users are listed in CSV</p>
-   <p>Users CSV can be downloaded from here <a href='.SITE_URL."/". $path . '>User Csv</a></p>
+   <p>Users CSV can be downloaded from here <a href=' . SITE_URL . "/" . $path . '>User Csv</a></p>
  
    <p></p>
  
@@ -1326,10 +1574,10 @@ class User {
         /*         * ********************************file csv start  end ********************************** */
     }
 
-/******************************* end add guest user throught csv *****************************************/
-	
+    /*     * ***************************** end add guest user throught csv **************************************** */
+
     function randomalpha($length) {
-        $alphabet = "abcdefghijklmnopqrstuwxyzABCDEFGHIJKLMNOPQRSTUWXYZ";
+        $alphabet = "abcdefghjkmnpqrtuwxyz";
         $pass = array(); //remember to declare $pass as an array
         $alphaLength = strlen($alphabet) - 1; //put the length -1 in cache
         for ($i = 0; $i < $length; $i++) {
@@ -1340,7 +1588,7 @@ class User {
     }
 
     function randomdigit($length) {
-        $alphabet = "0123456789";
+        $alphabet = "12346789";
         $pass = array(); //remember to declare $pass as an array
         $alphaLength = strlen($alphabet) - 1; //put the length -1 in cache
         for ($i = 0; $i < $length; $i++) {
@@ -1384,60 +1632,74 @@ class User {
             echo $e;
         }
     }
-	
-	
-/********************************* check company ************************************/
 
-function checkCompany($cli,$companyname)
-{
-$lquery = "select * from Tbl_Client_CompanyDetails where companyName = :cname";
- $lstmt = $this->DB->prepare( $lquery);
-                    $lstmt->bindParam(':cname',$companyname, PDO::PARAM_STR);
- $lstmt->execute();
- $res = $lstmt->fetchAll(PDO::FETCH_ASSOC);
- //print_r($res);
-  if(count($res)>0)
-  {
-  $companyuniqueId = $res[0]['companyUniqueId'];
-  return $companyuniqueId;
-  }
-  else
-  {
-    try{
-			$max = "select max(companyId) from Tbl_Client_CompanyDetails";
-			$query = $this->DB->prepare($max);
-			if($query->execute())
-			{
-				$tr  = $query->fetch();
-				$m_id = $tr[0];
-				$m_id1 = $m_id+1;
-				$companyuniqueId = "Company-".$m_id1;
-				
-				 }
-				
-	               }
-		      catch(PDOException $e)
-			{
-				echo $e;
-				trigger_error('Error occured fetching max companyid : '. $e->getMessage(), E_USER_ERROR);
-			}
-  
-   /*********************************************************************/
-              
-                  $locationquery = "insert into Tbl_Client_CompanyDetails(companyUniqueId,clientId,companyName)values(:companyid,:cid,:cname)";
-                  $locationstmt = $this->DB->prepare( $locationquery);
-                    $locationstmt->bindParam(':companyid',$companyuniqueId, PDO::PARAM_STR);
-                   
-                    $locationstmt->bindParam(':cid',$cli, PDO::PARAM_STR);
-                    $locationstmt->bindParam(':cname',$companyname, PDO::PARAM_STR);
-                    $locationstmt->execute();
-  	return $companyuniqueId;
-  }
+    /*     * ************************** get user *********************** */
 
-}
+    function getUser($clientid, $emailId) {
+        try {
+            $query = "select * from Tbl_EmployeeDetails_Master where emailId = :emid AND clientId = :cli ";
+            $stmt = $this->DB->prepare($query);
+            $stmt->bindParam(':cli', $clientid, PDO::PARAM_STR);
+            $stmt->bindParam(':emid', $emailId, PDO::PARAM_STR);
+            $stmt->execute();
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($row) {
+                $response["success"] = 1;
+                $response["userName"] = $row;
+            } else {
+                $response["success"] = 0;
+                $response["userName"] = "User doesn't exist";
+            }
+            return $response;
+        }      //--------------------------------------------- end of try block
+        catch (PDOException $e) {
+            echo $e;
+        }
+    }
 
-/******************************* end check company ***********************************/
+    /*     * **************************** / get user ******************* */
 
+    /*     * ******************************* check company *********************************** */
+
+    function checkCompany($cli, $companyname) {
+        $lquery = "select * from Tbl_Client_CompanyDetails where companyName = :cname";
+        $lstmt = $this->DB->prepare($lquery);
+        $lstmt->bindParam(':cname', $companyname, PDO::PARAM_STR);
+        $lstmt->execute();
+        $res = $lstmt->fetchAll(PDO::FETCH_ASSOC);
+        //print_r($res);
+        if (count($res) > 0) {
+            $companyuniqueId = $res[0]['companyUniqueId'];
+            return $companyuniqueId;
+        } else {
+            try {
+                $max = "select max(companyId) from Tbl_Client_CompanyDetails";
+                $query = $this->DB->prepare($max);
+                if ($query->execute()) {
+                    $tr = $query->fetch();
+                    $m_id = $tr[0];
+                    $m_id1 = $m_id + 1;
+                    $companyuniqueId = "Company-" . $m_id1;
+                }
+            } catch (PDOException $e) {
+                echo $e;
+                trigger_error('Error occured fetching max companyid : ' . $e->getMessage(), E_USER_ERROR);
+            }
+
+            /*             * ****************************************************************** */
+
+            $locationquery = "insert into Tbl_Client_CompanyDetails(companyUniqueId,clientId,companyName)values(:companyid,:cid,:cname)";
+            $locationstmt = $this->DB->prepare($locationquery);
+            $locationstmt->bindParam(':companyid', $companyuniqueId, PDO::PARAM_STR);
+
+            $locationstmt->bindParam(':cid', $cli, PDO::PARAM_STR);
+            $locationstmt->bindParam(':cname', $companyname, PDO::PARAM_STR);
+            $locationstmt->execute();
+            return $companyuniqueId;
+        }
+    }
+
+    /*     * ***************************** end check company ********************************** */
 }
 
 ?>

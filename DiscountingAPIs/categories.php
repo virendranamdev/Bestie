@@ -1,6 +1,6 @@
 <?php
 
-error_reporting(E_ALL ^ E_NOTICE);
+//error_reporting(E_ALL ^ E_NOTICE);
 
 if (isset($_SERVER['HTTP_ORIGIN'])) {
     header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
@@ -33,11 +33,47 @@ if (!empty($jsonArr)) {
 
     $clientid = $jsonArr["clientid"];
     $uuid = $jsonArr["employeeid"];
+    $city = $jsonArr["city"];
 
+    
+    
+     /***********************************************************/
+         $file1 = "locations.php";
+         
+       $city1 = (!empty($city))?$city:'Noida';
+  
+    $location = $deal_obj->discountingCurl($jsonArr, $file1);
+    $location1 = json_decode($location,true);
+  //  print_r($location1);
+    $count = count($location1['cities']);
+    $flag = 2;
+   
+    for($k=0;$k<$count;$k++)
+    {
+        $loc = $location1['cities'][$k]['state'];
+     
+        if(strtolower($city1) == strtolower($loc))
+        {
+            $flag = 1;
+            break;
+        }
+    }
+    if($flag == 2)
+    {
+        $city = 'Noida';
+    }
+ else {
+         $city = $city1;
+ }
+ 
+    /**********************************************************/
+   // echo "this is city".$city;
+    
     $data = $user_obj->getUserDetail($clientid, $uuid);
 
     if ($data['success'] == 1) {
         $chide['chide'] = $data['userName']['categoryHide'];
+        $chide['city']  = $city;
         $success = $data['success'];
 
         $file = basename(__FILE__, '');

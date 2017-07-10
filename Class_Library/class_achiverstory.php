@@ -57,18 +57,20 @@ class AchiverStory {
         }
     }
 
-    function create_AchiverStory($storyid , $Client_Id, $storytitle,$achievername, $achieverdes,$achieverloc , $achieverstory, $device, $Flag, $like, $comment, $Post_Date, $Uuid, $status) {
+    function create_AchiverStory($storyid , $Client_Id, $storytitle,$achievername,$achiveremailid, $achieverdes,$achieverloc , $achieverstory,$coverimg, $device, $Flag, $like, $comment, $Post_Date, $Uuid, $status) {
 
 	
         try {
-            $query = "insert into Tbl_C_AchiverStory(clientId, title,achieverName, designation, location, story ,device,flagType,likeType,comment,createdDate,createdBy,status) values(:cid,:title,:name,:desig,:loc,:story,:device,:flg,:liket,:comm,:cd,:cby,:status)";
+            $query = "insert into Tbl_C_AchiverStory(clientId, title,achieverName,achiverEmailId, designation, location, story,imagePath,device,flagType,likeType,comment,createdDate,createdBy,status) values(:cid,:title,:name,:email,:desig,:loc,:story,:coverimg,:device,:flg,:liket,:comm,:cd,:cby,:status)";
             $stmt = $this->DB->prepare($query);
             $stmt->bindParam(':cid', $Client_Id, PDO::PARAM_STR);
-			$stmt->bindParam(':title', $storytitle, PDO::PARAM_STR);
+	    $stmt->bindParam(':title', $storytitle, PDO::PARAM_STR);
             $stmt->bindParam(':name', $achievername, PDO::PARAM_STR);
-			$stmt->bindParam(':desig', $achieverdes, PDO::PARAM_STR);
-			$stmt->bindParam(':loc', $achieverloc, PDO::PARAM_STR);
+             $stmt->bindParam(':email', $achiveremailid, PDO::PARAM_STR);
+	    $stmt->bindParam(':desig', $achieverdes, PDO::PARAM_STR);
+	    $stmt->bindParam(':loc', $achieverloc, PDO::PARAM_STR);
             $stmt->bindParam(':story', $achieverstory, PDO::PARAM_STR);
+             $stmt->bindParam(':coverimg', $coverimg, PDO::PARAM_STR);
             $stmt->bindParam(':device', $device, PDO::PARAM_STR);
             $stmt->bindParam(':flg', $Flag, PDO::PARAM_STR);
             $stmt->bindParam(':status', $status, PDO::PARAM_STR);
@@ -554,6 +556,38 @@ class AchiverStory {
 		return json_encode($response);
     }
 	/****************************** / delete achiever image ***********************/
+	
+	/******************************** get referred story **************************/
+	
+	 function referredstorylist($clientId) {
+        try {
+           
+		   $query = "SELECT referColleague.* , DATE_FORMAT(referColleague.createdDate,'%d %b %Y %h:%i %p') as createdDate , CONCAT(edm.firstName,' ',edm.middleName,' ',edm.lastName) as referredbyname , edm.emailId as referredbyemailId , CONCAT(edm1.firstName,' ',edm1.middleName,' ',edm1.lastName) as referredtoname , edm1.emailId as referredtoemailId from Tbl_ReferColleague as referColleague JOIN Tbl_EmployeeDetails_Master as edm ON referColleague.referredBy = edm.employeeId JOIN Tbl_EmployeeDetails_Master as edm1 ON referColleague.userId = edm1.employeeId AND edm.clientId = :cli";
+
+            $stmt = $this->DB->prepare($query);
+			$stmt->bindParam(':cli', $clientId, PDO::PARAM_STR);
+            $stmt->execute();
+            $referredstory = $stmt->fetchAll(PDO::FETCH_ASSOC);
+			
+			if($referredstory)
+			{
+            $result['success'] = 1;
+            $result['message'] = "referred story detail";
+            $result['data'] = $referredstory;
+			}
+			else
+			{
+			$result['success'] = 0;
+            $result['message'] = "referred story detail not fetch";
+			}
+        } catch (Exception $ex) {
+            $result['success'] = 0;
+            $result['message'] = "referred story detail not fetch" . $ex;
+        }
+        return json_encode($result);
+    }
+	
+	/******************************* / get referred story *************************/
 	
 }
 

@@ -79,7 +79,7 @@ echo "</pre>";*/
               <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                 <div class="x_panel">
                   <div class="x_title">
-                    <h2> Colleague Stories</h2>
+                    <h2> My Story</h2>
                     <ul class="nav navbar-right panel_toolbox">
                       <li class="right"><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                       </li>
@@ -89,7 +89,10 @@ echo "</pre>";*/
                   </div>
                   <div class="x_content"> <div class="row">
                         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                          <ul class="inlineUL right"><li><a href="create-story.php"><button class="btn btn-primary btn-round">Create New Colleague Story</button></a></li><!--<li><a href="wallPredefineTemplate.php"><button class="btn btn-primary btn-round"> Use Predefined Temple</button></a></li>--></ul>
+                          <ul class="inlineUL right"><li><a href="create-story.php"><button class="btn btn-primary btn-round">Create New Colleague Story</button></a></li>
+						  
+						  <li><a href="refercolleaguestory.php"><button class="btn btn-success btn-round">Colleagues referrel</button></a></li>
+						  <!--<li><a href="wallPredefineTemplate.php"><button class="btn btn-primary btn-round"> Use Predefined Temple</button></a></li>--></ul>
                          </div>
 
 
@@ -113,10 +116,10 @@ echo "</pre>";*/
 						{
 						?>
                         <tr>
-                          <td><a href="story-details.php"><?php echo $achieverListArr['Data'][$i]['createdDate'];?> </a></td><td><a href="story-details.php"><?php echo $achieverListArr['Data'][$i]['achieverName'];?></a> </td>
+                          <td><a href="story-details.php?storyid=<?php echo $achieverListArr['Data'][$i]['storyId']; ?>"><?php echo $achieverListArr['Data'][$i]['createdDate'];?> </a></td><td><a href="story-details.php?storyid=<?php echo $achieverListArr['Data'][$i]['storyId']; ?>"><?php echo $achieverListArr['Data'][$i]['achieverName'];?></a> </td>
 
                           <!-- <td><center> <i class="slow-spin fa fa-spin fa-clock-o fa-lg liveData"></i></center></td>-->
-                          <td class="questionTD"><a href="story-details.php"><?php echo $achieverListArr['Data'][$i]['title'];?></a> </td><td><a href="story-details.php"><?php echo $achieverListArr['Data'][$i]['likeCount'];?></a></td><td><a href="story-details.php"><?php echo $achieverListArr['Data'][$i]['commentCount'];?></a></td>
+                          <td class="questionTD"><a href="story-details.php?storyid=<?php echo $achieverListArr['Data'][$i]['storyId']; ?>"><?php echo $achieverListArr['Data'][$i]['title'];?></a> </td><td><a href="story-details.php?storyid=<?php echo $achieverListArr['Data'][$i]['storyId']; ?>"><?php echo $achieverListArr['Data'][$i]['likeCount'];?></a></td><td><a href="story-details.php?storyid=<?php echo $achieverListArr['Data'][$i]['storyId']; ?>"><?php echo $achieverListArr['Data'][$i]['commentCount'];?></a></td>
                          
                            <td><ul class="wallUL">
 						   

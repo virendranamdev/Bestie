@@ -1,6 +1,8 @@
 <?php
 
-require_once('class_connect_db_Communication.php');
+if (!class_exists("Connection_Communication")) {
+    require_once('class_connect_db_Communication.php');
+}
 
 class LoginUser {
 
@@ -15,53 +17,42 @@ class LoginUser {
 
     /*     * ************************* dIf Valid the Api Returns the data of user needed by client  ************************************* */
 
-    function detectValidUser($packageName, $emailId, $password, $usertype='') {
-//        if (!empty($usertype)) {
-            try {
-                $query = "select ud.log_status,udp.userDOB,udp.userFatherName,udp.userMothername,udp.userSpouseName,udp.childrenName,ud.accessibility, bcd.defaultLocation, bcd.client_id,bcd.androidAppVersion,bcd.iosAppVersion, ASCII(SUBSTRING(bcd.defaultLocation, 1, 1)) as cityCode,bcd.clientType,if(bcd.logoImageName IS NULL or bcd.logoImageName='', '', concat('" . site_url . "',bcd.logoImageName)) as  logoImageName,if(bcd.welcomeImageName IS NULL or bcd.welcomeImageName='', '', concat('" . site_url . "',bcd.welcomeImageName)) as welcomeImageName,bcd.googleApiKey,ud.employeeId,ud.firstName,ud.middleName,ud.lastName,ud.emailId,ud.validity,ud.department,ud.designation,ud.contact,ud.companyName, if(udp.userImage IS NULL or udp.userImage='','', concat('" . site_url . "',udp.userImage)) as  userImage, if(udp.avatar_image='', '', concat('" . site_url . "', udp.avatar_image)) as avatar_image from Tbl_EmployeeDetails_Master as ud join  Tbl_ClientDetails_Master as bcd on bcd.client_id = ud.clientId join Tbl_EmployeePersonalDetails as udp on udp.employeeId = ud.employeeId where (UPPER(ud.emailId)=:emailId) and ud.password = :password and ud.status = 'Active' and bcd.status = 'Active' and bcd.packageName= :pack";
+    public function detectValidUser($packageName, $emailId, $password) {
+        try {
+            $query = "select ud.log_status,udp.userDOB,udp.userFatherName,udp.userMothername,udp.userSpouseName,udp.childrenName,ud.accessibility, ud.location as defaultLocation, bcd.client_id,bcd.androidAppVersion,bcd.iosAppVersion, ASCII(SUBSTRING(bcd.defaultLocation, 1, 1)) as cityCode,bcd.clientType,if(bcd.logoImageName IS NULL or bcd.logoImageName='', '', concat('" . site_url . "',bcd.logoImageName)) as  logoImageName,if(bcd.welcomeImageName IS NULL or bcd.welcomeImageName='', '', concat('" . site_url . "',bcd.welcomeImageName)) as welcomeImageName,bcd.googleApiKey,ud.employeeId,ud.firstName,ud.middleName,ud.lastName,ud.emailId,ud.validity,ud.department,ud.designation,ud.contact,ud.companyName, if(udp.userImage IS NULL or udp.userImage='','', concat('" . site_url . "',udp.userImage)) as  userImage, if(udp.avatar_image='', '', concat('" . site_url . "', udp.avatar_image)) as avatar_image from Tbl_EmployeeDetails_Master as ud join  Tbl_ClientDetails_Master as bcd on bcd.client_id = ud.clientId join Tbl_EmployeePersonalDetails as udp on udp.employeeId = ud.employeeId where (UPPER(ud.emailId)=:emailId) and ud.password = :password and ud.status = 'Active' and bcd.status = 'Active' and bcd.packageName= :pack";
 
-//                if ($usertype == "Guest") {
-//                    $query .= " and ud.accessibility='guestuser'";
-//                } else {
-//                    $query .= " and (ud.accessibility='User' or ud.accessibility='SubAdmin' or ud.accessibility='Admin')";
-//                }
+            $emailId = strtoupper(trim($emailId));
 
-                $emailId = strtoupper(trim($emailId));
-                
-                $password1 = md5(trim($password));
-                $packageName = strtoupper(trim($packageName));
-                $stmt = $this->db_connect->prepare($query);
-                $stmt->bindParam(':emailId', $emailId, PDO::PARAM_STR);
-                $stmt->bindParam(':password', $password1, PDO::PARAM_STR);
-                $stmt->bindParam(':pack', $packageName, PDO::PARAM_STR);
-                if ($stmt->execute()) {
-                    $result = $stmt->fetch(PDO::FETCH_ASSOC);
-                    // print_r($result);die;
-                    if ($result) {
-                        $response = array();
-                        $response["success"] = 1;
-                        $response["message"] = "Yes $emailId is a valid User";
-                        $response["posts"] = $result;
-                    } else {
-                        $response = array();
-                        $response["success"] = 0;
-                        $response["message"] = "Incorrect username or password";
-                    }
-
-                    return $response;
+            $password1 = md5(trim($password));
+            $packageName = strtoupper(trim($packageName));
+            $stmt = $this->db_connect->prepare($query);
+            $stmt->bindParam(':emailId', $emailId, PDO::PARAM_STR);
+            $stmt->bindParam(':password', $password1, PDO::PARAM_STR);
+            $stmt->bindParam(':pack', $packageName, PDO::PARAM_STR);
+            if ($stmt->execute()) {
+                $result = $stmt->fetch(PDO::FETCH_ASSOC);
+                if ($result) {
+                    $response = array();
+                    $response["success"] = 1;
+                    $response["message"] = "Yes $emailId is a valid User";
+                    $response["posts"] = $result;
                 } else {
-                    echo "query wrong";
+                    $response = array();
+                    $response["success"] = 0;
+                    $response["message"] = "Incorrect username or password";
                 }
-            }      //--------------------------------------------- end of try block
-            catch (PDOException $e) {
-                $response["success"] = 0;
-                $response["message"] = "Some Error Occured Please Try Again Later To Report Please write to us at info@benepik.com";
-                $response["posts"] = $e;
+
+                return $response;
+            } else {
+                echo "query wrong";
             }
-//        } else {
-//            $response["success"] = 0;
-//            $response["message"] = "Usertype not defined";
-//        }
+        }      //--------------------------------------------- end of try block
+        catch (PDOException $e) {
+            $response["success"] = 0;
+            $response["message"] = "Some Error Occured Please Try Again Later To Report Please write to us at info@benepik.com";
+            $response["posts"] = $e;
+        }
+
         return $response;
     }
 
@@ -71,20 +62,21 @@ class LoginUser {
         //  echo "client id = ".$clientid;
         // echo "user id -".$uid;
         try {
-            $query = "select ud.firstName,ud.log_status,bcd.client_id, ASCII(SUBSTRING(bcd.defaultLocation, 1, 1)) as cityCode,epd.userFatherName,epd.userMotherName,epd.userSpouseName,epd.childrenName,ud.companyName, if(epd.userImage IS NULL or epd.userImage='','',concat('" . site_url . "',epd.userImage)) as  userImage,bcd.iosAppVersion,bcd.androidAppVersion,epd.userDOB,epd.emailId, ud.accessibility, ud.employeeCode, ud.validity from Tbl_EmployeeDetails_Master as ud join  Tbl_ClientDetails_Master as bcd on bcd.client_id = ud.clientId join Tbl_EmployeePersonalDetails as epd where ud.employeeId =:uid and ud.status = 'Active' and bcd.status = 'Active' and bcd.client_id = :cid and epd.clientId = :cid and epd.employeeId = :uid";
+            $query = "select ud.firstName, ud.lastName,ud.log_status,bcd.client_id, ASCII(SUBSTRING(bcd.defaultLocation, 1, 1)) as cityCode,epd.userFatherName,epd.userMotherName,epd.userSpouseName,epd.childrenName,ud.companyName, if(epd.userImage IS NULL or epd.userImage='','',concat('" . site_url . "',epd.userImage)) as  userImage,bcd.iosAppVersion,bcd.androidAppVersion,epd.userDOB,epd.emailId, ud.accessibility, ud.employeeCode, ud.designation, ud.validity from Tbl_EmployeeDetails_Master as ud join  Tbl_ClientDetails_Master as bcd on bcd.client_id = ud.clientId join Tbl_EmployeePersonalDetails as epd where ud.employeeId =:uid and ud.status = 'Active' and bcd.status = 'Active' and bcd.client_id = :cid and epd.clientId = :cid and epd.employeeId = :uid";
 
             $stmt = $this->db_connect->prepare($query);
             $stmt->bindParam(':uid', $uid, PDO::PARAM_STR);
             $stmt->bindParam(':cid', $clientid, PDO::PARAM_STR);
             if ($stmt->execute()) {
                 $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                //  print_r($result);
+//                print_r($result);
+
                 $ert = count($result);
                 //  echo "ert = ".$ert;
                 if ($ert > 0) {
                     $response = array();
                     $response["success"] = 1;
-                    $response["message"] = "Yes $userEmail is a valid User";
+                    $response["message"] = "Yes " . $result[0]["emailId"] . " is a valid User";
                     $response["version"] = $result[0]["androidAppVersion"];
                     $response["iosversion"] = $result[0]["iosAppVersion"];
                     $response["log_status"] = $result[0]["log_status"];
@@ -107,10 +99,9 @@ class LoginUser {
         }
     }
 
-
     /*     * **********************insert login details for analytics ********************************** */
 
-    function entryUserLogin($packageName, $employeeID, $device, $deviceId) {
+    public function entryUserLogin($packageName, $employeeID, $device, $deviceId) {
         date_default_timezone_set('Asia/Kolkata');
         $login_date = date('Y-m-d H:i:s');
         $status = '1';
@@ -163,14 +154,14 @@ class LoginUser {
             $stmt->bindParam(':devId', $deviceId, PDO::PARAM_STR);
             $stmt->bindParam(':dat', $logout_date, PDO::PARAM_STR);
             $stmt->bindParam(':status', $status, PDO::PARAM_STR);
-            
-            if($stmt->execute()){
-               $response['success'] = 1;
-	       $response['message'] = "You have successfully logged out";
-	    }else{
-	    	$response['success'] = 0;
-  	        $response['message'] = "Log out failed";
-	    }
+
+            if ($stmt->execute()) {
+                $response['success'] = 1;
+                $response['message'] = "You have successfully logged out";
+            } else {
+                $response['success'] = 0;
+                $response['message'] = "Log out failed";
+            }
         } catch (PDOException $e) {
             echo $e;
         }
@@ -178,29 +169,30 @@ class LoginUser {
         return $response;
     }
 
-    /*********************************** check spalsh open *********************************/
-    
-     function checkspalshopen($cid,$uid,$device,$deviceId,$appversion) {
+    /*     * ********************************* check spalsh open ******************************** */
+
+    function checkspalshopen($cid, $uid, $device, $deviceId, $appversion) {
         date_default_timezone_set('Asia/Kolkata');
         $login_date = date('Y-m-d H:i:s');
-        $devicename = ($device == 2)?'Android':'Ios';
+        $devicename = ($device == 2) ? 'Android' : 'Ios';
 
 
         try {
             $query = "insert into Tbl_Analytic_AppView(userUniqueId,deviceId,date_of_entry,clientId,device,appVersion) values(:empid, :devId, :dat, :cid, :dev, :appv)";
             $stmt = $this->db_connect->prepare($query);
             $stmt->bindParam(':empid', $uid, PDO::PARAM_STR);
-             $stmt->bindParam(':devId', $deviceId, PDO::PARAM_STR);
-                $stmt->bindParam(':dat', $login_date, PDO::PARAM_STR);
+            $stmt->bindParam(':devId', $deviceId, PDO::PARAM_STR);
+            $stmt->bindParam(':dat', $login_date, PDO::PARAM_STR);
             $stmt->bindParam(':cid', $cid, PDO::PARAM_STR);
-            $stmt->bindParam(':dev',$devicename, PDO::PARAM_STR);
-             $stmt->bindParam(':appv',$appversion, PDO::PARAM_STR);
-          
+            $stmt->bindParam(':dev', $devicename, PDO::PARAM_STR);
+            $stmt->bindParam(':appv', $appversion, PDO::PARAM_STR);
+
             $stmt->execute();
         } catch (PDOException $e) {
             echo $e;
         }
     }
+
 }
 
 ?>

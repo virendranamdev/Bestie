@@ -156,10 +156,10 @@ if(isset($_GET['empid']))
                         <label class=" control-label col-md-2 col-sm-2 col-xs-12 forcePadding">First Name</label>
                         <div class="col-md-4 col-sm-4 col-xs-12 form-group has-feedback margintop">
                         <input type="text" class="form-control has-feedback-left" id="inputSuccess2" placeholder="Enter First Name" name="first_name" value="<?php echo $firstname; ?>" required>
-						<span class="fa fa-user form-control-feedback left" aria-hidden="true"></span>
-						</div>
+			<span class="fa fa-user form-control-feedback left" aria-hidden="true"></span>
+			</div>
                         
-						 <label class=" control-label col-md-2 col-sm-2 col-xs-12 forcePadding">Middle Name</label>
+			<label class=" control-label col-md-2 col-sm-2 col-xs-12 forcePadding">Middle Name</label>
                         <div class="col-md-4 col-sm-4 col-xs-12 form-group has-feedback margintop">
                         <input type="text" class="form-control has-feedback-left" id="inputSuccess2" placeholder="Enter Middle Name" name="middle_name" value="<?php echo $middlename; ?>">
                         <span class="fa fa-user form-control-feedback left" aria-hidden="true"></span>
@@ -167,11 +167,11 @@ if(isset($_GET['empid']))
                       </div></div>
 					  
                       
-					  <div class="form-group">
-					  <div class="row">
+			<div class="form-group">
+			<div class="row">
                         <label class=" control-label col-md-2 col-sm-2 col-xs-12 forcePadding">Last Name</label>
                         <div class="col-md-4 col-sm-4 col-xs-12 form-group has-feedback">
-                        <input type="text" class="form-control has-feedback-left" id="inputSuccess2" placeholder="Enter Middle Name" name="last_name" value="<?php echo $lastname; ?>" required>
+                        <input type="text" class="form-control has-feedback-left" id="inputSuccess2" placeholder="Enter Middle Name" name="last_name" value="<?php echo $lastname; ?>">
                         <span class="fa fa-user form-control-feedback left" aria-hidden="true"></span>
                       </div>
                       
@@ -325,7 +325,7 @@ if(isset($_GET['empid']))
 						<div class="row">
 						<div class="col-md-6 col-sm-6 col-xs-12 form-group has-feedback" style="background-color:#337ab7;height:40px;width:100%; border:2px solid #337ab7;color:#fff;"> Upload CSV File</div>
 						</div>
-						<center><input type="file" accept=".csv" name="user_csv_file" id="user_csv_file" class="btn btn-default" style="margin-top:50px;" required></input></center>
+						<center><input type="file" accept=".csv" name="user_csv_file" id="user_csv_file" class="btn btn-default" style="margin-top:50px;" onchange="handleFiles(this.files)" required></input></center>
 						 <div class="col-md-3 col-sm-3 col-xs-12 form-group has-feedback"></div>
                       </div>
 					  

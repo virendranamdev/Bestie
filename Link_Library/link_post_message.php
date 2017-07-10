@@ -5,14 +5,17 @@ require_once('../Class_Library/class_post.php');
 require_once('../Class_Library/class_push_notification.php');
 require_once('../Class_Library/class_notification.php');
 require_once('../Class_Library/class_welcomeTable.php');
+include_once('../Class_Library/class_get_group.php');  // for getting all group
 
 $obj = new Post();
 $notiobj = new notification();                                        // object of class post page
 $push = new PushNotification();                         // object of class push notification page
 $read = new Reading();
 $welcomeobj = new WelcomePage();
-date_default_timezone_set('Asia/Calcutta');
-$post_date = date('Y-m-d H:i:s A');
+$customGroup = new Group();                  //class_get_group.php
+
+date_default_timezone_set('Asia/Kolkata');
+$post_date = date('Y-m-d H:i:s');
 $maxid = $obj->maxID(); 
 
 
@@ -119,34 +122,56 @@ $device = 1;
 	
 /**************************** post sent to group *****************************/
     $groupcount = count($myArray);
+    $general_group = array();
+    $custom_group = array();
     for ($k = 0; $k < $groupcount; $k++) {
 	//echo "group id".$myArray[$k];
         $result1 = $read->postSentToGroup($Client_Id, $POST_ID, $myArray[$k], $FLAG);
-//echo $result1;
+/***********************  custom group *********************/
+         $groupdetails = $read->getGroupDetails($Client_Id, $myArray[$k]);  //get all groupdetails
+
+        if ($groupdetails['groupType'] == 2) {
+            array_push($custom_group, $myArray[$k]);
+        } else {
+            array_push($general_group, $myArray[$k]);
+        }
     }
 /******************************* / post sent to group ***********************************/
     
-/****************** fetch all user employee id from user detail start *************************/
-    $gcm_value = $push->get_Employee_details($User_Type, $myArray, $Client_Id);
-    $token = json_decode($gcm_value, true);
-    /*echo "hello user  id";
-    echo "<pre>";
-    print_r($token);
-    echo "</pre>";*/
+/******************  fetch all user employee id from user detail start **************************** */
+if (count($general_group) > 0) {
+       
+        $gcm_value = $push->get_Employee_details($User_Type, $general_group, $Client_Id);
+    
+        $generaluserid = json_decode($gcm_value, true);
+
+    }
+    else{   
+               $generaluserid = array();
+    }
+    if (count($custom_group) > 0) {
+        $gcm_value1 = $customGroup->getCustomGroupUser($Client_Id, $custom_group);
+        $customuserid = json_decode($gcm_value1, true);
+
+    }
+     else{
+              $customuserid = array();
+    }
+    /*************get group admin uuid  form group admin table if user type not= all ************** */
 
 /*********get group admin uuid  form group admin table if user type not= all **************/
 
 		if ($User_Type != 'All') 
 		{
-			$groupadminuuid = $push->getGroupAdminUUId($myArray, $Client_Id);
-            $adminuuid = json_decode($groupadminuuid, true);
+			//$groupadminuuid = $push->getGroupAdminUUId($myArray, $Client_Id);
+          //  $adminuuid = json_decode($groupadminuuid, true);
               /*echo "hello groupm admin id";
               echo "<pre>";
               print_r($adminuuid)."<br/>";
               echo "</pre>";
               echo "--------------all employee id---------";*/
 
-            $allempid = array_merge($token, $adminuuid);
+            $allempid = array_merge($generaluserid, $customuserid);
               /*echo "<pre>";
               print_r($allempid);
               echo "<pre>";
@@ -160,7 +185,7 @@ $device = 1;
  
 		} else 
 		{
-			$allempid1 = $token;
+			$allempid1 = $generaluserid;
 			/*echo "user unique id";
               echo "<pre>";
               print_r($allempid1);
@@ -209,52 +234,40 @@ $type = 'Message';
     /*********************Create file of user which this post send End*********************/
 	
     /*********************check push notificaticon enabale or disable******************** */
-    if ($PUSH_NOTIFICATION == 'PUSH_YES') 
-	{
+    if ($PUSH_NOTIFICATION == 'PUSH_YES') {
         $hrimg = ($image == "")?"":SITE_URL . $image;
+        $fullpath = "";
         $sf = "successfully send";
         $ids = array();
         $idsIOS = array();
 
         foreach ($token1 as $row) {
-            if ($row['deviceName'] == 3) {
-                array_push($idsIOS, $row["registrationToken"]);
-            } else {
-                array_push($ids, $row["registrationToken"]);
-            }
-            //array_push($ids,$row["registrationToken"]);
-        }
+		$content = $POST_CONTENT;
+		
+    	        $data = array('Id' => $maxid, 'Title' => $content, 'Content' => $content, 'SendBy' => $BY, 'Picture' => $hrimg, 'Image' => $fullpath, 'Date' => $post_date, 'flag' => $FLAG, 'flagValue' => $Flagname, 'success' => $sf, 'like' => $like_val, 'comment' => $comment_val);
+	    
+		$badgecount = $push->getBadgecount($row['deviceId']);
+		$badgecount = $badgecount['badgeCount']+1;
+		$addBadgecount = $push->updateBadgecount($row['deviceId'], $badgecount);
+	    
+                if ($row['deviceName'] == "3") {
+                    $data['device_token'] = $row['registrationToken'];
+            	    $IOSrevert = $push->sendAPNSPushCron($data, $googleapiIOSPem['iosPemfile'], '', $badgecount);        
+                } else {
+                    $data['device_token'] = $row['registrationToken'];
+                    $data['badge'] = $badgecount;
+                    $revert = $push->sendGoogleCloudMessageCron($data, $googleapiIOSPem['googleApiKey']);
+		}
+	}
 
-        $data = array('Id' => $maxid, 'Title' => $POST_TITLE, 'Content' => $POST_CONTENT, 'SendBy' => $BY, 'Picture' => $hrimg, 'Date' => $post_date, 'flag' => $FLAG, 'flagValue' => $Flagname, 'success' => $sf, 'like' => $like_val, 'comment' => $comment_val);
-		
-		$IOSrevert = $push->sendAPNSPush($data, $idsIOS, $googleapiIOSPem['iosPemfile']);
-        $revert = $push->sendGoogleCloudMessage($data, $ids, $googleapiIOSPem['googleApiKey']);
-        
-		$rt = json_decode($revert, true);
-        $iosrt = json_decode($IOSrevert, true);
-		
-		/*echo "<pre>";
-		print_r($data);
-		print_r($rt);
-		print_r($iosrt);
-		echo "</pre>";*/
-		
-        if ($rt['success'] == 1) 
-		{
-            echo "<script>alert('Post Successfully Send');</script>";
-            echo "<script>window.location='../create-reminder.php'</script>";
-        } 
-		else
-		{
+        if ($revert['success'] == 1) {
             echo "<script>alert('Post Successfully Send');</script>";
             echo "<script>window.location='../create-reminder.php'</script>";
         }
-    }
-    else 
-	{
-        echo "<script>alert('Post Successfully Send');</script>";
-        echo "<script>window.location='../create-reminder.php'</script>";
-    }
+} else {
+	echo "<script>alert('Post Successfully Send');</script>";
+	echo "<script>window.location='../create-reminder.php'</script>";
+}
 } else {
     ?>
 

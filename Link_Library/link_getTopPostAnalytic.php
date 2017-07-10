@@ -22,8 +22,8 @@ if (!empty($_POST["mydata"]))
         $result = $obj->getTopPostForAnalytic($client, $fromdt, $enddte,$department,$location);
          $data = json_decode($result,true);
          $count = count($data);
-//           echo "<pre>";
-//          print_r($data);
+         echo "<pre>";
+         print_r($data);
         if($count>0)
         {
          for($i=0;$i<$count;$i++)

@@ -15,13 +15,19 @@ if (!empty($_POST["mydata"])) {
         $fromdt = date("Y-m-d H:i:s", strtotime($fromdt1));
      //   echo "statrt date-".$fromdt;
         $enddte1 = $data['enddate'];
-        $enddte = date("Y-m-d H:i:s", strtotime($enddte1));
-
+        $enddte2 = date("Y-m-d", strtotime($enddte1));
+        $enddte = date_create($enddte2,"Y-m-d 23:59:59");
+echo "end date".$enddte;
+		$department = $data['department'];
+		
      //   echo "end date-".$enddte;
-        $result = $obj->graphGetHappinessIndex($client, $fromdt, $enddte);
-
+        $result = $obj->graphGetHappinessIndex($client, $fromdt, $enddte , $department);
         $res = json_decode($result, true);
-         
+	
+		$resultcount = $obj->graphGetHappinessIndexcount($client, $fromdt, $enddte , $department);
+        $rescount = json_decode($resultcount, true);
+		 //print_r($res);
+		 
            for ($i = 0; $i < count($res['data']); $i++) 
         {
             $user = $res['data'][$i]['name'];
@@ -42,7 +48,18 @@ if (!empty($_POST["mydata"])) {
             }
             $res['data'][$i]['name'] = $user;
         }
- echo $jsonres = json_encode($res);
+		
+		
+		
+		
+		$arraycomplete = array();
+		$arraycomplete['totalcomment'] = $rescount['totalhappresponse'];
+		$arraycomplete['arrdata'] = json_encode($res);
+		
+		//print_r($arraycomplete);
+		
+ //echo $jsonres = json_encode($res);
+ echo $jsonres = json_encode($arraycomplete);
     }
 }
 else

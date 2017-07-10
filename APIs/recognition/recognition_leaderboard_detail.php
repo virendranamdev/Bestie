@@ -33,13 +33,16 @@ if (!class_exists("Family") && include_once("../../Class_Library/Api_Class/class
         $result = $fam->getUserDetails($clientId, $employeeid);
 
         if ($result['success'] == 1) {       
-            $response = $obj->recognitionLeaderboardDetail($clientId, $employeeid);
-            $response['user_image'] = $result['UserDetails']['userImage'];
-	    $response['username'] = ($result['UserDetails']['lastName'] !='')?$result['UserDetails']['firstName'].' '.$result['UserDetails']['lastName']:$result['UserDetails']['firstName'];
+            //$response = $obj->recognitionLeaderboardDetail($clientId, $employeeid);
+            
             
             $leader = $employeeid;
             $data = $fam->getRecognisedUser($clientId, $employeeid, $val, $leader);
-            unset($data['success']);unset($data['message']);
+            $response['success'] = $data['success'];
+            $response['message'] = $data['message'];
+            $response['user_image'] = $result['UserDetails']['userImage'];
+	    $response['username'] = ($result['UserDetails']['lastName'] !='')?$result['UserDetails']['firstName'].' '.$result['UserDetails']['lastName']:$result['UserDetails']['firstName'];
+	    unset($data['success']);unset($data['message']);
             
             $response['recognition'] = $data;
         }

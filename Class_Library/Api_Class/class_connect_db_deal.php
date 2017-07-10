@@ -21,12 +21,10 @@ class Connection_Deal{
     }
     
     public function discountingCurl($jsonArr, $file) {
-        $url = "http://thomasinternational.benepik.com/webservices/discounting_Api_New/" . $file;
-
+        //$url = "http://thomasinternational.benepik.com/webservices/discounting_Api_New/" . $file;
+	$url = "http://thomasinternational.benepik.com/webservices/Latest_Discounting_APIs/" . $file;
         // Set CURL request headers (authentication and type)       
-        $headers = array(
-            'Content-Type: application/json'
-        );
+        $headers = array('Content-Type: application/json');
 
         // Initialize curl handle       
         $ch = curl_init();

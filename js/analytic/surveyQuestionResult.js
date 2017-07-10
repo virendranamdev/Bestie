@@ -148,7 +148,7 @@ function showEmojiGraph(quid, sid, department, location)
         data: {"mydata": dataString},
         success: function (response) {
             var resdata = response;
-              alert(resdata);
+             // alert(resdata);
             console.log(resdata);
             var jsonData = JSON.parse(resdata);
             document.getElementById("respondent").innerHTML = "Respondent : " + JSON.stringify(jsonData.respondent.respondent);
@@ -373,3 +373,131 @@ function surveyWordGraph(resdata)
 
 
 }
+
+
+  /*************************** survey analytic  for rating graph ************************************/
+function showRatingGraph(quid1, sid1, department1, location1)
+{
+
+    var postData =
+            {
+                "questionid": quid1,
+                "surveyid": sid1,
+                "department": department1,
+                "location": location1
+            }
+ // console.log(postData);
+    var dataString = JSON.stringify(postData);
+  //  alert(dataString);
+   
+    jQuery.ajax({
+        type: "POST",
+        //dataType: "json",
+        //contentType: "application/json; charset=utf-8",
+        url: "surveyQuestionRatingResult.php",
+        data: {"mydata": dataString},
+        success: function (response) {
+            var resdata = response;
+            //  alert(resdata);
+            console.log(resdata);
+            var jsonData = JSON.parse(resdata);
+            document.getElementById("respondent").innerHTML = "Respondent : " + JSON.stringify(jsonData.respondent.respondent);
+             document.getElementById("average").innerHTML = "Average : " + jsonData.average;
+             document.getElementById("mode").innerHTML = "Mode : " + jsonData.mode;
+            
+            // console.log(jsonData.comment);  
+            var commentdata = jsonData.comment;
+         
+          //  console.log(commentdata);
+            var clength = commentdata.length;
+           //   console.log(clength);
+//              /************************************************************/
+            if (clength > 0)
+            {
+
+                $('#datatable tbody').remove();
+                for (var i = 0; i < clength; i++)
+                {
+                   
+                    var newRow = '<tbody><tr><td>' + commentdata[i].answeredDate + '</td><td>' + commentdata[i].firstName + ' '+commentdata[i].lastName + '</td><td>' + commentdata[i].answer + '</td></tr><tbody>';
+                    $('#datatable').append(newRow);
+
+                }
+
+            }   
+            else    
+            {
+                 $('#datatable tbody').remove();
+                var newRow = '<tbody><tr><td colspan = 3>No Record Available</td></tr><tbody>';
+                $('#datatable').append(newRow);
+            }
+
+            /***************************************************************/
+            surveyGraphRating(jsonData);
+        },
+        error: function (e) {
+            alert(e);
+            console.log(e.message);
+        }
+    });
+}
+///*********************************************** end login analytic graph **********************************/
+
+/********************************** draw chart radio button options function ********************************************************/
+function surveyGraphRating(resdata) {
+    //   alert(resdata);
+ // console.log(resdata);
+  var categorydata = resdata.category;
+    
+   //  console.log(categorydata); 
+  //  console.log(resdata.data3);
+   // console.log(categorydata.data1);
+    
+    /***************************/
+    
+    Highcharts.chart('MiniSurveyRating', {
+    chart: {
+        type: 'column'
+    },
+    title: {
+        text: JSON.stringify(resdata.question.question)
+    },
+    subtitle: {
+        text: ''
+    },
+    xAxis: {
+      //  categories: ['Jan','Feb','Mar','Apr','May','Jun','Jul', 'Aug', 'Sep','Oct','Nov','Dec'],
+        categories: categorydata,
+        crosshair: true
+    },
+    yAxis: {
+        min: 0,
+        allowDecimals: false,
+        title: {
+            text: 'No. of Respondent'
+        }
+    },
+    tooltip: {
+        headerFormat: '<span style="font-size:12px">{series.name}:{point.key}</span><table>',
+        pointFormat: '<tr><td style="color:{series.color};padding:0">No. of respondent: </td>' +
+            '<td style="padding:0"><b>{point.y:.0f}</b></td></tr>',
+        footerFormat: '</table>',
+        shared: true,
+        useHTML: true
+    },
+    plotOptions: {
+        column: {
+            pointPadding: 0.2,
+            borderWidth: 0
+        }
+    },
+    series: [{
+        name: 'Rating',
+       // data: [49.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4]
+         data: resdata.data3
+
+    }]
+});
+    
+}
+/************************************** end draw chart of emoji function **************************************/

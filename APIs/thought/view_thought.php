@@ -2,7 +2,7 @@
 
 error_reporting(E_ALL);ini_set('display_errors', 1);
 if (file_exists("../../Class_Library/class_Thought.php") && include("../../Class_Library/class_Thought.php")) {
-
+ // require_once('../../Class_Library/Api_Class/class_AppAnalytic.php');
     if (isset($_SERVER['HTTP_ORIGIN'])) {
         header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
         header('Access-Control-Allow-Credentials: true');
@@ -28,11 +28,15 @@ if (file_exists("../../Class_Library/class_Thought.php") && include("../../Class
       "uuid":"",
       "value":""
       } */
-    if (!empty($jsonArr['clientid'])) {
+    if ((!empty($jsonArr["clientid"])) && (!empty($jsonArr['device'])) && (!empty($jsonArr['deviceId']))) {
         $obj = new ThoughtOfDay();
+      //  $analytic_obj = new AppAnalytic();
 
         extract($jsonArr);
         $response = $obj->getthoughtlist($clientid, $uuid, $value);
+          /************* analytic purpose seve data *****************/
+           // $flagtype = 5;
+        // $analytic_obj->listAppview($clientid, $uuid, $device, $deviceId, $flagtype);
     } else {
         $result['success'] = 0;
         $result['result'] = "Invalid json";

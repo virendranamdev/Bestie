@@ -19,15 +19,18 @@ $exercise_instruction = "";
 
 if (isset($_GET['health'])) {
     $health_Id = $_GET['health'];
-    $clientId = $_SESSION['client_id'];
+	$clientId = $_SESSION['client_id'];
+	//echo "<script>alert('".$health_Id.$clientId."')</script>";
+    
 //    include_once('Class_Library/class_Health_Wellness.php');
 //    $obj = new HealthWellness();
     $exerciseDetails = $objHealth->getExerciseSingle($clientId, $health_Id);
-    $exercise_type = $exerciseDetails['exercise_area_id'];
+	$exercise_type = $exerciseDetails['exercise_area_id'];
     $exercise_name = $exerciseDetails['exercise_name'];
     $img = explode("images/health_wellness/", $exerciseDetails['exercise_image']);
     $exercise_image = "images/health_wellness/" . $img[1];
     $exercise_instruction = $exerciseDetails['exercise_instruction'];
+    $disclaimer = $exerciseDetails['disclaimer'];
 }
 ?>
 
@@ -55,6 +58,9 @@ if (isset($_GET['health'])) {
                 <div class="x_panel">
                     <div class="x_title">
                         <h2>Health & Wellness</h2>
+						<?php /*echo "<pre>";
+	print_r($exerciseDetails);
+	echo "</pre>";*/?>
                         <ul class="nav navbar-right panel_toolbox">
                             <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                             </li>
@@ -87,12 +93,31 @@ if (isset($_GET['health'])) {
                                                 <input type='hidden' name="flagvalue" value="Health Wellness :">
                                                 <input type='hidden' name="exerciseImage" value="<?php echo $exercise_image; ?>">
 
+						<?php if (!isset($_GET['health'])) { ?>
                                                 <select class="form-control" id="sel1" name="exercise_type" <?php echo $val['exercise_area_id']; ?> >
-                                                    <option>&nbsp;&nbsp;&nbsp;&nbsp;&emsp;Select Exercise Area </option>
+                                                    <option value="0">&nbsp;&nbsp;&nbsp;&nbsp;&emsp;Select Exercise Area </option>
                                                     <?php foreach ($exercise as $val) { ?>
                                                         <option <?php if ($exercise_type == $val['autoId']) { ?> selected="" <?php } ?> value="<?php echo $val['autoId']; ?>">&nbsp;&nbsp;&nbsp;&nbsp;&emsp; <?php echo $val['exercise_area']; ?></option>
                                                     <?php } ?>
                                                 </select>
+						<?php } ?>
+												
+						
+						<?php if (isset($_GET['health'])) { ?>
+						<select class="form-control" id="sel1" name="exercise_type" <?php echo $val['exercise_area_id']; ?> >
+                                                    <!--<option value="0">&nbsp;&nbsp;&nbsp;&nbsp;&emsp;Select Exercise Area </option>-->
+                                                    <?php foreach ($exercise as $val) {
+							if ($exercise_type == $val['autoId']) {
+								$exarea = $val['exercise_area'];
+								$exautoid = $val['autoId'];
+							}
+							}
+						    ?>
+                                                <option  selected value="<?php echo $exercise_type; ?>">&nbsp;&nbsp;&nbsp;&nbsp;&emsp; <?php echo $exarea; ?></option>
+                                                    
+                                                </select>
+						<?php } ?>
+											
                                                 <span class="fa fa-question form-control-feedback left" aria-hidden="true"></span>
                                             </div>
                                         </div>
@@ -110,16 +135,24 @@ if (isset($_GET['health'])) {
                                                 <?php if (isset($_GET['health'])) { ?>
                                                     <img src="<?php echo SITE . $exercise_image; ?>" id="imgprvw1" class="img-responsive"/>
                                                 <?php }else{
-													?>
-												<img id="imgprvw1" class="img-responsive"/>
-													<?php
-												} ?>
+						?>
+						<img id="imgprvw1" class="img-responsive"/>
+							<?php
+						} ?>
                                                 <span class = "fa  fa-file-image-o form-control-feedback left" aria-hidden = "true"></span>
                                             </div>
 
                                             <label class = " control-label col-md-3 col-sm-3 col-xs-12">Instruction</label>
                                             <div class = "col-md-9 col-sm-9 col-xs-12 form-group has-feedback">
                                                 <textarea type = "text" class = "form-control has-feedback-left" id = "inputSuccess2" placeholder = "Enter Instruction" required="" name="exercise_instructions"><?php echo strip_tags($exercise_instruction);
+                                                ?></textarea>
+                                                <span class="fa fa-question form-control-feedback left" aria-hidden="true"></span>
+
+                                            </div>
+                                            
+                                            <label class = " control-label col-md-3 col-sm-3 col-xs-12">Disclaimer</label>
+                                            <div class = "col-md-9 col-sm-9 col-xs-12 form-group has-feedback">
+                                                <textarea type = "text" class = "form-control has-feedback-left" id = "inputSuccess2" placeholder = "Enter Disclaimer" required="" name="disclaimer"><?php echo strip_tags($disclaimer);
                                                 ?></textarea>
                                                 <span class="fa fa-question form-control-feedback left" aria-hidden="true"></span>
 

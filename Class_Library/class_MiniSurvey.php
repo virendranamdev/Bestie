@@ -271,17 +271,26 @@ class MiniSurvey {
         //  $this->utype = $user_type;
 
         try {
-            $query = "select *,DATE_FORMAT(createdDate,'%d %b %Y') as createdDate from Tbl_C_SurveyQuestion where surveyId=:sid";
+            $query = "select ques.*,survey.*,DATE_FORMAT(ques.createdDate,'%d %b %Y') as createdDate,DATE_FORMAT(survey.expiryDate,'%d %b %Y') as expiryDate from Tbl_C_SurveyQuestion as ques join Tbl_C_SurveyDetails as survey on survey.surveyId = ques.surveyId where ques.surveyId=:sid";
             $stmt = $this->DB->prepare($query);
             $stmt->bindParam(':sid', $this->sid, PDO::PARAM_STR);
             $stmt->execute();
             $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+            
+            $query2 = "select count(distinct(tas.answeredBy)) as respondent from Tbl_Analytic_Survey as tas where tas.surveyId = :sid and tas.status = 1";
+            
+             $stmt1 = $this->DB->prepare($query2);
+            $stmt1->bindParam(':sid', $this->sid, PDO::PARAM_STR);
+            $stmt1->execute();
+            $rows2 = $stmt1->fetch(PDO::FETCH_ASSOC);
+            
             $response = array();
 
             if ($rows) {
                 $response["success"] = 1;
                 $response["message"] = "You successfully fetched";
+                 $response["respondent"] = $rows2;
                 $response["posts"] = $rows;
                 return json_encode($response);
             } else {
@@ -586,10 +595,113 @@ class MiniSurvey {
     /******************************************************************/
     
     
+     function getGraphDataforRating($qid, $sid,$department,$location) {
+       
+        try {
+            
+            /******************************get survey result graph data*******************************************/
+         $query = "SELECT x.rating as category, COALESCE(data1, 0) AS data1
+FROM (
+  SELECT '1' AS rating 
+  UNION SELECT '2'
+  UNION SELECT '3'
+  UNION SELECT '4'
+  UNION SELECT '5') x
+LEFT JOIN (  
+   SELECT
+      CASE when tas.answer = 1 then 1
+          when tas.answer = 2 then 2
+          when tas.answer = 3 then 3
+          when tas.answer = 4 then 4  
+           else 5
+      END AS rating,
+      COUNT(tas.answeredBy) as data1
+   FROM Tbl_Analytic_Survey as tas join Tbl_EmployeeDetails_Master as edm on edm.employeeId = tas.answeredBy where tas.surveyId = :sid and tas.questionId = :qid and tas.status = 1";
+//            $query = " select tas.answer as category,count(tas.answeredBy) as data1 from Tbl_Analytic_Survey as tas join Tbl_EmployeeDetails_Master as edm on edm.employeeId = tas.answeredBy where tas.surveyId = :sid and tas.questionId = :qid and tas.status = 1";
+           ;
+            
+             if ($department == 'All' && $location == 'All'){
+                $query .= "";}
+				
+			if ($department != 'All' && $location != 'All'){
+                $query .= " AND edm.department = :dept AND edm.location = :loca";}
+				
+			if ($department == 'All' && $location != 'All'){
+                $query .= " AND edm.location = :loca";}
+				
+			if ($department != 'All' && $location == 'All'){
+                $query .= " AND edm.department = :dept";}
+			
+		$query .= "  GROUP BY 1 ) y ON x.rating = y.rating ";
+            
+          // echo $query;
+            
+            
+            $stmt = $this->DB->prepare($query);
+            $stmt->bindParam(':qid', $qid, PDO::PARAM_STR);
+            $stmt->bindParam(':sid', $sid, PDO::PARAM_STR);            
+            if ($department != 'All') {$stmt->bindParam(':dept', $department, PDO::PARAM_STR);}
+	    if ($location != 'All') {$stmt->bindParam(':loca', $location, PDO::PARAM_STR);}
+            
+            $stmt->execute();
+            $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        //    print_r($rows);
+/*************************************select respondent***************************************************/
+            
+             $query = "select count(tas.answeredBy) as respondent from Tbl_Analytic_Survey as tas join Tbl_EmployeeDetails_Master as edm on edm.employeeId = tas.answeredBy where tas.surveyId = :sid and tas.questionId = :qid and tas.status = 1";
+            
+             if ($department == 'All' && $location == 'All'){
+                $query .= "";}
+				
+			if ($department != 'All' && $location != 'All'){
+                $query .= " AND edm.department = :dept AND edm.location = :loca";}
+				
+			if ($department == 'All' && $location != 'All'){
+                $query .= " AND edm.location = :loca";}
+				
+			if ($department != 'All' && $location == 'All'){
+                $query .= " AND edm.department = :dept";}
+			
+		
+           // echo $query;
+            
+            
+            $stmt = $this->DB->prepare($query);
+            $stmt->bindParam(':qid', $qid, PDO::PARAM_STR);
+            $stmt->bindParam(':sid', $sid, PDO::PARAM_STR);            
+            if ($department != 'All') {$stmt->bindParam(':dept', $department, PDO::PARAM_STR);}
+	    if ($location != 'All') {$stmt->bindParam(':loca', $location, PDO::PARAM_STR);}
+            
+            $stmt->execute();
+            $rows1 = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            /******************************************************************************/
+            
+
+           $query1 = "select question from Tbl_C_SurveyQuestion where surveyId = :sid and questionId = :qid";
+
+            $stmt1 = $this->DB->prepare($query1);
+            $stmt1->bindParam(':qid', $qid, PDO::PARAM_STR);
+//            $stmt1->bindParam(':cli', $clientid, PDO::PARAM_STR);
+            $stmt1->bindParam(':sid', $sid, PDO::PARAM_STR);
+            $stmt1->execute();
+            $value = $stmt1->fetch(PDO::FETCH_ASSOC);
+/*****************************get survey comment*******************************************************/
+            $comments = self::getSurveyquestionresponse($sid, $qid,$department,$location);
+            
+            $response["data"] = $rows;
+             $response["question"] = $value;
+              $response["respondent"] = $rows1;
+             $response['comment'] = $comments;
+        } catch (PDOException $e) {
+            echo $e;
+        }
+      //  return json_encode($response);
+       return json_encode( $response, JSON_NUMERIC_CHECK );
+    }
     
     
-    
-    
+    /*********************************************************************/
     function getSurveyquestion($qid, $clientid, $sid) {
 
         try {
@@ -653,7 +765,7 @@ class MiniSurvey {
 
             if (count($rows) > 0) {
 
-                $query2 = "select distinct(userUniqueId) from Tbl_Analytic_EmployeeHappiness where surveyId =:sid and clientId = :cli";
+                $query2 = "select distinct(answeredBy) from Tbl_Analytic_Survey where surveyId =:sid and clientId = :cli";
                 $stmt1 = $this->DB->prepare($query2);
                 $stmt1->bindParam(':cli', $clientid, PDO::PARAM_STR);
                 $stmt1->bindParam(':sid', $sid, PDO::PARAM_STR);

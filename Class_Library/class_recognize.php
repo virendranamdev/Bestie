@@ -500,6 +500,45 @@ class Recognize {
         }
         return $result;
     }
+	
+	
+	/******************************** refer budge **************************/
+	
+	  function ReferBudge($badgeName , $comment , $referredBy) {
+        
+	    date_default_timezone_set('Asia/Kolkata');
+        $cd = date('Y-m-d H:i:s');
+		
+        try {
+            $query = "insert into Tbl_ReferBadge (badgeName, comment, referredBy, createDate) VALUES (:bname, :comm, :referedby, :cd)";
+            
+			$stmt = $this->DB->prepare($query);
+            $stmt->bindParam(':bname', $badgeName, PDO::PARAM_STR);
+			$stmt->bindParam(':comm', $comment, PDO::PARAM_STR);
+			$stmt->bindParam(':referedby', $referredBy, PDO::PARAM_STR);
+			$stmt->bindParam(':cd', $cd, PDO::PARAM_STR);
+			
+            $res = $stmt->execute();
+            if($res)
+			{
+				$response['success'] = 1;
+				$response['message'] = "referred successfully";
+			}
+			else{
+				$response['success'] = 0;
+				$response['message'] = "not referred successfully";
+			}
+
+            
+        } catch (PDOException $e) {
+            $response['success'] = 0;
+			$response['message'] = "not referred successfully".$e;
+        }
+		return json_encode($response);
+    }
+	
+	
+	/******************************** refer budge **************************/
 
     /*     * ********************************** / FUNCTION FOR API *********************************** */
     /*     * ********************************** FUNCTION FOR PANEL *********************************** */
@@ -670,6 +709,39 @@ class Recognize {
     }
 
     /*     * ****************************** / user recognize details ************************ */
+	
+	/*************************** get referred badge list **********************/
+	
+	 function referredbadgelist($clientId) {
+        try {
+           
+		   $query = "SELECT badge.* , DATE_FORMAT(badge.createDate,'%d %b %Y %h:%i %p') as createDate , CONCAT(edm.firstName,' ',edm.middleName,' ',edm.lastName) as referredbyname , edm.emailId as referredbyemailId from Tbl_ReferBadge as badge JOIN Tbl_EmployeeDetails_Master as edm ON badge.referredBy = edm.employeeId AND edm.clientId = :cli";
+
+            $stmt = $this->DB->prepare($query);
+			$stmt->bindParam(':cli', $clientId, PDO::PARAM_STR);
+            $stmt->execute();
+            $referredbadge = $stmt->fetchAll(PDO::FETCH_ASSOC);
+			
+			if($referredbadge)
+			{
+            $result['success'] = 1;
+            $result['message'] = "referred Badge detail";
+            $result['data'] = $referredbadge;
+			}
+			else
+			{
+			$result['success'] = 0;
+            $result['message'] = "referred Badge detail not fetch";
+			}
+        } catch (Exception $ex) {
+            $result['success'] = 0;
+            $result['message'] = "referred Badge detail not fetch" . $ex;
+        }
+        return json_encode($result);
+    }
+	
+	/*************************** / get referred badge list ********************/
+	
     /*     * ***************************** / FUNCTION FOR PANEL *********************************** */
 }
 

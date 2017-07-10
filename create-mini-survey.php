@@ -106,7 +106,7 @@ $optcount = count($data['data']);
                                 <div class="form-group">
                                     <label class=" control-label col-md-3 col-sm-3 col-xs-12">Answer Type</label>
                                      <div class="col-md-9 col-sm-9 col-xs-12 form-group has-feedback">
-                                      <input type="hidden" name="optioncount" value="<?php echo $optcount;?>">   
+                                         <input type="hidden" name="optioncount" value="<?php echo $optcount;?>">   
                                     <?php 
                                     for($i=0;$i<$optcount;$i++)
                                     {
@@ -124,7 +124,7 @@ $optcount = count($data['data']);
                                                     <div  ng-if="quesDiv.questionType == 'option'">
                                                         <div class="row">
                                                             <div class="col-xs-7 col-sm-7 col-md-7 col-lg-7">
-                                                                <input type="text" name="numberoption" ng-model="noOfoptions" ng-keyup="optionContentData($index, noOfoptions)"class="form-control has-feedback-left"placeholder="Enter Number of option..." required/>
+                                                                <input type="text" name="numberoption{{$index}}" ng-model="noOfoptions" ng-keyup="optionContentData($index, noOfoptions)"class="form-control has-feedback-left"placeholder="Enter Number of option..." required/>
                                                             </div>
                                                         </div><br>
                                                         <div class="row">

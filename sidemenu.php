@@ -33,28 +33,31 @@
                     </ul>
                   </li>
 
-                <li><a href="wall.php"><i class="fa fa-table"></i> Feedback Wall </a></li>
+                <li><a href="wall.php"><i class="fa fa-table"></i> Vibes </a></li>
 
                 <!--<li><a href="happiness.php"><i class="fa fa-smile-o"></i> Happiness Index </a></li>-->
 				
-				<li><a href="happiness-details.php"><i class="fa fa-smile-o"></i> Happiness Index </a></li>
+				<li><a href="happiness-details.php"><i class="fa fa-smile-o"></i> Happiness Indicator </a></li>
 				
-                 <li><a href="mini-survey.php"><i class="fa fa-line-chart"></i> Mini Survey</a></li>
-                 <li><a href="story.php"><i class="fa fa-book"></i> Colleague Stories</a></li>
+                 <li><a href="mini-survey.php"><i class="fa fa-line-chart"></i>We are listening</a></li>
+                 <li><a href="story.php"><i class="fa fa-book"></i> My Story</a></li>
 
-                 <li><a href="album.php"><i class="fa fa-file-image-o" ></i>Album</a></li>
+                 <li><a href="album.php"><i class="fa fa-file-image-o" ></i> Let's Click</a></li>
 				 
 				 <li><a href="reminder.php"><i class="fa fa-bell-o" aria-hidden="true"></i> Notification </a>  </li>
 				
-                   <li><a  href="view-previous-thought.php"><i class="fa fa-hourglass-start"></i> Thought Of The Day </a></li>
-                   <li><a  href="recognition.php"><i class="fa fa-bar-chart-o"></i> Recognition </a>         </li>
-				   <li><a  href="health-welness-view.php"><i class="fa fa-heartbeat"></i>Health & Wellness </a></li>
+                   <li><a  href="view-previous-thought.php"><i class="fa fa-hourglass-start"></i> Thought for the Day </a></li>
+                   <li><a  href="recognition.php"><i class="fa fa-bar-chart-o"></i> Badge me </a>         </li>
+				   <li><a  href="health-welness-view.php"><i class="fa fa-heartbeat"></i>Be well </a></li>
 				    <li><a><i class="fa fa-user"></i> Analytics <span class="fa fa-chevron-down"></span></a>
                     <ul class="nav child_menu">
                       <li><a href="activeuseranalytic.php">Active User</a></li>
-                      <li><a href="postViewAnalytic.php">Post</a></li>                    
+                      <li><a href="postViewAnalytic.php">Post</a></li> 
+					  <li><a href="postViewListAnalytic.php">Module View</a></li> 
                     </ul>
                   </li>
+				  
+				  <li><a href="termsandcondition.php"><i class="fa fa-table"></i> Terms and Conditions </a></li>
 				  
 				   </ul>
               </div>
